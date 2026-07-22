@@ -4,6 +4,7 @@
       <NuxtPage />
     </NuxtLayout>
     <BaseToast />
+    <UpdateNotifier />
   </div>
 </template>
 

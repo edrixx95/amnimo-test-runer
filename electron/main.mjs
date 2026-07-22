@@ -1,7 +1,9 @@
-import { app, BrowserWindow, dialog } from "electron";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import http from "http";
+import log from "electron-log"; // Wait, they might not have electron-log, I'll omit it or use console.log
+import { autoUpdater } from "electron-updater";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -80,6 +82,7 @@ function createWindow() {
     icon: path.join(process.cwd(), "build", "icon.png"),
     title: "Amnimo Test Runner",
     webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
@@ -109,6 +112,42 @@ app.whenReady().then(async () => {
   // Wait for Nuxt API to be responsive
   waitForServer(SERVER_PORT, () => {
     createWindow();
+    
+    // Auto Updater configuration
+    autoUpdater.logger = console;
+    
+    ipcMain.on('check-for-updates', () => {
+      autoUpdater.checkForUpdatesAndNotify();
+    });
+
+    ipcMain.on('install-update', () => {
+      autoUpdater.quitAndInstall();
+    });
+
+    autoUpdater.on('checking-for-update', () => {
+      if (mainWindow) mainWindow.webContents.send('update-status', { status: 'checking' });
+    });
+
+    autoUpdater.on('update-available', (info) => {
+      if (mainWindow) mainWindow.webContents.send('update-status', { status: 'available', version: info.version });
+    });
+
+    autoUpdater.on('update-not-available', (info) => {
+      if (mainWindow) mainWindow.webContents.send('update-status', { status: 'not-available' });
+    });
+
+    autoUpdater.on('error', (err) => {
+      if (mainWindow) mainWindow.webContents.send('update-status', { status: 'error', error: err.message });
+    });
+
+    autoUpdater.on('download-progress', (progressObj) => {
+      if (mainWindow) mainWindow.webContents.send('update-status', { status: 'downloading', percent: progressObj.percent });
+    });
+
+    autoUpdater.on('update-downloaded', (info) => {
+      if (mainWindow) mainWindow.webContents.send('update-status', { status: 'downloaded', version: info.version });
+    });
+
   });
 });
 
