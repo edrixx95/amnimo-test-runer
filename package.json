@@ -1,7 +1,7 @@
 {
   "name": "amnimo-test-runner",
-  "version": "1.0.0",
-  "description": "Amnimo E2E Test Runner",
+  "version": "1.0.1",
+  "description": "Amnimo Test Runner Desktop App",
   "author": {
     "name": "DAT NGUYEN THANH",
     "email": "thanhdat.nguyen@dts-insight.co.jp"
@@ -53,7 +53,8 @@
       "installerHeaderIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
       "installerSidebar": "build/installerSidebar.bmp",
-      "uninstallerSidebar": "build/installerSidebar.bmp"
+      "uninstallerSidebar": "build/installerSidebar.bmp",
+      "differentialPackage": false
     }
   },
   "dependencies": {
