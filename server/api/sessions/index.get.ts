@@ -1,3 +1,7 @@
+import { getAggregatedReport } from '../../utils/reportUtils';
+import { getLiveProgress } from '../../utils/liveProgressParser';
+import { sessionManager } from '../../utils/sessionManager';
+
 export default defineEventHandler(async (event) => {
   try {
     const sessions = await sessionManager.getSessions();
@@ -12,9 +16,19 @@ export default defineEventHandler(async (event) => {
           } else {
             session.status = 'Completed';
           }
+          session.meta = aggregated._meta as any;
         } catch (err) {
           // Keep existing status if aggregation fails
           console.error(`Failed to aggregate status for ${session.id}:`, err);
+        }
+      } else if (session.status === 'Running') {
+        try {
+          const liveMeta = await getLiveProgress(session.id);
+          if (liveMeta) {
+            session.meta = liveMeta;
+          }
+        } catch (err) {
+          console.error(`Failed to parse live progress for ${session.id}:`, err);
         }
       }
     }));

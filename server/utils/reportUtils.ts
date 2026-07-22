@@ -198,6 +198,17 @@ export const getAggregatedReport = async (sessionId: string, session: Session) =
   return {
     categories: finalCategories,
     // Add meta stats for any future use, but keep structure compatible with excel.json
-    _meta: { total: totalCount, passed: passedCount, failed: failedCount, skipped: skippedCount }
+    _meta: { 
+      failed: failedCount,
+      testCounts: {
+        passed: passedCount,
+        failed: failedCount,
+        skipped: skippedCount
+      },
+      specCounts: {
+        completed: 0, // Not explicitly tracked in excel.json, but could be derived
+        total: 0
+      }
+    }
   };
 };

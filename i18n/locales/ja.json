@@ -1,0 +1,80 @@
+{
+  "nav": {
+    "sessions": "セッション",
+    "firmware": "ファームウェア",
+    "settings": "設定",
+    "version": "バージョン"
+  },
+  "download": {
+    "complete": "ダウンロード完了",
+    "speed": "{received} / {total}"
+  },
+  "home": {
+    "activeSessions": "アクティブなセッション",
+    "newSession": "新規セッション",
+    "noActiveSessions": "アクティブなセッションがありません",
+    "startFirstSession": "上のボタンをクリックして最初のセッションを開始してください。",
+    "running": "実行中",
+    "completed": "完了",
+    "failed": "失敗",
+    "cancelled": "キャンセル",
+    "unknown": "不明",
+    "stop": "停止",
+    "delete": "削除",
+    "viewReport": "レポート",
+    "status": {
+      "running": "実行中",
+      "completed": "完了",
+      "failed": "失敗",
+      "cancelled": "キャンセル",
+      "unknown": "不明",
+      "draft": "下書き",
+      "preparing": "準備中",
+      "ready": "準備完了",
+      "closed": "終了"
+    },
+    "modal": {
+      "title": "新しいセッションの初期化",
+      "sessionName": "セッション名",
+      "description": "新しいセッションが下書き状態で作成されます。その後、環境の構成に進みます。",
+      "cancel": "キャンセル",
+      "submit": "作成して設定"
+    }
+  },
+  "firmware": {
+    "title": "ファームウェア管理",
+    "description": "テスト用のファームウェアパッケージをダウンロードおよびアップロードします。",
+    "externalTitle": "外部ファームウェア",
+    "localTitle": "ローカルファームウェア",
+    "upload": "アップロード",
+    "download": "ダウンロード",
+    "delete": "削除",
+    "refresh": "更新",
+    "fileName": "ファイル名",
+    "size": "サイズ",
+    "date": "日付",
+    "actions": "アクション"
+  },
+  "settings": {
+    "title": "設定",
+    "envConfig": "環境設定",
+    "envDesc": "amnimo-e2eテストリポジトリへのパスを設定します。",
+    "e2ePath": "Amnimo E2E ディレクトリパス",
+    "browse": "参照...",
+    "validConfig": "有効な設定",
+    "invalidPath": "無効なパス",
+    "checking": "確認中...",
+    "validate": "検証",
+    "saving": "保存中...",
+    "saveSettings": "設定を保存",
+    "softwareUpdate": "ソフトウェアアップデート",
+    "updateDesc": "Amnimo Test Runnerの新しいバージョンを確認します。",
+    "currentVersion": "現在のバージョン",
+    "checkUpdates": "アップデートを確認",
+    "checkingUpdates": "確認中...",
+    "installRestart": "インストールして再起動",
+    "language": "言語",
+    "languageDesc": "希望するアプリケーションの言語を選択してください。",
+    "selectLanguage": "言語を選択"
+  }
+}

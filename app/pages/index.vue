@@ -8,12 +8,12 @@
       <div class="max-w-7xl mx-auto">
         <div class="mb-8 flex justify-between items-center animate-fade-in-up">
           <div>
-            <h3 class="text-2xl font-bold text-slate-900 tracking-tight">Overview</h3>
+            <h3 class="text-2xl font-bold text-slate-900 tracking-tight">{{ $t('home.activeSessions') }}</h3>
             <p class="text-slate-500 mt-1">Manage and track your E2E test sessions</p>
           </div>
           <button @click="openCreateModal" class="inline-flex items-center gap-2 bg-amnimo-600 hover:bg-amnimo-700 hover:shadow-lg hover:shadow-amnimo-500/30 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0">
             <Icon name="heroicons:plus" class="w-5 h-5" />
-            Create Session
+            {{ $t('home.newSession') }}
           </button>
         </div>
 
@@ -95,14 +95,14 @@
             </div>
             <h3 class="text-lg font-semibold text-slate-900 mb-2">
               <span v-if="sessionStore.sessions.length > 0">No sessions match your filter</span>
-              <span v-else>No sessions found</span>
+              <span v-else>{{ $t('home.noActiveSessions') }}</span>
             </h3>
             <p class="text-slate-500 mb-6">
               <span v-if="sessionStore.sessions.length > 0">Try adjusting your search criteria or clearing filters.</span>
-              <span v-else>You haven't run any test sessions yet.</span>
+              <span v-else>{{ $t('home.startFirstSession') }}</span>
             </p>
             <button v-if="sessionStore.sessions.length === 0" @click="openCreateModal" class="inline-flex items-center justify-center bg-amnimo-50 text-amnimo-700 hover:bg-amnimo-100 hover:text-amnimo-800 px-5 py-2.5 rounded-xl font-medium transition-colors">
-              Create your first session
+              {{ $t('home.newSession') }}
             </button>
             <button v-else @click="resetFilters" class="inline-flex items-center justify-center bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 px-5 py-2.5 rounded-xl font-medium transition-colors">
               Clear Filters
@@ -134,7 +134,7 @@
                   <p class="text-xs text-slate-500 mt-1.5 font-bold">{{ new Date(session.createdAt).toLocaleString() }}</p>
                 </div>
                 <span class="shrink-0 mt-1 inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider shadow-sm border" :class="getStatusClass(session.status)">
-                  {{ session.status }}
+                  {{ $t(`home.status.${session.status.toLowerCase()}`) || session.status }}
                 </span>
               </div>
             </div>
@@ -150,6 +150,34 @@
                 <span class="text-slate-500 font-bold">Base URL</span>
                 <span class="font-bold text-slate-800 truncate max-w-[140px]" :title="session.baseUrl">{{ session.baseUrl || '-' }}</span>
               </div>
+              
+              <!-- Live Progress -->
+              <div v-if="session.status === 'Running' && session.meta" class="pt-3 mt-3 border-t border-gray-200/50 space-y-2">
+                <div class="flex justify-between items-center text-xs font-bold">
+                  <span class="text-slate-500">Progress</span>
+                  <span class="text-slate-700">{{ session.meta.specCounts?.completed || 0 }} / {{ session.meta.specCounts?.total || 0 }} specs</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                  <div class="h-1.5 rounded-full transition-all duration-500"
+                    :class="session.status === 'Failed' || session.meta.testCounts?.failed > 0 ? 'bg-red-500' : (session.status === 'Completed' || session.meta.specCounts?.completed === session.meta.specCounts?.total ? 'bg-green-500' : 'bg-blue-500')"
+                    :style="{ width: session.meta.specCounts?.total ? `${(session.meta.specCounts.completed / session.meta.specCounts.total) * 100}%` : '0%' }"
+                  ></div>
+                </div>
+                <div class="flex gap-2 pt-1">
+                  <div class="flex-1 flex items-center justify-center gap-1 bg-emerald-50 text-emerald-700 rounded-md text-[10px] font-bold py-1 border border-emerald-100/50" title="Passed">
+                    <Icon name="heroicons:check-circle" class="w-3 h-3" />
+                    {{ session.meta.testCounts?.passed || 0 }}
+                  </div>
+                  <div class="flex-1 flex items-center justify-center gap-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-bold py-1 border border-rose-100/50" title="Failed">
+                    <Icon name="heroicons:x-circle" class="w-3 h-3" />
+                    {{ session.meta.testCounts?.failed || 0 }}
+                  </div>
+                  <div class="flex-1 flex items-center justify-center gap-1 bg-amber-50 text-amber-700 rounded-md text-[10px] font-bold py-1 border border-amber-100/50" title="Skipped">
+                    <Icon name="heroicons:minus-circle" class="w-3 h-3" />
+                    {{ session.meta.testCounts?.skipped || 0 }}
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="px-4 py-3 border-t border-gray-50 flex justify-between items-center gap-2" :class="session.status === 'Closed' ? 'bg-transparent' : 'bg-white'">
@@ -164,7 +192,7 @@
               <div class="flex gap-2">
                 <button @click.stop="openReport(session.id)" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors shadow-sm hover:shadow-md">
                   <Icon name="heroicons:document-text" class="w-4 h-4" />
-                  Report
+                  {{ $t('home.viewReport') }}
                 </button>
                 <NuxtLink v-if="session.status !== 'Closed'" @click.stop :to="session.status === 'Draft' ? `/sessions/${session.id}/setup` : `/sessions/${session.id}/runner`" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-amnimo-600 hover:bg-amnimo-700 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <Icon name="heroicons:arrow-right" class="w-4 h-4" />
@@ -184,13 +212,13 @@
         
         <div class="modal-content relative bg-white rounded-2xl shadow-glass w-full max-w-md overflow-hidden border border-slate-200">
           <div class="px-6 py-5 border-b border-slate-100">
-            <h3 class="text-xl font-bold text-slate-900">Initialize New Session</h3>
+            <h3 class="text-xl font-bold text-slate-900">{{ $t('home.modal.title') }}</h3>
           </div>
           
           <form @submit.prevent="handleCreateSession" class="p-6">
             <div class="space-y-4">
               <div>
-                <label for="sessionName" class="block text-sm font-bold text-slate-800 mb-1.5">Session Name</label>
+                <label for="sessionName" class="block text-sm font-bold text-slate-800 mb-1.5">{{ $t('home.modal.sessionName') }}</label>
                 <input
                   id="sessionName"
                   v-model="newSessionName"
@@ -200,7 +228,7 @@
                 />
               </div>
               <p class="text-sm font-medium text-slate-500">
-                A new session will be created in Draft status. You will then proceed to configure the environment.
+                {{ $t('home.modal.description') }}
               </p>
             </div>
             
@@ -210,7 +238,7 @@
                 @click="closeModal"
                 class="px-5 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm active:scale-95"
               >
-                Cancel
+                {{ $t('home.modal.cancel') }}
               </button>
               <button
                 type="submit"
@@ -218,7 +246,7 @@
                 class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-amnimo-600 border border-transparent rounded-xl hover:bg-amnimo-700 disabled:opacity-50 transition-colors shadow-sm active:scale-95 w-full sm:w-auto"
               >
                 <AppSpinner v-if="isCreating" size="sm" />
-                Create & Setup
+                {{ $t('home.modal.submit') }}
               </button>
             </div>
           </form>
@@ -249,7 +277,7 @@
 
 <script setup lang="ts">
 import { useSessionStore } from '~/composables/session/useSessionStore';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ReportModal from '~/components/ReportModal.vue';
 import ConfirmModal from '~/components/ConfirmModal.vue';
@@ -283,8 +311,20 @@ const confirmModal = ref({
   action: null as null | (() => Promise<void>)
 });
 
+let pollInterval: any = null;
+
 onMounted(() => {
   sessionStore.fetchSessions();
+  pollInterval = setInterval(() => {
+    // Only fetch in background if any session is running or preparing
+    if (sessionStore.sessions.some(s => s.status === 'Running' || s.status === 'Preparing')) {
+      sessionStore.fetchSessions(true);
+    }
+  }, 3000);
+});
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval);
 });
 
 // Filter & Sort State

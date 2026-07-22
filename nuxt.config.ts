@@ -6,8 +6,15 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@nuxt/icon',
     '@pinia/nuxt',
-    '@vueuse/nuxt'
+    '@vueuse/nuxt',
+    '@nuxtjs/i18n'
   ],
+  i18n: {
+    locales: ['en', 'ja'],
+    defaultLocale: 'en',
+    strategy: 'no_prefix',
+    vueI18n: './i18n.config.ts'
+  },
   nitro: {
     experimental: {
       websocket: true

@@ -1,0 +1,80 @@
+{
+  "nav": {
+    "sessions": "Sessions",
+    "firmware": "Firmware",
+    "settings": "Settings",
+    "version": "Version"
+  },
+  "download": {
+    "complete": "Download complete",
+    "speed": "{received} / {total}"
+  },
+  "home": {
+    "activeSessions": "Active Sessions",
+    "newSession": "New Session",
+    "noActiveSessions": "No active sessions",
+    "startFirstSession": "Start your first E2E test session by clicking the button above.",
+    "running": "Running",
+    "completed": "Completed",
+    "failed": "Failed",
+    "cancelled": "Cancelled",
+    "unknown": "Unknown",
+    "stop": "Stop",
+    "delete": "Delete",
+    "viewReport": "Report",
+    "status": {
+      "running": "Running",
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "unknown": "Unknown",
+      "draft": "Draft",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "closed": "Closed"
+    },
+    "modal": {
+      "title": "Initialize New Session",
+      "sessionName": "Session Name",
+      "description": "A new session will be created in Draft status. You will then proceed to configure the environment.",
+      "cancel": "Cancel",
+      "submit": "Create & Setup"
+    }
+  },
+  "firmware": {
+    "title": "Firmware Management",
+    "description": "Download and upload firmware packages for testing.",
+    "externalTitle": "External Firmwares",
+    "localTitle": "Local Firmwares",
+    "upload": "Upload",
+    "download": "Download",
+    "delete": "Delete",
+    "refresh": "Refresh",
+    "fileName": "File Name",
+    "size": "Size",
+    "date": "Date",
+    "actions": "Actions"
+  },
+  "settings": {
+    "title": "Settings",
+    "envConfig": "Environment Configuration",
+    "envDesc": "Configure the path to your amnimo-e2e test repository.",
+    "e2ePath": "Amnimo E2E Directory Path",
+    "browse": "Browse...",
+    "validConfig": "Valid Configuration",
+    "invalidPath": "Invalid Path",
+    "checking": "Checking...",
+    "validate": "Validate",
+    "saving": "Saving...",
+    "saveSettings": "Save Settings",
+    "softwareUpdate": "Software Update",
+    "updateDesc": "Check for new versions of Amnimo Test Runner.",
+    "currentVersion": "Current Version",
+    "checkUpdates": "Check for Updates",
+    "checkingUpdates": "Checking...",
+    "installRestart": "Install and Restart",
+    "language": "Language",
+    "languageDesc": "Select your preferred application language.",
+    "selectLanguage": "Select Language"
+  }
+}

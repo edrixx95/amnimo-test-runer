@@ -2,7 +2,7 @@
   <div class="flex-1 flex flex-col h-full overflow-hidden relative bg-slate-50">
     <header class="h-16 flex items-center px-8 border-b border-gray-100 bg-white shrink-0 shadow-sm z-10 relative">
       <div class="flex items-center gap-4">
-        <h2 class="text-xl font-semibold text-slate-800 tracking-tight">Firmware Management</h2>
+        <h2 class="text-xl font-semibold text-slate-800 tracking-tight">{{ $t('firmware.title') }}</h2>
         <div v-if="selectedSource" class="flex items-center gap-2 text-sm">
           <Icon name="heroicons:chevron-right" class="w-4 h-4 text-slate-400" />
           <span class="px-2.5 py-1 bg-amnimo-50 text-amnimo-700 font-bold rounded-lg uppercase tracking-wider text-xs">
@@ -16,12 +16,12 @@
       <div class="max-w-7xl mx-auto">
         <div class="mb-8 flex justify-between items-end">
           <div>
-            <h3 class="text-2xl font-bold text-slate-900 tracking-tight">External Firmwares</h3>
-            <p class="text-slate-500 mt-1">Download firmware images from Staging and Production servers</p>
+            <h3 class="text-2xl font-bold text-slate-900 tracking-tight">{{ $t('firmware.externalTitle') }}</h3>
+            <p class="text-slate-500 mt-1">{{ $t('firmware.description') }}</p>
           </div>
           <button v-if="selectedSource" @click="fetchFirmwares" class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-amnimo-700 px-4 py-2 rounded-xl font-medium transition-all shadow-sm">
             <Icon name="heroicons:arrow-path" class="w-5 h-5" :class="{'animate-spin': isLoading}" />
-            Refresh
+            {{ $t('firmware.refresh') }}
           </button>
         </div>
 
@@ -129,7 +129,7 @@
                   <tr class="bg-slate-50/80 border-b border-gray-200 text-xs uppercase tracking-wider font-bold text-slate-500 select-none">
                     <th class="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors group" @click="sortBy('filename')">
                       <div class="flex items-center gap-1.5">
-                        Filename
+                        {{ $t('firmware.fileName') }}
                         <Icon v-if="sortKey === 'filename'" :name="sortOrder === 'asc' ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="w-3.5 h-3.5 text-amnimo-600" />
                         <Icon v-else name="heroicons:chevron-up-down" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-50" />
                       </div>
@@ -157,19 +157,19 @@
                     </th>
                     <th class="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors group" @click="sortBy('size')">
                       <div class="flex items-center gap-1.5">
-                        Size
+                        {{ $t('firmware.size') }}
                         <Icon v-if="sortKey === 'size'" :name="sortOrder === 'asc' ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="w-3.5 h-3.5 text-amnimo-600" />
                         <Icon v-else name="heroicons:chevron-up-down" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-50" />
                       </div>
                     </th>
                     <th class="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors group" @click="sortBy('date')">
                       <div class="flex items-center gap-1.5">
-                        Date
+                        {{ $t('firmware.date') }}
                         <Icon v-if="sortKey === 'date'" :name="sortOrder === 'asc' ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="w-3.5 h-3.5 text-amnimo-600" />
                         <Icon v-else name="heroicons:chevron-up-down" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-50" />
                       </div>
                     </th>
-                    <th class="px-6 py-4 text-right">Action</th>
+                    <th class="px-6 py-4 text-right">{{ $t('firmware.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -218,7 +218,7 @@
                       <a :href="`/api/firmwares/download?url=${encodeURIComponent(fw.url)}`" download
                          class="inline-flex items-center justify-center gap-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-amnimo-600 hover:text-white hover:border-amnimo-600 px-4 py-2 rounded-xl transition-all font-bold text-sm shadow-sm group-hover:shadow-md active:scale-95">
                         <Icon name="heroicons:arrow-down-tray" class="w-4 h-4" />
-                        Download
+                        {{ $t('firmware.download') }}
                       </a>
                     </td>
                   </tr>

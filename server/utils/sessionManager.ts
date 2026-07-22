@@ -5,8 +5,10 @@ import { SESSION_STATUS } from '../../shared/constants';
 import { randomUUID } from 'node:crypto';
 import { getSettings } from './settingsManager';
 
-// Đảm bảo đường dẫn tuyệt đối cho an toàn
-const SESSIONS_DIR = path.resolve(process.cwd(), 'sessions');
+// Đảm bảo đường dẫn tuyệt đối cho an toàn, sử dụng APP_DATA_PATH nếu có để bảo lưu dữ liệu
+const SESSIONS_DIR = process.env.APP_DATA_PATH 
+  ? path.join(process.env.APP_DATA_PATH, 'sessions') 
+  : path.resolve(process.cwd(), 'sessions');
 
 export const sessionManager = {
   async init() {

@@ -17,6 +17,7 @@ async function startNitroServer() {
     // Start Nitro server within the same process
     process.env.PORT = SERVER_PORT.toString();
     process.env.HOST = "127.0.0.1";
+    process.env.APP_DATA_PATH = app.getPath('userData');
 
     // Import the built Nitro server
     // Node.js ESM loader on Windows requires file:// protocol for absolute paths
@@ -112,7 +113,8 @@ app.whenReady().then(async () => {
   // Wait for Nuxt API to be responsive
   waitForServer(SERVER_PORT, () => {
     createWindow();
-    
+    ipcMain.handle('get-version', () => app.getVersion());
+
     // Auto Updater configuration
     autoUpdater.logger = console;
     
@@ -146,6 +148,30 @@ app.whenReady().then(async () => {
 
     autoUpdater.on('update-downloaded', (info) => {
       if (mainWindow) mainWindow.webContents.send('update-status', { status: 'downloaded', version: info.version });
+    });
+
+    // Handle generic downloads
+    mainWindow.webContents.session.on('will-download', (event, item, webContents) => {
+      item.on('updated', (event, state) => {
+        if (state === 'progressing') {
+          if (!item.isPaused() && mainWindow) {
+            mainWindow.webContents.send('download-progress', {
+              filename: item.getFilename(),
+              received: item.getReceivedBytes(),
+              total: item.getTotalBytes(),
+              state: item.getState()
+            });
+          }
+        }
+      });
+      item.once('done', (event, state) => {
+        if (mainWindow) {
+          mainWindow.webContents.send('download-complete', {
+            filename: item.getFilename(),
+            state: state
+          });
+        }
+      });
     });
 
   });

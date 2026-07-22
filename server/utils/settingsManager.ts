@@ -5,7 +5,10 @@ export interface AppSettings {
   e2ePath: string;
 }
 
-const SETTINGS_FILE = path.resolve(process.cwd(), 'sessions', 'settings.json');
+const SETTINGS_DIR = process.env.APP_DATA_PATH 
+  ? path.join(process.env.APP_DATA_PATH, 'sessions') 
+  : path.resolve(process.cwd(), 'sessions');
+const SETTINGS_FILE = path.join(SETTINGS_DIR, 'settings.json');
 const DEFAULT_E2E_PATH = 'C:/amnimo/amnimo-e2e';
 
 let cachedSettings: AppSettings | null = null;

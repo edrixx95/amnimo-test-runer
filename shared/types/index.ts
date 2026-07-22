@@ -30,6 +30,12 @@ export type SessionSummary = {
   duration: number;
 };
 
+export type SessionMeta = {
+  testCounts: { passed: number; failed: number; skipped: number };
+  specCounts: { completed: number; total: number };
+};
+
 export type Session = SessionMetadata & {
   summary?: SessionSummary;
+  meta?: SessionMeta;
 };

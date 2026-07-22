@@ -8,8 +8,8 @@ export const useSessionStore = defineStore('session', () => {
   const isLoading = ref(false);
   const hasError = ref(false);
 
-  const fetchSessions = async () => {
-    isLoading.value = true;
+  const fetchSessions = async (background = false) => {
+    if (!background) isLoading.value = true;
     hasError.value = false;
     try {
       const data = await $fetch<Session[]>('/api/sessions');
@@ -18,7 +18,7 @@ export const useSessionStore = defineStore('session', () => {
       console.error('Failed to fetch sessions:', e);
       hasError.value = true;
     } finally {
-      isLoading.value = false;
+      if (!background) isLoading.value = false;
     }
   };
 
