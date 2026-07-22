@@ -1,0 +1,469 @@
+<template>
+  <div class="flex-1 flex flex-col h-full overflow-hidden relative">
+    <header class="h-16 flex items-center px-8 border-b border-gray-100 bg-white shrink-0 shadow-sm z-10 relative">
+      <h2 class="text-xl font-semibold text-slate-800 tracking-tight">Session Dashboard</h2>
+    </header>
+
+    <div class="flex-1 p-8 overflow-auto bg-slate-50/50">
+      <div class="max-w-7xl mx-auto">
+        <div class="mb-8 flex justify-between items-center animate-fade-in-up">
+          <div>
+            <h3 class="text-2xl font-bold text-slate-900 tracking-tight">Overview</h3>
+            <p class="text-slate-500 mt-1">Manage and track your E2E test sessions</p>
+          </div>
+          <button @click="openCreateModal" class="inline-flex items-center gap-2 bg-amnimo-600 hover:bg-amnimo-700 hover:shadow-lg hover:shadow-amnimo-500/30 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0">
+            <Icon name="heroicons:plus" class="w-5 h-5" />
+            Create Session
+          </button>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="relative z-20 mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap items-center gap-4 animate-fade-in-up" style="animation-delay: 0.05s;">
+          <!-- Search -->
+          <div class="flex-1 min-w-[200px] relative">
+            <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <input 
+              v-model="searchQuery"
+              type="text" 
+              placeholder="Search sessions by name or ID..." 
+              class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-amnimo-500 focus:ring-1 focus:ring-amnimo-500 transition-all outline-none"
+            />
+          </div>
+          
+          <!-- Filters -->
+          <div class="flex flex-wrap items-center gap-3">
+            <CustomSelect
+              v-model="filterStatus"
+              :options="[
+                { label: 'All Statuses', value: 'All' },
+                { label: 'Draft', value: 'Draft' },
+                { label: 'Preparing', value: 'Preparing' },
+                { label: 'Ready', value: 'Ready' },
+                { label: 'Running', value: 'Running' },
+                { label: 'Completed', value: 'Completed' },
+                { label: 'Failed', value: 'Failed' },
+                { label: 'Closed', value: 'Closed' }
+              ]"
+            />
+            
+            <CustomSelect
+              v-model="filterDevice"
+              :options="[
+                { label: 'All Devices', value: 'All' },
+                ...uniqueDevices.map(d => ({ label: d, value: d }))
+              ]"
+            />
+
+            <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-amnimo-500 transition-colors shadow-sm" title="Filter by Created Date">
+              <Icon name="heroicons:calendar" class="w-4 h-4 text-slate-400" />
+              <input v-model="dateRange.start" type="date" class="bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer" />
+              <span class="text-slate-400 text-xs font-medium">to</span>
+              <input v-model="dateRange.end" type="date" class="bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer" />
+              <!-- Clear date button -->
+              <button v-if="dateRange.start || dateRange.end" @click="dateRange = {start:'', end:''}" class="ml-1 text-slate-400 hover:text-rose-500" title="Clear Dates">
+                <Icon name="heroicons:x-mark" class="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div class="h-6 w-px bg-slate-200 mx-1"></div>
+
+            <CustomSelect
+              v-model="sortBy"
+              icon="heroicons:arrows-up-down"
+              :options="[
+                { label: 'Newest First', value: 'Newest' },
+                { label: 'Oldest First', value: 'Oldest' },
+                { label: 'Name (A-Z)', value: 'Name (A-Z)' },
+                { label: 'Name (Z-A)', value: 'Name (Z-A)' }
+              ]"
+            />
+          </div>
+        </div>
+
+        <div v-if="sessionStore.isLoading" class="flex justify-center p-20">
+          <AppLoader size="md" text="Loading Sessions..." />
+        </div>
+
+        <div v-else-if="sessionStore.hasError" class="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 animate-fade-in">
+          Failed to load sessions. Please try again.
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+          <div v-if="filteredSessions.length === 0" class="col-span-full p-12 text-center bg-white border border-dashed border-gray-200 rounded-2xl">
+            <div class="w-16 h-16 bg-amnimo-50 text-amnimo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Icon name="heroicons:inbox" class="w-8 h-8" />
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">
+              <span v-if="sessionStore.sessions.length > 0">No sessions match your filter</span>
+              <span v-else>No sessions found</span>
+            </h3>
+            <p class="text-slate-500 mb-6">
+              <span v-if="sessionStore.sessions.length > 0">Try adjusting your search criteria or clearing filters.</span>
+              <span v-else>You haven't run any test sessions yet.</span>
+            </p>
+            <button v-if="sessionStore.sessions.length === 0" @click="openCreateModal" class="inline-flex items-center justify-center bg-amnimo-50 text-amnimo-700 hover:bg-amnimo-100 hover:text-amnimo-800 px-5 py-2.5 rounded-xl font-medium transition-colors">
+              Create your first session
+            </button>
+            <button v-else @click="resetFilters" class="inline-flex items-center justify-center bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 px-5 py-2.5 rounded-xl font-medium transition-colors">
+              Clear Filters
+            </button>
+          </div>
+
+          <div v-for="session in filteredSessions" :key="session.id" @click="session.status !== 'Closed' && navigateToSession(session)" :class="[session.status === 'Closed' ? 'border-slate-300 bg-slate-200/80 opacity-80 grayscale' : 'bg-white shadow-soft hover:shadow-glass hover:border-amnimo-200 border-gray-100 hover:-translate-y-1 cursor-pointer', 'group flex flex-col rounded-2xl border overflow-hidden transition-all duration-300']">
+            <div class="px-5 py-4 border-b border-gray-50/80" :class="session.status === 'Closed' ? 'bg-transparent' : 'bg-white'">
+              <div class="flex justify-between items-start gap-2">
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <!-- Test Type Badge -->
+                    <span
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border shadow-sm"
+                      :class="{
+                        'bg-purple-50 text-purple-700 border-purple-200': session.testType === 'playground',
+                        'bg-blue-50 text-blue-700 border-blue-200': session.testType === 'system',
+                        'bg-emerald-50 text-emerald-700 border-emerald-200': !session.testType || session.testType === 'release',
+                      }"
+                    >
+                      <Icon 
+                        :name="session.testType === 'playground' ? 'heroicons:beaker' : session.testType === 'system' ? 'heroicons:cube-transparent' : 'heroicons:rocket-launch'" 
+                        class="w-3 h-3" 
+                      />
+                      {{ session.testType || 'release' }}
+                    </span>
+                  </div>
+                  <h3 class="font-bold text-slate-900 line-clamp-2 tracking-tight text-lg leading-tight" :title="session.name || session.id">{{ session.name || session.id }}</h3>
+                  <p class="text-xs text-slate-500 mt-1.5 font-bold">{{ new Date(session.createdAt).toLocaleString() }}</p>
+                </div>
+                <span class="shrink-0 mt-1 inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider shadow-sm border" :class="getStatusClass(session.status)">
+                  {{ session.status }}
+                </span>
+              </div>
+            </div>
+
+            <div class="px-5 py-4 space-y-3 flex-1 text-sm text-slate-600" :class="session.status === 'Closed' ? 'bg-transparent' : 'bg-slate-50/30'">
+              <div class="flex justify-between items-center">
+                <span class="text-slate-500 font-bold">Device</span>
+                <span class="font-bold text-slate-800">
+                  {{ session.series || '-' }}{{ session.board ? ` / ${session.board}` : '' }}{{ session.deviceType ? ` (${session.deviceType})` : '' }}
+                </span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-500 font-bold">Base URL</span>
+                <span class="font-bold text-slate-800 truncate max-w-[140px]" :title="session.baseUrl">{{ session.baseUrl || '-' }}</span>
+              </div>
+            </div>
+
+            <div class="px-4 py-3 border-t border-gray-50 flex justify-between items-center gap-2" :class="session.status === 'Closed' ? 'bg-transparent' : 'bg-white'">
+              <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button @click.stop="handleDeleteSession(session.id)" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Session">
+                  <Icon name="heroicons:trash" class="w-4 h-4" />
+                </button>
+                <button v-if="session.status !== 'Closed'" @click.stop="handleCloseSession(session.id)" class="p-2 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Close Session">
+                  <Icon name="heroicons:lock-closed" class="w-4 h-4" />
+                </button>
+              </div>
+              <div class="flex gap-2">
+                <button @click.stop="openReport(session.id)" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors shadow-sm hover:shadow-md">
+                  <Icon name="heroicons:document-text" class="w-4 h-4" />
+                  Report
+                </button>
+                <NuxtLink v-if="session.status !== 'Closed'" @click.stop :to="session.status === 'Draft' ? `/sessions/${session.id}/setup` : `/sessions/${session.id}/runner`" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-amnimo-600 hover:bg-amnimo-700 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <Icon name="heroicons:arrow-right" class="w-4 h-4" />
+                  {{ session.status === 'Draft' ? 'Setup' : 'Open' }}
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Session Modal -->
+    <Transition name="modal">
+      <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
+        <div class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm transform-gpu will-change-opacity" @click="closeModal"></div>
+        
+        <div class="modal-content relative bg-white rounded-2xl shadow-glass w-full max-w-md overflow-hidden border border-slate-200">
+          <div class="px-6 py-5 border-b border-slate-100">
+            <h3 class="text-xl font-bold text-slate-900">Initialize New Session</h3>
+          </div>
+          
+          <form @submit.prevent="handleCreateSession" class="p-6">
+            <div class="space-y-4">
+              <div>
+                <label for="sessionName" class="block text-sm font-bold text-slate-800 mb-1.5">Session Name</label>
+                <input
+                  id="sessionName"
+                  v-model="newSessionName"
+                  type="text"
+                  class="block w-full rounded-xl border-slate-300 bg-white text-slate-900 shadow-sm focus:border-amnimo-500 focus:ring-amnimo-500 sm:text-sm py-2.5 px-3 border transition-colors outline-none focus:ring-2 focus:ring-opacity-50"
+                  required
+                />
+              </div>
+              <p class="text-sm font-medium text-slate-500">
+                A new session will be created in Draft status. You will then proceed to configure the environment.
+              </p>
+            </div>
+            
+            <div class="mt-8 flex justify-end gap-3">
+              <button
+                type="button"
+                @click="closeModal"
+                class="px-5 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                :disabled="isCreating"
+                class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-amnimo-600 border border-transparent rounded-xl hover:bg-amnimo-700 disabled:opacity-50 transition-colors shadow-sm active:scale-95 w-full sm:w-auto"
+              >
+                <AppSpinner v-if="isCreating" size="sm" />
+                Create & Setup
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Transition>
+    
+    <!-- Report Modal -->
+    <ReportModal v-model="showReportModal" :sessionId="reportSessionId" />
+
+    <!-- Aggregated Data Viewer -->
+    <ExcelJsonViewer v-model="showDataViewer" :jsonUrl="dataViewerUrl" @openHtmlReport="openHtmlReportDialog" />
+
+    <HtmlReportViewer v-if="htmlReportUrl" v-model="showHtmlReport" :url="htmlReportUrl" />
+
+    <!-- Confirm Modal -->
+    <ConfirmModal
+      v-model="confirmModal.isOpen"
+      :title="confirmModal.title"
+      :message="confirmModal.message"
+      :confirmText="confirmModal.confirmText"
+      :type="confirmModal.type"
+      :isLoading="confirmModal.isLoading"
+      @confirm="executeConfirm"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useSessionStore } from '~/composables/session/useSessionStore';
+import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import ReportModal from '~/components/ReportModal.vue';
+import ConfirmModal from '~/components/ConfirmModal.vue';
+import ExcelJsonViewer from '~/components/ExcelJsonViewer.vue';
+import HtmlReportViewer from '~/components/HtmlReportViewer.vue';
+
+const sessionStore = useSessionStore();
+const router = useRouter();
+
+const isModalOpen = ref(false);
+const newSessionName = ref('');
+const isCreating = ref(false);
+
+const showReportModal = ref(false);
+const reportSessionId = ref('');
+
+const showDataViewer = ref(false);
+const dataViewerUrl = ref('');
+
+const showHtmlReport = ref(false);
+const htmlReportUrl = ref('');
+
+// Confirm Modal state
+const confirmModal = ref({
+  isOpen: false,
+  title: '',
+  message: '',
+  confirmText: '',
+  type: 'danger' as 'danger' | 'warning' | 'info',
+  isLoading: false,
+  action: null as null | (() => Promise<void>)
+});
+
+onMounted(() => {
+  sessionStore.fetchSessions();
+});
+
+// Filter & Sort State
+const searchQuery = ref('');
+const filterStatus = ref('All');
+const filterDevice = ref('All');
+const dateRange = ref({ start: '', end: '' });
+const sortBy = ref('Newest');
+
+const uniqueDevices = computed(() => {
+  const devices = new Set<string>();
+  for (const session of sessionStore.sessions) {
+    if (session.board) {
+      devices.add(session.board);
+    }
+  }
+  return Array.from(devices).sort();
+});
+
+const filteredSessions = computed(() => {
+  let result = [...sessionStore.sessions];
+
+  // Apply Search
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase();
+    result = result.filter(s => 
+      (s.name && s.name.toLowerCase().includes(q)) || 
+      (s.id && s.id.toLowerCase().includes(q))
+    );
+  }
+
+  // Apply Status Filter
+  if (filterStatus.value !== 'All') {
+    result = result.filter(s => s.status === filterStatus.value);
+  }
+
+  // Apply Device Filter
+  if (filterDevice.value !== 'All') {
+    result = result.filter(s => s.board === filterDevice.value);
+  }
+
+  // Apply Date Filter
+  if (dateRange.value.start) {
+    const startObj = new Date(dateRange.value.start);
+    startObj.setHours(0, 0, 0, 0);
+    result = result.filter(s => new Date(s.createdAt) >= startObj);
+  }
+  if (dateRange.value.end) {
+    const endObj = new Date(dateRange.value.end);
+    endObj.setHours(23, 59, 59, 999);
+    result = result.filter(s => new Date(s.createdAt) <= endObj);
+  }
+
+  // Apply Sorting
+  result.sort((a, b) => {
+    switch (sortBy.value) {
+      case 'Newest':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case 'Oldest':
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case 'Name (A-Z)':
+        return (a.name || a.id).localeCompare(b.name || b.id);
+      case 'Name (Z-A)':
+        return (b.name || b.id).localeCompare(a.name || a.id);
+      default:
+        return 0;
+    }
+  });
+
+  return result;
+});
+
+const resetFilters = () => {
+  searchQuery.value = '';
+  filterStatus.value = 'All';
+  filterDevice.value = 'All';
+  dateRange.value = { start: '', end: '' };
+};
+
+const openCreateModal = () => {
+  const timestamp = new Date().getTime();
+  newSessionName.value = `session-${timestamp}`;
+  isModalOpen.value = true;
+};
+
+const closeModal = () => {
+  if (isCreating.value) return;
+  isModalOpen.value = false;
+};
+
+const handleCreateSession = async () => {
+  if (!newSessionName.value.trim()) return;
+  
+  isCreating.value = true;
+  try {
+    const session = await sessionStore.createSession({ name: newSessionName.value });
+    if (session) {
+      closeModal();
+      router.push(`/sessions/${session.id}/setup`);
+    }
+  } catch (error) {
+    console.error('Failed to create session:', error);
+    alert('Failed to create session');
+  } finally {
+    isCreating.value = false;
+  }
+};
+
+const handleDeleteSession = (id: string) => {
+  confirmModal.value = {
+    isOpen: true,
+    title: 'Delete Session',
+    message: 'Are you sure you want to delete this session? This action cannot be undone and will remove all associated logs and reports.',
+    confirmText: 'Delete',
+    type: 'danger',
+    isLoading: false,
+    action: async () => {
+      await sessionStore.deleteSession(id);
+    }
+  };
+};
+
+const handleCloseSession = (id: string) => {
+  confirmModal.value = {
+    isOpen: true,
+    title: 'Close Session',
+    message: 'Are you sure you want to close this session? Once closed, you will not be able to run new tests in this session.',
+    confirmText: 'Close Session',
+    type: 'warning',
+    isLoading: false,
+    action: async () => {
+      await $fetch(`/api/sessions/${id}/close`, { method: 'POST' });
+      await sessionStore.fetchSessions();
+    }
+  };
+};
+
+const executeConfirm = async () => {
+  if (!confirmModal.value.action) return;
+  confirmModal.value.isLoading = true;
+  try {
+    await confirmModal.value.action();
+    confirmModal.value.isOpen = false;
+  } catch (err: any) {
+    alert(`Operation failed: ${err.message || err.data?.message || err}`);
+  } finally {
+    confirmModal.value.isLoading = false;
+  }
+};
+
+const openReport = (id: string) => {
+  dataViewerUrl.value = `/api/sessions/${id}/aggregated-report`;
+  showDataViewer.value = true;
+};
+
+const openHtmlReportDialog = (url: string) => {
+  htmlReportUrl.value = url;
+  showHtmlReport.value = true;
+};
+
+const navigateToSession = (session: any) => {
+  if (session.status === 'Draft') {
+    router.push(`/sessions/${session.id}/setup`);
+  } else {
+    router.push(`/sessions/${session.id}/runner`);
+  }
+};
+
+const getStatusClass = (status: string) => {
+  switch (status) {
+    case 'Draft': return 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100';
+    case 'Preparing': return 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100 shadow-sky-100/50';
+    case 'Ready': return 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 shadow-blue-100/50';
+    case 'Running': return 'bg-amnimo-50 text-amnimo-700 border-amnimo-300 shadow-[0_0_12px_rgba(16,6,159,0.3)] animate-pulse font-black';
+    case 'Completed': return 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100 shadow-emerald-100/50 font-black';
+    case 'Failed': return 'bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100 shadow-rose-100/50 font-black';
+    case 'Archived': return 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 shadow-purple-100/50';
+    case 'Closed': return 'bg-gray-50 text-gray-500 border-gray-200 opacity-80';
+    default: return 'bg-slate-50 text-slate-600 border-slate-200';
+  }
+};
+</script>
