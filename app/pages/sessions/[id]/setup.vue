@@ -1208,7 +1208,6 @@ const updateEnvVariables = () => {
   if (!env.includes("TEST_PASSWORD=")) upsert("TEST_PASSWORD", "yoko1234");
   if (!env.includes("CLI_SERVER_URL="))
     upsert("CLI_SERVER_URL", "http://localhost");
-  if (!env.includes("CLI_SERVER_PORT=")) upsert("CLI_SERVER_PORT", "8080");
 
   formData.value.envContent = env;
 };

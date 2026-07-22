@@ -46,11 +46,7 @@ export default defineEventHandler(async (event) => {
       'utf-8'
     );
     
-    // If envContent was updated, write it to the actual e2e directory
-    if (body.envContent !== undefined) {
-      const e2eEnvPath = path.join(getSettings().e2ePath, '.env');
-      await fs.writeFile(e2eEnvPath, body.envContent, 'utf-8');
-    }
+    // Removed writing envContent to the shared e2e directory to allow concurrent sessions
 
     return updatedSession;
   } catch (error: any) {

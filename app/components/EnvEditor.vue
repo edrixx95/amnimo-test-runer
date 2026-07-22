@@ -356,12 +356,58 @@
               </div>
             </div>
           </label>
-          <input
-            type="text"
-            v-model="parsedEnv[key]"
-            @input="emitChange"
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
-          />
+          <div class="relative">
+            <input
+              type="text"
+              v-model="parsedEnv[key]"
+              @click="toggleDropdown(key)"
+              @blur="handleBlur"
+              @input="emitChange"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
+            />
+            <div
+              v-if="getOptions(key).length > 0"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
+            >
+              <Icon
+                name="heroicons:chevron-up-down"
+                class="w-5 h-5 transition-colors duration-200"
+                :class="
+                  focusedField === key ? 'text-amnimo-500' : 'text-slate-400'
+                "
+              />
+            </div>
+          </div>
+          <Transition
+            enter-active-class="transition duration-100 ease-out"
+            enter-from-class="transform scale-95 opacity-0"
+            enter-to-class="transform scale-100 opacity-100"
+            leave-active-class="transition duration-75 ease-in"
+            leave-from-class="transform scale-100 opacity-100"
+            leave-to-class="transform scale-95 opacity-0"
+          >
+            <div
+              v-show="focusedField === key && getOptions(key).length > 0"
+              :id="`dropdown-${key}`"
+              class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+            >
+              <ul class="py-1">
+                <li
+                  v-for="opt in getOptions(key)"
+                  :key="opt"
+                  @mousedown.prevent="selectOption(key, opt)"
+                  :class="[
+                    'px-4 py-2 text-sm cursor-pointer transition-colors break-all',
+                    parsedEnv[key] === opt
+                      ? 'bg-amnimo-50 text-amnimo-600 font-bold'
+                      : 'text-slate-700 hover:bg-amnimo-50 hover:text-amnimo-600',
+                  ]"
+                >
+                  {{ opt || '(Empty)' }}
+                </li>
+              </ul>
+            </div>
+          </Transition>
         </div>
       </div>
     </div>
@@ -406,6 +452,8 @@ const envComments = ref<Record<string, string>>({});
 const allLines = ref<string[]>([]); // To preserve comments and empty lines
 
 const firmwares = ref<string[]>([]);
+const availablePorts = ref<string[]>([]);
+
 const focusedField = ref<string | null>(null);
 
 // IIS Scanning State
@@ -494,6 +542,9 @@ const selectOption = (key: string, opt: string) => {
 };
 
 const getOptions = (key: string) => {
+  if (key === "CLI_SERVER_PORT") {
+    return availablePorts.value;
+  }
   if (key === "PREV_FIRMWARE_NAME" || key === "TEST_FIRMWARE_NAME") {
     let list = firmwares.value;
 
@@ -584,7 +635,6 @@ const parseEnv = (content: string) => {
   if (!env["TEST_USERNAME"]) env["TEST_USERNAME"] = "admin";
   if (!env["TEST_PASSWORD"]) env["TEST_PASSWORD"] = "yoko1234";
   if (!env["CLI_SERVER_URL"]) env["CLI_SERVER_URL"] = "http://localhost";
-  if (!env["CLI_SERVER_PORT"]) env["CLI_SERVER_PORT"] = "8080";
 
   parsedEnv.value = env;
   envComments.value = comments;
@@ -656,6 +706,19 @@ onMounted(async () => {
     firmwares.value = fwList;
   } catch (err) {
     console.error("Failed to load firmwares", err);
+  }
+
+  try {
+    const ports = await $fetch<number[]>("/api/utils/available-ports");
+    availablePorts.value = ports.map((p) => p.toString());
+
+    // Auto-assign first available port if not present
+    if (!parsedEnv.value["CLI_SERVER_PORT"] && availablePorts.value.length > 0) {
+      parsedEnv.value["CLI_SERVER_PORT"] = availablePorts.value[0];
+      emitChange();
+    }
+  } catch (err) {
+    console.error("Failed to load available ports", err);
   }
 });
 </script>

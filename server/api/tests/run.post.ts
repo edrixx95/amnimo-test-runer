@@ -5,6 +5,7 @@ import { promisify } from 'node:util';
 import { clearSessionProcesses, getSessionProcesses, initLogStreams, writeLog, saveProcessPids } from '../../utils/processManager';
 import { Session } from '../../../shared/types';
 import { getSettings } from '../../utils/settingsManager';
+import { getAvailablePort } from '../../utils/portFinder';
 
 const execAsync = promisify(exec);
 const SESSIONS_DIR = path.resolve(process.cwd(), 'sessions');
@@ -65,14 +66,25 @@ export default defineEventHandler(async (event) => {
   
   let cliPort = '8080';
   let resolvedSessionName = sessionName;
+  const parsedEnv: Record<string, string> = {};
+
   try {
     const sessionPath = path.join(SESSIONS_DIR, sessionId, 'session.json');
     const data = await fs.readFile(sessionPath, 'utf-8');
     const session: Session = JSON.parse(data);
     if (!resolvedSessionName) resolvedSessionName = session.name;
+    
     if (session.envContent) {
-      const match = session.envContent.match(/^CLI_SERVER_PORT=(.*)$/m);
-      if (match) cliPort = match[1].trim();
+      session.envContent.split('\n').forEach(line => {
+        const match = line.match(/^([^=]+)=(.*)$/);
+        if (match) {
+          parsedEnv[match[1].trim()] = match[2].trim();
+        }
+      });
+      // Ensure cliPort matches the user's config
+      if (parsedEnv['CLI_SERVER_PORT']) {
+        cliPort = parsedEnv['CLI_SERVER_PORT'];
+      }
     }
   } catch (e) {
     // ignored
@@ -87,7 +99,7 @@ export default defineEventHandler(async (event) => {
   const backendProc = spawn(npmCmd, ['run', 'dev'], { 
     cwd, 
     shell: isWindows,
-    env: { ...process.env, FORCE_COLOR: '1' } 
+    env: { ...process.env, ...parsedEnv, FORCE_COLOR: '1' } 
   });
   sessionProcs.backendProcess = backendProc;
   
@@ -142,7 +154,7 @@ export default defineEventHandler(async (event) => {
   const e2eProc = spawn(npmCmd, e2eArgs, { 
     cwd, 
     shell: isWindows,
-    env: { ...process.env, FORCE_COLOR: '1' } 
+    env: { ...process.env, ...parsedEnv, FORCE_COLOR: '1' } 
   });
   sessionProcs.e2eProcess = e2eProc;
   
