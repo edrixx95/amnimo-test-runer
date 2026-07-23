@@ -37,7 +37,7 @@ const expectedDevices = computed<ExpectedDevice[]>(() => {
     return [
       { id: 'internal', name: 'Internal Storage', regex: /^nvme0p1$/, icon: IconInternalStorage },
       { id: 'usb', name: 'USB Drive', regex: /^sda$/, icon: IconUsb },
-      { id: 'sd', name: 'SD Card', regex: /^mmc/, icon: IconSdCard }
+      { id: 'sd', name: 'SD Card', regex: /^mmcblk1$/, icon: IconSdCard }
     ];
   } else if (['AX30'].includes(b)) {
     return [

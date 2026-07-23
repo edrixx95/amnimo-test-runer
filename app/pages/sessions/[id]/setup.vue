@@ -109,7 +109,7 @@
         >
           <!-- Scrollable Content -->
           <div class="flex-1 overflow-y-auto p-8 md:p-12 bg-slate-50/50">
-            <div class="max-w-5xl mx-auto">
+            <div class="max-w-6xl mx-auto">
               <Transition name="step" mode="out-in">
                 <!-- Step 1: Test Type -->
                 <div v-if="currentStep === 1" key="step1" class="space-y-8">
@@ -339,7 +339,7 @@
                                 <div
                                   v-for="dtype in DEVICE_TYPES[board]"
                                   :key="dtype"
-                                  @click.stop="formData.deviceType = dtype"
+                                  @click.stop="formData.deviceType = formData.deviceType === dtype ? '' : dtype"
                                   class="rounded-lg px-2.5 py-1 text-xs font-bold cursor-pointer transition-all duration-200 border"
                                   :class="
                                     formData.deviceType === dtype
@@ -771,7 +771,7 @@
                         :class="
                           checklistState.manual[item.id]
                             ? 'border-emerald-300 bg-emerald-50/40'
-                            : 'border-gray-100 bg-white'
+                            : 'border-gray-100 bg-white hover:border-slate-300'
                         "
                       >
                         <FirmwarePreparation
@@ -896,10 +896,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useToast } from '~/composables/useToast';
 import {
   BOARDS,
   DEVICE_TYPES,
   CHECKLISTS,
+  DEFAULT_CHECKLIST,
   getFirmwarePrefix,
 } from "~~/shared/constants";
 import type { Session } from "~~/shared/types";
@@ -907,10 +909,11 @@ import type { Session } from "~~/shared/types";
 const route = useRoute();
 const router = useRouter();
 const sessionId = route.params.id as string;
-
 const session = ref<Session | null>(null);
 const isLoadingSession = ref(true);
 const isSaving = ref(false);
+
+const { addToast } = useToast();
 
 const currentStep = ref(1);
 
@@ -970,7 +973,7 @@ onMounted(async () => {
     }
   } catch (err) {
     console.error("Failed to load session:", err);
-    alert("Session not found");
+    addToast({ title: 'Error', message: "Session not found", type: 'error' });
     router.push("/");
   } finally {
     isLoadingSession.value = false;
@@ -1009,7 +1012,7 @@ const currentChecklistKey = computed(() => {
 });
 
 const currentChecklist = computed(() => {
-  return (CHECKLISTS as any)[currentChecklistKey.value];
+  return (CHECKLISTS as any)[currentChecklistKey.value] || (CHECKLISTS as any)[formData.value.board] || DEFAULT_CHECKLIST;
 });
 
 // Reset checklist state when device changes
@@ -1189,9 +1192,6 @@ const updateEnvVariables = () => {
   upsert("SERIES", formData.value.series);
 
   let deviceTypeValue = formData.value.deviceType || "";
-  if (formData.value.board === "AR10" && deviceTypeValue.toLowerCase() === "normal") {
-    deviceTypeValue = "";
-  }
   upsert("DEVICE_TYPE", deviceTypeValue);
   
   upsert("BASE_URL", formData.value.baseUrl);
@@ -1241,7 +1241,7 @@ const isStepValid = computed(() => {
   if (currentStep.value === 2) {
     // Target Device
     if (!formData.value.board || !formData.value.baseUrl) return false;
-    if (availableDeviceTypes.value.length > 0 && !formData.value.deviceType)
+    if (availableDeviceTypes.value.length > 0 && formData.value.board !== 'AR10' && !formData.value.deviceType)
       return false;
     return true;
   }

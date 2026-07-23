@@ -3,7 +3,7 @@ import path from 'node:path';
 import { SESSION_STATUS } from '~~/shared/constants';
 import type { Session } from '~~/shared/types';
 
-const SESSIONS_DIR = path.resolve(process.cwd(), 'sessions');
+const SESSIONS_DIR = process.env.APP_DATA_PATH ? path.join(process.env.APP_DATA_PATH, 'sessions') : path.resolve(process.cwd(), 'sessions');
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id');

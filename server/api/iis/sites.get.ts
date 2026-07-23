@@ -22,11 +22,20 @@ function getLocalIp() {
 
 export default defineEventHandler(async (event) => {
   try {
-    const { stdout } = await execAsync('%SystemRoot%\\System32\\inetsrv\\appcmd.exe list site', { windowsHide: true });
+    const { stdout: siteOut } = await execAsync('%SystemRoot%\\System32\\inetsrv\\appcmd.exe list site', { windowsHide: true });
+    const { stdout: vdirOut } = await execAsync('%SystemRoot%\\System32\\inetsrv\\appcmd.exe list vdir', { windowsHide: true });
     
+    const physicalPaths: Record<string, string> = {};
+    for (const line of vdirOut.split('\n')) {
+      const match = line.match(/VDIR "([^/]+)\/" \(physicalPath:([^)]+)\)/);
+      if (match) {
+        physicalPaths[match[1]] = match[2];
+      }
+    }
+
     const localIp = getLocalIp();
     const sites = [];
-    const lines = stdout.split('\n');
+    const lines = siteOut.split('\n');
     for (const line of lines) {
       if (!line.trim()) continue;
       // Format: SITE "Default Web Site" (id:1,bindings:http/*:80:,state:Started)
@@ -35,11 +44,13 @@ export default defineEventHandler(async (event) => {
       const bindingMatch = line.match(/bindings:[a-zA-Z]+\/\*:(\d+):/);
       
       if (nameMatch) {
+        const siteName = nameMatch[1];
         sites.push({
-          name: nameMatch[1],
+          name: siteName,
           state: stateMatch ? stateMatch[1] : 'Unknown',
           port: bindingMatch ? parseInt(bindingMatch[1], 10) : null,
-          url: bindingMatch ? `http://${localIp}:${bindingMatch[1]}` : null
+          url: bindingMatch ? `http://${localIp}:${bindingMatch[1]}` : null,
+          physicalPath: physicalPaths[siteName] || null
         });
       }
     }

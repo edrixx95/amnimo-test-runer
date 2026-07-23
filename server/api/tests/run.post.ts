@@ -8,7 +8,7 @@ import { getSettings } from '../../utils/settingsManager';
 import { getAvailablePort } from '../../utils/portFinder';
 
 const execAsync = promisify(exec);
-const SESSIONS_DIR = path.resolve(process.cwd(), 'sessions');
+const SESSIONS_DIR = process.env.APP_DATA_PATH ? path.join(process.env.APP_DATA_PATH, 'sessions') : path.resolve(process.cwd(), 'sessions');
 
 async function killPortOnWindows(port: string) {
   try {

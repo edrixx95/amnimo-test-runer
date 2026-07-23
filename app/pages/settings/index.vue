@@ -111,6 +111,42 @@
           </div>
         </div>
 
+        <!-- Data Management / Backup & Restore -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-6 flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-bold text-slate-800">Data Management</h3>
+              <p class="text-sm text-slate-500 mt-1">Backup and restore your session data across devices.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <input 
+                type="file" 
+                ref="fileInput" 
+                class="hidden" 
+                accept=".zip" 
+                @change="handleImportBackup" 
+              />
+              <button 
+                @click="$refs.fileInput.click()"
+                :disabled="isImporting"
+                class="px-4 py-2 text-sm font-bold bg-white text-slate-700 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50 inline-flex items-center gap-2 shrink-0"
+              >
+                <Icon v-if="isImporting" name="heroicons:arrow-path" class="w-4 h-4 animate-spin" />
+                <Icon v-else name="heroicons:arrow-up-tray" class="w-4 h-4" />
+                Import Backup
+              </button>
+              <a 
+                href="/api/backup/export" 
+                target="_blank"
+                class="px-4 py-2 text-sm font-bold text-white bg-slate-800 rounded-xl hover:bg-slate-900 transition-colors shadow-sm inline-flex items-center gap-2 shrink-0"
+              >
+                <Icon name="heroicons:arrow-down-tray" class="w-4 h-4" />
+                Export Backup
+              </a>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
     
@@ -142,6 +178,40 @@ const isCheckingUpdate = ref(false);
 const updateStatusMessage = ref('');
 const updateProgress = ref(0);
 const isUpdateReady = ref(false);
+
+const fileInput = ref<HTMLInputElement | null>(null);
+const isImporting = ref(false);
+
+const handleImportBackup = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (!target.files || target.files.length === 0) return;
+  
+  const file = target.files[0];
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  isImporting.value = true;
+  try {
+    const res = await $fetch<{ success: boolean, message: string }>('/api/backup/import', {
+      method: 'POST',
+      body: formData
+    });
+    
+    addToast({ title: 'Success', message: res.message, type: 'success' });
+    // Clear input
+    target.value = '';
+    
+    // Optionally trigger a reload to fetch new sessions
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  } catch (e: any) {
+    console.error('Import failed', e);
+    addToast({ title: 'Error', message: e.data?.statusMessage || e.message || 'Import failed', type: 'error' });
+  } finally {
+    isImporting.value = false;
+  }
+};
 
 onMounted(async () => {
   try {

@@ -91,7 +91,11 @@ function createWindow() {
   });
 
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.loadURL(`http://127.0.0.1:${SERVER_PORT}`);
+  
+  // Clear the cache before loading to ensure updates are reflected
+  mainWindow.webContents.session.clearCache().then(() => {
+    mainWindow.loadURL(`http://127.0.0.1:${SERVER_PORT}`);
+  });
 
   mainWindow.once("ready-to-show", () => {
     if (splashWindow) {

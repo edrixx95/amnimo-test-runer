@@ -113,7 +113,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
+import { useToast } from '~/composables/useToast';
+
+const { addToast } = useToast();
 import { useRouter } from 'vue-router';
 import ExcelJsonViewer from '~/components/ExcelJsonViewer.vue';
 
@@ -194,7 +197,7 @@ const rerunFailedTests = async (reportName: string) => {
     emit('update:modelValue', false);
     router.push(`/sessions/${props.sessionId}/runner`);
   } catch (e: any) {
-    alert("Failed to rerun tests: " + e.message);
+    addToast({ title: 'Error', message: "Failed to rerun tests: " + e.message, type: 'error' });
   } finally {
     isRerunning.value = false;
   }
@@ -214,7 +217,7 @@ const confirmDeleteReport = async () => {
     // Successfully deleted, refresh list
     await fetchReports();
   } catch (e: any) {
-    alert("Failed to delete report: " + (e.data?.statusMessage || e.message));
+    addToast({ title: 'Error', message: "Failed to delete report: " + (e.data?.statusMessage || e.message), type: 'error' });
   } finally {
     isDeleting.value = false;
     reportToDelete.value = null;

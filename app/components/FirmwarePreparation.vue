@@ -50,7 +50,7 @@
           <div
             v-for="fw in [prevFw, testFw]"
             :key="fw"
-            class="bg-white border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
+            class="bg-white border rounded-lg p-4 flex flex-wrap items-center justify-between gap-4 transition-colors"
             :class="
               filesStatus[fw]
                 ? 'border-emerald-200 bg-emerald-50/30'
@@ -248,6 +248,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";
+import { useToast } from '~/composables/useToast';
+
+const { addToast } = useToast();
 
 const props = defineProps<{
   prevFw: string;
@@ -282,9 +285,19 @@ const handleFocus = () => {
   checkStatus(true);
 };
 
+const handleServerPathUpdate = (e: Event) => {
+  const customEvent = e as CustomEvent;
+  if (customEvent.detail) {
+    serverPath.value = customEvent.detail;
+  }
+};
+
 onMounted(() => {
   const savedPath = localStorage.getItem("amnimo_server_path");
   if (savedPath) serverPath.value = savedPath;
+  
+  window.addEventListener("serverPathUpdated", handleServerPathUpdate);
+  
   checkStatus();
 
   // Background polling every 5 seconds
@@ -294,6 +307,10 @@ onMounted(() => {
 
   // Check immediately when user switches back to browser from File Explorer
   window.addEventListener("focus", handleFocus);
+
+  onUnmounted(() => {
+    window.removeEventListener("serverPathUpdated", handleServerPathUpdate as EventListener);
+  });
 });
 
 onUnmounted(() => {
@@ -376,7 +393,7 @@ async function handleUpload(event: Event, filename: string) {
 
   const file = input.files[0];
   if (file.name !== filename) {
-    alert(`Tên file không khớp! Yêu cầu tải lên file: ${filename}`);
+    addToast({ title: 'Error', message: `Tên file không khớp! Yêu cầu tải lên file: ${filename}`, type: 'error' });
     return;
   }
 
@@ -394,7 +411,7 @@ async function handleUpload(event: Event, filename: string) {
     );
     await checkStatus();
   } catch (err: any) {
-    alert(`Lỗi upload: ${err.message}`);
+    addToast({ title: 'Error', message: `Lỗi upload: ${err.message}`, type: 'error' });
   } finally {
     uploading.value[filename] = false;
     input.value = ""; // Reset
@@ -426,9 +443,9 @@ function startDownload(filename: string) {
     delete downloadProgress.value[filename];
     try {
       const data = JSON.parse(e.data);
-      alert(`Lỗi tải xuống: ${data.message}`);
+      addToast({ title: 'Error', message: `Lỗi tải xuống: ${data.message}`, type: 'error' });
     } catch {
-      alert(`Lỗi kết nối tải xuống`);
+      addToast({ title: 'Error', message: `Lỗi kết nối tải xuống`, type: 'error' });
     }
   });
 }
@@ -479,7 +496,7 @@ async function copyFromServer(filename: string) {
     });
     await checkStatus();
   } catch (err: any) {
-    alert(`Lỗi copy từ server: ${err.message}`);
+    addToast({ title: 'Error', message: `Lỗi copy từ server: ${err.message}`, type: 'error' });
   } finally {
     isGettingFromServer.value[filename] = false;
   }

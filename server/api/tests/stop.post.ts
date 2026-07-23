@@ -17,7 +17,8 @@ export default defineEventHandler(async (event) => {
   clearSessionProcesses(sessionId);
 
   try {
-    const sessionPath = path.join(process.cwd(), 'sessions', sessionId, 'session.json');
+    const SESSIONS_DIR = process.env.APP_DATA_PATH ? path.join(process.env.APP_DATA_PATH, 'sessions') : path.resolve(process.cwd(), 'sessions');
+    const sessionPath = path.join(SESSIONS_DIR, sessionId, 'session.json');
     const data = await fs.readFile(sessionPath, 'utf-8');
     const session = JSON.parse(data);
     session.status = 'Failed';

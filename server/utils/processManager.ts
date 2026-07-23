@@ -16,7 +16,7 @@ type TestSessionProcesses = {
 };
 
 const processMap = new Map<string, TestSessionProcesses>();
-const SESSIONS_DIR = path.resolve(process.cwd(), 'sessions');
+const SESSIONS_DIR = process.env.APP_DATA_PATH ? path.join(process.env.APP_DATA_PATH, 'sessions') : path.resolve(process.cwd(), 'sessions');
 
 export const getSessionProcesses = (sessionId: string) => {
   if (!processMap.has(sessionId)) {

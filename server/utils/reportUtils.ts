@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import type { Session } from '../../shared/types';
 import { getSettings } from './settingsManager';
 
-const SESSIONS_DIR = path.resolve(process.cwd(), 'sessions');
+const SESSIONS_DIR = process.env.APP_DATA_PATH ? path.join(process.env.APP_DATA_PATH, 'sessions') : path.resolve(process.cwd(), 'sessions');
 const getReportsDir = () => path.join(getSettings().e2ePath, 'test-results/e2e-reports');
 
 export const getAggregatedReport = async (sessionId: string, session: Session) => {

@@ -329,7 +329,7 @@
         System Constants
       </h4>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div v-for="key in block3Keys" :key="key">
+        <div v-for="key in block3Keys" :key="key" class="relative">
           <label
             class="flex items-center text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide"
           >
@@ -427,6 +427,8 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
 }>();
 
+const { addToast } = useToast();
+
 const block1Row1Keys = ["SERIES", "BOARD", "DEVICE_TYPE"];
 const block1Row2Keys = ["PREV_FIRMWARE_NAME", "TEST_FIRMWARE_NAME"];
 const block2Keys = [
@@ -459,7 +461,7 @@ const focusedField = ref<string | null>(null);
 // IIS Scanning State
 const isScanningIIS = ref(false);
 const iisSites = ref<
-  { name: string; state: string; port: number; url: string }[]
+  { name: string; state: string; port: number; url: string; physicalPath?: string }[]
 >([]);
 const showIISDropdown = ref(false);
 const iisTargetKey = ref<string | null>(null);
@@ -472,16 +474,22 @@ const scanIIS = async (key: string) => {
     iisSites.value = data;
     showIISDropdown.value = true;
   } catch (error: any) {
-    alert(
-      error.data?.statusMessage ||
-        "Failed to scan IIS. Please ensure you are running the test runner as Administrator.",
-    );
+    addToast({
+      title: 'Error',
+      message: error.data?.statusMessage || "Failed to scan IIS. Please ensure you are running the test runner as Administrator.",
+      type: 'error'
+    });
   } finally {
     isScanningIIS.value = false;
   }
 };
 
-const selectIISSite = (site: { port: number; url: string }) => {
+const selectIISSite = (site: { port: number; url: string; physicalPath?: string }) => {
+  if (site.physicalPath) {
+    localStorage.setItem("amnimo_server_path", site.physicalPath);
+    window.dispatchEvent(new CustomEvent('serverPathUpdated', { detail: site.physicalPath }));
+  }
+
   if (site.url) {
     try {
       const urlObj = new URL(site.url);

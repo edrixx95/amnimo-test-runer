@@ -56,30 +56,46 @@ export default defineEventHandler(async (event) => {
       }
     }
 
+    let isBusy = false;
+
     // Step 2: Update module info
-    await $fetch(`${urlStr}/api/device/mobile`, {
-      method: 'POST',
-      body: {},
-      headers: authHeaders,
-      timeout: 120000
-    });
+    try {
+      await $fetch(`${urlStr}/api/device/mobile`, {
+        method: 'POST',
+        body: {},
+        headers: authHeaders,
+        timeout: 120000
+      });
+    } catch (e: any) {
+      if (e.response?._data?.result?.messages?.[0]?.code === 'E542') {
+        isBusy = true;
+      }
+      console.warn('POST /api/device/mobile failed, ignoring...', e);
+    }
 
     // Step 3: Update SIM info for module 0
-    await $fetch(`${urlStr}/api/device/mobile/sim`, {
-      method: 'POST',
-      body: { "module-number": 0 },
-      headers: authHeaders,
-      timeout: 120000
-    });
+    try {
+      await $fetch(`${urlStr}/api/device/mobile/sim`, {
+        method: 'POST',
+        body: { "module-number": 0 },
+        headers: authHeaders,
+        timeout: 120000
+      });
+    } catch (e: any) {
+      if (e.response?._data?.result?.messages?.[0]?.code === 'E542') {
+        isBusy = true;
+      }
+      console.warn('POST /api/device/mobile/sim failed, ignoring...', e);
+    }
 
     // Step 4: Fetch the refreshed mobile info
-    const res = await $fetch(`${urlStr}/api/device/mobile`, {
+    const res: any = await $fetch(`${urlStr}/api/device/mobile`, {
       method: 'GET',
       headers: authHeaders,
       timeout: 120000
     });
 
-    return res;
+    return { ...res, isBusy };
   } catch (err: any) {
     if (err.status === 401) {
       throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });

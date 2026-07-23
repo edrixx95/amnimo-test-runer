@@ -582,6 +582,9 @@ import { useRoute } from "vue-router";
 import type { Session } from "~~/shared/types";
 import TestProgress from "~/components/TestProgress.vue";
 import ConfirmModal from "~/components/ConfirmModal.vue";
+import { useToast } from '~/composables/useToast';
+
+const { addToast } = useToast();
 
 const route = useRoute();
 const sessionId = route.params.id as string;
@@ -768,11 +771,11 @@ const executeTests = async () => {
   if (!session.value || isTesting.value) return;
 
   if (executionMode.value === "single" && selectedTests.value.length === 0) {
-    alert("Please select at least one test to run.");
+    addToast({ title: 'Error', message: "Please select at least one test to run.", type: 'error' });
     return;
   }
   if (executionMode.value === "order" && !selectedOrder.value) {
-    alert("Please select a test order.");
+    addToast({ title: 'Error', message: "Please select a test order.", type: 'error' });
     return;
   }
 
@@ -801,7 +804,7 @@ const executeTests = async () => {
   } catch (err) {
     console.error("Failed to start tests:", err);
     isTesting.value = false;
-    alert("Failed to start tests. Check console.");
+    addToast({ title: 'Error', message: "Failed to start tests. Check console.", type: 'error' });
   }
 };
 
@@ -1073,7 +1076,7 @@ const saveEnv = async () => {
     showEnvModal.value = false;
   } catch (err) {
     console.error("Failed to save env", err);
-    alert("Failed to save configuration");
+    addToast({ title: 'Error', message: "Failed to save configuration", type: 'error' });
   } finally {
     isSavingEnv.value = false;
   }
@@ -1144,7 +1147,7 @@ const downloadLog = async (type: "e2e" | "backend") => {
     }
   } catch (err: any) {
     if (err.name !== "AbortError") {
-      alert("Failed to save log: " + err.message);
+      addToast({ title: 'Error', message: "Failed to save log: " + err.message, type: 'error' });
     }
   }
 };
@@ -1168,7 +1171,7 @@ const rerunFailed = async () => {
       },
     });
   } catch (err: any) {
-    alert("Failed to rerun tests: " + err.message);
+    addToast({ title: 'Error', message: "Failed to rerun tests: " + err.message, type: 'error' });
     isTesting.value = false;
   }
 };
@@ -1205,7 +1208,7 @@ const executeConfirm = async () => {
     await confirmModal.value.action();
     confirmModal.value.isOpen = false;
   } catch (err: any) {
-    alert(`Operation failed: ${err.message || err.data?.message || err}`);
+    addToast({ title: 'Error', message: `Operation failed: ${err.message || err.data?.message || err}`, type: 'error' });
   } finally {
     confirmModal.value.isLoading = false;
   }

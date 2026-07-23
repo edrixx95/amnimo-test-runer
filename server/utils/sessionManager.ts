@@ -10,6 +10,8 @@ const SESSIONS_DIR = process.env.APP_DATA_PATH
   ? path.join(process.env.APP_DATA_PATH, 'sessions') 
   : path.resolve(process.cwd(), 'sessions');
 
+export const getSessionsDir = () => SESSIONS_DIR;
+
 export const sessionManager = {
   async init() {
     try {

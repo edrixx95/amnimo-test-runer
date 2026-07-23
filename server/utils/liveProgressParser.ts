@@ -3,7 +3,7 @@ import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { SessionMeta } from '../../shared/types';
 
-const SESSIONS_DIR = path.resolve(process.cwd(), 'sessions');
+const SESSIONS_DIR = process.env.APP_DATA_PATH ? path.join(process.env.APP_DATA_PATH, 'sessions') : path.resolve(process.cwd(), 'sessions');
 
 export const getLiveProgress = async (sessionId: string): Promise<SessionMeta | null> => {
   const e2eLogPath = path.join(SESSIONS_DIR, sessionId, 'logs', 'e2e.log');

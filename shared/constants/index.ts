@@ -24,10 +24,37 @@ export const BOARDS = {
 } as const;
 
 export const DEVICE_TYPES: Record<string, string[]> = {
-  AR10: ["Normal", "WoM"],
+  AR10: ["WoM"],
   AX30: ["A", "B"],
   AC15: ["V2A", "V3A"],
   AC25: ["V2A", "V3A"],
+};
+
+export const DEFAULT_CHECKLIST = {
+  peripherals: [
+    { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
+    { id: "usb", label: "Storage Device", icon: "heroicons:archive-box" },
+    { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
+    { id: "nx_witness", label: "Nx Witness", icon: "heroicons:video-camera" },
+  ],
+  partners: [
+    {
+      id: "dhcp",
+      label:
+        "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
+      icon: "heroicons:computer-desktop",
+    },
+  ],
+  manual: [
+    {
+      id: "fw_prep",
+      title: "【FWファイル準備】",
+      instructions: [
+        "ローカル配置: プロジェクトルートのamnimo-e2e/upload/ディレクトリに､リリースFWの｢1つ前｣のバージョンのFWファイルを格納する｡",
+        "サーバー配置: 各自構築したファイルサーバーのディレクトリにリリースFW およびリリースFWの1つ前のバージョンのFWファイルを格納する｡",
+      ],
+    },
+  ],
 };
 
 export const CHECKLISTS = {
@@ -58,39 +85,11 @@ export const CHECKLISTS = {
       },
     ],
   },
-  AG10: {
+  "AX30 B": {
     peripherals: [
       { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
       { id: "usb", label: "Storage Device", icon: "heroicons:archive-box" },
       { id: "antenna", label: "Antenna", icon: "heroicons:signal" },
-      { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
-      { id: "nx_witness", label: "Nx Witness", icon: "heroicons:video-camera" },
-    ],
-    partners: [
-      {
-        id: "dhcp",
-        label:
-          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
-        icon: "heroicons:computer-desktop",
-      },
-    ],
-    manual: [
-      {
-        id: "fw_prep",
-        title: "【FWファイル準備】",
-        instructions: [
-          "ローカル配置: プロジェクトルートのamnimo-e2e/upload/ディレクトリに､リリースFWの｢1つ前｣のバージョンのFWファイルを格納する｡",
-          "サーバー配置: 各自構築したファイルサーバーのディレクトリにリリースFW およびリリースFWの1つ前のバージョンのFWファイルを格納する｡",
-        ],
-      },
-    ],
-  },
-  AG20: {
-    peripherals: [
-      { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
-      { id: "usb", label: "Storage Device", icon: "heroicons:archive-box" },
-      { id: "antenna", label: "Antenna", icon: "heroicons:signal" },
-      { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
       { id: "nx_witness", label: "Nx Witness", icon: "heroicons:video-camera" },
     ],
     partners: [
@@ -114,6 +113,116 @@ export const CHECKLISTS = {
   },
   AR10: {
     peripherals: [{ id: "sim", label: "SIM", icon: "heroicons:credit-card" }],
+    partners: [
+      {
+        id: "dhcp",
+        label:
+          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
+        icon: "heroicons:computer-desktop",
+      },
+    ],
+    manual: [
+      {
+        id: "fw_prep",
+        title: "【FWファイル準備】",
+        instructions: [
+          "ローカル配置: プロジェクトルートのamnimo-e2e/upload/ディレクトリに､リリースFWの｢1つ前｣のバージョンのFWファイルを格納する｡",
+          "サーバー配置: 各自構築したファイルサーバーのディレクトリにリリースFW およびリリースFWの1つ前のバージョンのFWファイルを格納する｡",
+        ],
+      },
+    ],
+  },
+  "AR10 WoM": {
+    partners: [
+      {
+        id: "dhcp",
+        label:
+          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
+        icon: "heroicons:computer-desktop",
+      },
+    ],
+    manual: [
+      {
+        id: "fw_prep",
+        title: "【FWファイル準備】",
+        instructions: [
+          "ローカル配置: プロジェクトルートのamnimo-e2e/upload/ディレクトリに､リリースFWの｢1つ前｣のバージョンのFWファイルを格納する｡",
+          "サーバー配置: 各自構築したファイルサーバーのディレクトリにリリースFW およびリリースFWの1つ前のバージョンのFWファイルを格納する｡",
+        ],
+      },
+    ],
+  },
+  AR20: {
+    peripherals: [
+      { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
+      { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
+    ],
+    partners: [
+      {
+        id: "dhcp",
+        label:
+          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
+        icon: "heroicons:computer-desktop",
+      },
+    ],
+    manual: [
+      {
+        id: "fw_prep",
+        title: "【FWファイル準備】",
+        instructions: [
+          "ローカル配置: プロジェクトルートのamnimo-e2e/upload/ディレクトリに､リリースFWの｢1つ前｣のバージョンのFWファイルを格納する｡",
+          "サーバー配置: 各自構築したファイルサーバーのディレクトリにリリースFW およびリリースFWの1つ前のバージョンのFWファイルを格納する｡",
+        ],
+      },
+    ],
+  },
+  AC10: {
+    peripherals: [{ id: "sim", label: "SIM", icon: "heroicons:credit-card" }],
+    partners: [
+      {
+        id: "dhcp",
+        label:
+          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
+        icon: "heroicons:computer-desktop",
+      },
+    ],
+    manual: [
+      {
+        id: "fw_prep",
+        title: "【FWファイル準備】",
+        instructions: [
+          "ローカル配置: プロジェクトルートのamnimo-e2e/upload/ディレクトリに､リリースFWの｢1つ前｣のバージョンのFWファイルを格納する｡",
+          "サーバー配置: 各自構築したファイルサーバーのディレクトリにリリースFW およびリリースFWの1つ前のバージョンのFWファイルを格納する｡",
+        ],
+      },
+    ],
+  },
+  AC15: {
+    peripherals: [{ id: "sim", label: "SIM", icon: "heroicons:credit-card" }],
+    partners: [
+      {
+        id: "dhcp",
+        label:
+          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
+        icon: "heroicons:computer-desktop",
+      },
+    ],
+    manual: [
+      {
+        id: "fw_prep",
+        title: "【FWファイル準備】",
+        instructions: [
+          "ローカル配置: プロジェクトルートのamnimo-e2e/upload/ディレクトリに､リリースFWの｢1つ前｣のバージョンのFWファイルを格納する｡",
+          "サーバー配置: 各自構築したファイルサーバーのディレクトリにリリースFW およびリリースFWの1つ前のバージョンのFWファイルを格納する｡",
+        ],
+      },
+    ],
+  },
+  AC25: {
+    peripherals: [
+      { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
+      { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
+    ],
     partners: [
       {
         id: "dhcp",

@@ -279,6 +279,7 @@
 import { useSessionStore } from '~/composables/session/useSessionStore';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from '~/composables/useToast';
 import ReportModal from '~/components/ReportModal.vue';
 import ConfirmModal from '~/components/ConfirmModal.vue';
 import ExcelJsonViewer from '~/components/ExcelJsonViewer.vue';
@@ -286,6 +287,7 @@ import HtmlReportViewer from '~/components/HtmlReportViewer.vue';
 
 const sessionStore = useSessionStore();
 const router = useRouter();
+const { addToast } = useToast();
 
 const isModalOpen = ref(false);
 const newSessionName = ref('');
@@ -427,7 +429,7 @@ const handleCreateSession = async () => {
     }
   } catch (error) {
     console.error('Failed to create session:', error);
-    alert('Failed to create session');
+    addToast({ title: 'Error', message: 'Failed to create session', type: 'error' });
   } finally {
     isCreating.value = false;
   }
@@ -469,7 +471,7 @@ const executeConfirm = async () => {
     await confirmModal.value.action();
     confirmModal.value.isOpen = false;
   } catch (err: any) {
-    alert(`Operation failed: ${err.message || err.data?.message || err}`);
+    addToast({ title: 'Error', message: `Operation failed: ${err.message || err.data?.message || err}`, type: 'error' });
   } finally {
     confirmModal.value.isLoading = false;
   }
