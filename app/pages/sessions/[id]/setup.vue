@@ -601,6 +601,21 @@
                         class="break-inside-avoid mb-6 w-full inline-block"
                       />
 
+                      <!-- DHCP Client Verification Card -->
+                      <PeripheralDhcpCheck
+                        v-if="
+                          currentChecklist.peripherals?.some(
+                            (p) => p.id === 'dhcp',
+                          )
+                        "
+                        :base-url="formData.baseUrl"
+                        :dhcp-client-ip="extractedDhcpIp"
+                        :username="extractedUsername"
+                        :password="extractedPassword"
+                        v-model="checklistState.peripherals['dhcp']"
+                        class="break-inside-avoid mb-6 w-full inline-block"
+                      />
+
                       <!-- Other Peripherals (Manual Check) -->
                       <template
                         v-if="
@@ -614,6 +629,7 @@
                                 'ssd',
                                 'internal_storage',
                                 'nx_witness',
+                                'dhcp',
                               ].includes(p.id),
                           ).length
                         "
@@ -629,6 +645,7 @@
                                 'ssd',
                                 'internal_storage',
                                 'nx_witness',
+                                'dhcp',
                               ].includes(p.id),
                           )"
                           :key="item.id"
@@ -951,6 +968,21 @@ const extractedPrevFw = computed(() => {
 const extractedTestFw = computed(() => {
   const match = formData.value.envContent.match(/^TEST_FIRMWARE_NAME=(.*)$/m);
   return match ? match[1].trim() : "";
+});
+
+const extractedDhcpIp = computed(() => {
+  const match = formData.value.envContent.match(/^DHCP_CLIENT_IP=(.*)$/m);
+  return match ? match[1].trim() : "";
+});
+
+const extractedUsername = computed(() => {
+  const match = formData.value.envContent.match(/^TEST_USERNAME=(.*)$/m);
+  return match ? match[1].trim() : "admin";
+});
+
+const extractedPassword = computed(() => {
+  const match = formData.value.envContent.match(/^TEST_PASSWORD=(.*)$/m);
+  return match ? match[1].trim() : "yoko1234";
 });
 
 // Load session data

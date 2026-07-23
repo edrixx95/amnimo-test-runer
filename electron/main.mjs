@@ -12,6 +12,9 @@ let mainWindow = null;
 let splashWindow = null;
 const SERVER_PORT = 8765;
 
+// Completely disable HTTP cache to prevent sticking on old versions
+app.commandLine.appendSwitch('disable-http-cache');
+
 async function startNitroServer() {
   try {
     // Start Nitro server within the same process
@@ -92,9 +95,13 @@ function createWindow() {
 
   mainWindow.setMenuBarVisibility(false);
   
-  // Clear the cache before loading to ensure updates are reflected
+  // Clear cache and service workers to ensure updates are reflected
   mainWindow.webContents.session.clearCache().then(() => {
-    mainWindow.loadURL(`http://127.0.0.1:${SERVER_PORT}`);
+    return mainWindow.webContents.session.clearStorageData({
+      storages: ['serviceworkers', 'cachestorage']
+    });
+  }).then(() => {
+    mainWindow.loadURL(`http://127.0.0.1:${SERVER_PORT}`, { extraHeaders: 'pragma: no-cache\n' });
   });
 
   mainWindow.once("ready-to-show", () => {

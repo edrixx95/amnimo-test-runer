@@ -6,10 +6,24 @@ import { SessionMeta } from '../../shared/types';
 const SESSIONS_DIR = process.env.APP_DATA_PATH ? path.join(process.env.APP_DATA_PATH, 'sessions') : path.resolve(process.cwd(), 'sessions');
 
 export const getLiveProgress = async (sessionId: string): Promise<SessionMeta | null> => {
-  const e2eLogPath = path.join(SESSIONS_DIR, sessionId, 'logs', 'e2e.log');
-  if (!existsSync(e2eLogPath)) {
+  const logsDir = path.join(SESSIONS_DIR, sessionId, 'logs');
+  
+  if (!existsSync(logsDir)) {
     return null;
   }
+  
+  // Find the latest e2e log file
+  const files = await fs.readdir(logsDir);
+  const e2eLogs = files
+    .filter(f => f.startsWith('e2e') && f.endsWith('.log'))
+    .sort()
+    .reverse();
+
+  if (e2eLogs.length === 0) {
+    return null;
+  }
+
+  const e2eLogPath = path.join(logsDir, e2eLogs[0]);
 
   try {
     const logs = await fs.readFile(e2eLogPath, 'utf-8');

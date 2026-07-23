@@ -36,16 +36,10 @@ export const DEFAULT_CHECKLIST = {
     { id: "usb", label: "Storage Device", icon: "heroicons:archive-box" },
     { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
     { id: "nx_witness", label: "Nx Witness", icon: "heroicons:video-camera" },
+    { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
   ],
-  partners: [
-    {
-      id: "dhcp",
-      label:
-        "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
-      icon: "heroicons:computer-desktop",
-    },
-  ],
-  manual: [
+  partners: [],
+    manual: [
     {
       id: "fw_prep",
       title: "【FWファイル準備】",
@@ -65,15 +59,9 @@ export const CHECKLISTS = {
       { id: "antenna", label: "Antenna", icon: "heroicons:signal" },
       { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
       { id: "nx_witness", label: "Nx Witness", icon: "heroicons:video-camera" },
+      { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
     ],
-    partners: [
-      {
-        id: "dhcp",
-        label:
-          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
-        icon: "heroicons:computer-desktop",
-      },
-    ],
+    partners: [],
     manual: [
       {
         id: "fw_prep",
@@ -91,15 +79,9 @@ export const CHECKLISTS = {
       { id: "usb", label: "Storage Device", icon: "heroicons:archive-box" },
       { id: "antenna", label: "Antenna", icon: "heroicons:signal" },
       { id: "nx_witness", label: "Nx Witness", icon: "heroicons:video-camera" },
+      { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
     ],
-    partners: [
-      {
-        id: "dhcp",
-        label:
-          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
-        icon: "heroicons:computer-desktop",
-      },
-    ],
+    partners: [],
     manual: [
       {
         id: "fw_prep",
@@ -112,15 +94,11 @@ export const CHECKLISTS = {
     ],
   },
   AR10: {
-    peripherals: [{ id: "sim", label: "SIM", icon: "heroicons:credit-card" }],
-    partners: [
-      {
-        id: "dhcp",
-        label:
-          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
-        icon: "heroicons:computer-desktop",
-      },
+    peripherals: [
+      { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
+      { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
     ],
+    partners: [],
     manual: [
       {
         id: "fw_prep",
@@ -133,14 +111,7 @@ export const CHECKLISTS = {
     ],
   },
   "AR10 WoM": {
-    partners: [
-      {
-        id: "dhcp",
-        label:
-          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
-        icon: "heroicons:computer-desktop",
-      },
-    ],
+    partners: [],
     manual: [
       {
         id: "fw_prep",
@@ -157,14 +128,7 @@ export const CHECKLISTS = {
       { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
       { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
     ],
-    partners: [
-      {
-        id: "dhcp",
-        label:
-          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
-        icon: "heroicons:computer-desktop",
-      },
-    ],
+    partners: [],
     manual: [
       {
         id: "fw_prep",
@@ -177,15 +141,11 @@ export const CHECKLISTS = {
     ],
   },
   AC10: {
-    peripherals: [{ id: "sim", label: "SIM", icon: "heroicons:credit-card" }],
-    partners: [
-      {
-        id: "dhcp",
-        label:
-          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
-        icon: "heroicons:computer-desktop",
-      },
+    peripherals: [
+      { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
+      { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
     ],
+    partners: [],
     manual: [
       {
         id: "fw_prep",
@@ -198,15 +158,11 @@ export const CHECKLISTS = {
     ],
   },
   AC15: {
-    peripherals: [{ id: "sim", label: "SIM", icon: "heroicons:credit-card" }],
-    partners: [
-      {
-        id: "dhcp",
-        label:
-          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
-        icon: "heroicons:computer-desktop",
-      },
+    peripherals: [
+      { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
+      { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
     ],
+    partners: [],
     manual: [
       {
         id: "fw_prep",
@@ -223,14 +179,7 @@ export const CHECKLISTS = {
       { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
       { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
     ],
-    partners: [
-      {
-        id: "dhcp",
-        label:
-          "DHCP client (Connect partner device GW via hub, confirm IP not assigned)",
-        icon: "heroicons:computer-desktop",
-      },
-    ],
+    partners: [],
     manual: [
       {
         id: "fw_prep",

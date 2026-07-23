@@ -1,6 +1,6 @@
 {
   "name": "amnimo-test-runner",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Amnimo Test Runner Desktop App",
   "author": {
     "name": "DAT NGUYEN THANH",
@@ -41,7 +41,8 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico"
+      "icon": "build/icon.ico",
+      "requestedExecutionLevel": "requireAdministrator"
     },
     "nsis": {
       "oneClick": false,
