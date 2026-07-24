@@ -21,6 +21,7 @@ export type SessionMetadata = {
   startedAt?: string;
   finishedAt?: string;
   closedAt?: string;
+  updatedAt?: string;
 };
 
 export type SessionSummary = {

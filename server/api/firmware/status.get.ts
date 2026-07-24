@@ -1,6 +1,6 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { getSettings } from '../../utils/settingsManager';
+import fs from "node:fs";
+import path from "node:path";
+import { getSettings } from "../../utils/settingsManager";
 
 export default defineEventHandler((event) => {
   const query = getQuery(event);
@@ -8,14 +8,14 @@ export default defineEventHandler((event) => {
   const fw2 = query.fw2 as string;
   const serverPath = query.serverPath as string;
 
-  const results: Record<string, { local: boolean, server: boolean }> = {};
-  const uploadDir = path.join(getSettings().e2ePath, 'upload');
+  const results: Record<string, { local: boolean; server: boolean }> = {};
+  const uploadDir = path.join(getSettings().e2ePath, "upload");
 
   const checkFile = (fw: string) => {
     if (!fw) return;
     const local = fs.existsSync(path.join(uploadDir, fw));
     let server = false;
-    
+
     if (serverPath && fs.existsSync(serverPath)) {
       try {
         const stat = fs.statSync(serverPath);
@@ -26,7 +26,7 @@ export default defineEventHandler((event) => {
         server = false;
       }
     }
-    
+
     results[fw] = { local, server };
   };
 

@@ -1,4 +1,4 @@
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export type ToastType = "success" | "error" | "info" | "warning";
 
 export interface ToastOptions {
   id?: string;
@@ -13,7 +13,7 @@ export interface Toast extends ToastOptions {
 }
 
 export const useToast = () => {
-  const toasts = useState<Toast[]>('app-toasts', () => []);
+  const toasts = useState<Toast[]>("app-toasts", () => []);
 
   const removeToast = (id: string) => {
     const index = toasts.value.findIndex((t) => t.id === id);
@@ -25,11 +25,11 @@ export const useToast = () => {
   const addToast = (options: ToastOptions) => {
     const id = options.id || Math.random().toString(36).substring(2, 9);
     const duration = options.duration ?? 4000;
-    
+
     const toast: Toast = {
       ...options,
       id,
-      type: options.type || 'info'
+      type: options.type || "info",
     };
 
     toasts.value.push(toast);
@@ -46,6 +46,6 @@ export const useToast = () => {
   return {
     toasts,
     addToast,
-    removeToast
+    removeToast,
   };
 };

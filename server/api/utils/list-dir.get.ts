@@ -1,10 +1,10 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
+import fs from "node:fs";
+import path from "node:path";
+import os from "node:os";
 
 export default defineEventHandler((event) => {
   const query = getQuery(event);
-  let targetPath = (query.path as string) || '';
+  let targetPath = (query.path as string) || "";
 
   if (!targetPath) {
     targetPath = os.homedir();
@@ -18,20 +18,20 @@ export default defineEventHandler((event) => {
     }
 
     const items = fs.readdirSync(targetPath, { withFileTypes: true });
-    
+
     // We only care about directories for a folder picker
     const folders = items
-      .filter(dirent => {
+      .filter((dirent) => {
         try {
           // Ignore hidden folders starting with dot or system folders
-          if (dirent.name.startsWith('.')) return false;
+          if (dirent.name.startsWith(".")) return false;
           return dirent.isDirectory();
         } catch {
           return false; // Handle permission errors on stat
         }
       })
-      .map(dirent => dirent.name)
-      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+      .map((dirent) => dirent.name)
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 
     const parentPath = path.dirname(targetPath);
     const hasParent = parentPath !== targetPath; // In windows, dirname('C:\\') is 'C:\\'
@@ -39,9 +39,12 @@ export default defineEventHandler((event) => {
     return {
       currentPath: targetPath,
       parentPath: hasParent ? parentPath : null,
-      folders
+      folders,
     };
   } catch (err: any) {
-    throw createError({ statusCode: 400, statusMessage: err.message || 'Access denied or invalid path' });
+    throw createError({
+      statusCode: 400,
+      statusMessage: err.message || "Access denied or invalid path",
+    });
   }
 });

@@ -6,7 +6,7 @@
       <div class="flex justify-between items-center mb-3">
         <h3 class="font-bold text-slate-800 flex items-center gap-2">
           <Icon name="heroicons:queue-list" class="w-5 h-5 text-amnimo-500" />
-          {{ $t('testProgress.testQueue') }}
+          {{ $t("testProgress.testQueue") }}
         </h3>
         <span
           class="text-xs font-bold text-slate-500 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-sm"
@@ -69,7 +69,7 @@
         >
           <Icon name="heroicons:inbox" class="w-8 h-8 opacity-50" />
         </div>
-        <p class="text-sm font-medium">{{ $t('testProgress.queueIsEmpty') }}</p>
+        <p class="text-sm font-medium">{{ $t("testProgress.queueIsEmpty") }}</p>
       </div>
 
       <div
@@ -115,7 +115,7 @@
               v-if="spec.innerTests.length > 0"
               class="text-xs font-medium text-slate-500 mt-0.5"
             >
-              {{ spec.innerTests.length }} {{ $t('testProgress.tests') }}
+              {{ spec.innerTests.length }} {{ $t("testProgress.tests") }}
             </p>
           </div>
           <div v-if="!isTesting" class="shrink-0 flex items-center">
@@ -222,8 +222,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'remove-file', path: string): void;
-  (e: 'remove-case', path: string, caseName: string): void;
+  (e: "remove-file", path: string): void;
+  (e: "remove-case", path: string, caseName: string): void;
 }>();
 
 const completedSpecs = computed(

@@ -32,16 +32,29 @@
 
       <!-- File -->
       <div v-else>
-        <div class="flex items-center gap-1.5 p-1.5 hover:bg-amnimo-600/10 rounded text-sm text-gray-400 group">
-          <div v-if="node.type === 'file'" @click="toggleFolderAndLoadCases(node)" class="cursor-pointer p-0.5 rounded hover:bg-gray-700">
+        <div
+          class="flex items-center gap-1.5 p-1.5 hover:bg-amnimo-600/10 rounded text-sm text-gray-400 group"
+        >
+          <div
+            v-if="node.type === 'file'"
+            @click="toggleFolderAndLoadCases(node)"
+            class="cursor-pointer p-0.5 rounded hover:bg-gray-700"
+          >
             <Icon
-              :name="isOpen(node.path || node.name) ? 'heroicons:chevron-down' : 'heroicons:chevron-right'"
+              :name="
+                isOpen(node.path || node.name)
+                  ? 'heroicons:chevron-down'
+                  : 'heroicons:chevron-right'
+              "
               class="w-4 h-4 text-gray-500 hover:text-amnimo-600"
             />
           </div>
           <div v-else class="w-5"></div>
-          
-          <div class="flex items-center gap-2 cursor-pointer flex-1 min-w-0" :class="{ 'opacity-50': selected.includes(node.path!) }">
+
+          <div
+            class="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
+            :class="{ 'opacity-50': selected.includes(node.path!) }"
+          >
             <button
               v-if="!selected.includes(node.path!)"
               @click.stop="toggleFile(node.path!)"
@@ -50,7 +63,10 @@
             >
               <Icon name="heroicons:plus" class="w-3.5 h-3.5" />
             </button>
-            <div v-else class="shrink-0 w-4 h-4 flex items-center justify-center rounded text-amnimo-500">
+            <div
+              v-else
+              class="shrink-0 w-4 h-4 flex items-center justify-center rounded text-amnimo-500"
+            >
               <Icon name="heroicons:check" class="w-3.5 h-3.5" />
             </div>
 
@@ -58,9 +74,12 @@
               name="heroicons:document-text"
               class="w-4 h-4 text-gray-500 group-hover:text-amnimo-600 shrink-0"
             />
-            <span class="truncate group-hover:text-amnimo-600" @click="toggleFolderAndLoadCases(node)" :title="node.name">{{
-              node.name
-            }}</span>
+            <span
+              class="truncate group-hover:text-amnimo-600"
+              @click="toggleFolderAndLoadCases(node)"
+              :title="node.name"
+              >{{ node.name }}</span
+            >
           </div>
         </div>
 
@@ -69,27 +88,46 @@
           v-if="isOpen(node.path || node.name)"
           class="pl-9 mt-0.5 space-y-0.5"
         >
-          <div v-if="node.cases === undefined" class="p-1.5 text-xs text-gray-500 flex items-center gap-2">
-            <Icon name="heroicons:arrow-path" class="w-3.5 h-3.5 animate-spin" />
-            {{ $t('fileTree.loadingCases') }}
+          <div
+            v-if="node.cases === undefined"
+            class="p-1.5 text-xs text-gray-500 flex items-center gap-2"
+          >
+            <Icon
+              name="heroicons:arrow-path"
+              class="w-3.5 h-3.5 animate-spin"
+            />
+            {{ $t("fileTree.loadingCases") }}
           </div>
-          <div v-else-if="node.cases.length === 0" class="p-1.5 text-xs text-gray-500">
-            {{ $t('fileTree.noCasesFound') }}
+          <div
+            v-else-if="node.cases.length === 0"
+            class="p-1.5 text-xs text-gray-500"
+          >
+            {{ $t("fileTree.noCasesFound") }}
           </div>
           <div v-else v-for="testCase in node.cases" :key="testCase">
             <div
               class="flex items-center gap-2 p-1.5 hover:bg-amnimo-600/10 rounded cursor-pointer text-xs text-gray-400 group min-w-0"
-              :class="{ 'opacity-50': selected.includes(`${node.path}::${testCase}`) || selected.includes(node.path!) }"
+              :class="{
+                'opacity-50':
+                  selected.includes(`${node.path}::${testCase}`) ||
+                  selected.includes(node.path!),
+              }"
             >
               <button
-                v-if="!selected.includes(`${node.path}::${testCase}`) && !selected.includes(node.path!)"
+                v-if="
+                  !selected.includes(`${node.path}::${testCase}`) &&
+                  !selected.includes(node.path!)
+                "
                 @click.stop="toggleCase(node.path!, testCase)"
                 class="shrink-0 w-4 h-4 flex items-center justify-center bg-gray-700 hover:bg-purple-600 rounded text-gray-300 hover:text-white transition-colors"
                 :disabled="disabled"
               >
                 <Icon name="heroicons:plus" class="w-3.5 h-3.5" />
               </button>
-              <div v-else class="shrink-0 w-4 h-4 flex items-center justify-center rounded text-purple-500">
+              <div
+                v-else
+                class="shrink-0 w-4 h-4 flex items-center justify-center rounded text-purple-500"
+              >
                 <Icon name="heroicons:check" class="w-3.5 h-3.5" />
               </div>
 
@@ -97,9 +135,15 @@
                 name="heroicons:beaker"
                 class="w-3.5 h-3.5 text-gray-500 group-hover:text-purple-400 shrink-0"
               />
-              <span class="truncate group-hover:text-purple-400" @click="!selected.includes(node.path!) && toggleCase(node.path!, testCase)" :title="testCase">{{
-                testCase
-              }}</span>
+              <span
+                class="truncate group-hover:text-purple-400"
+                @click="
+                  !selected.includes(node.path!) &&
+                  toggleCase(node.path!, testCase)
+                "
+                :title="testCase"
+                >{{ testCase }}</span
+              >
             </div>
           </div>
         </div>

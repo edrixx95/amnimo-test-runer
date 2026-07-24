@@ -1,24 +1,32 @@
-import { spawn, exec } from 'node:child_process';
-import path from 'node:path';
-import fs from 'node:fs/promises';
-import { promisify } from 'node:util';
-import { clearSessionProcesses, getSessionProcesses, initLogStreams, writeLog, saveProcessPids } from '../../utils/processManager';
-import { Session } from '../../../shared/types';
-import { getSettings } from '../../utils/settingsManager';
-import { getAvailablePort } from '../../utils/portFinder';
+import { spawn, exec } from "node:child_process";
+import path from "node:path";
+import fs from "node:fs/promises";
+import { promisify } from "node:util";
+import {
+  clearSessionProcesses,
+  getSessionProcesses,
+  initLogStreams,
+  writeLog,
+  saveProcessPids,
+} from "../../utils/processManager";
+import type { Session, SessionStatus } from "../../../shared/types";
+import { getSettings } from "../../utils/settingsManager";
+import { getAvailablePort } from "../../utils/portFinder";
 
 const execAsync = promisify(exec);
-const SESSIONS_DIR = process.env.APP_DATA_PATH ? path.join(process.env.APP_DATA_PATH, 'sessions') : path.resolve(process.cwd(), 'sessions');
+const SESSIONS_DIR = process.env.APP_DATA_PATH
+  ? path.join(process.env.APP_DATA_PATH, "sessions")
+  : path.resolve(process.cwd(), "sessions");
 
 async function killPortOnWindows(port: string) {
   try {
     const { stdout } = await execAsync(`netstat -ano | findstr :${port}`);
-    const lines = stdout.trim().split('\n');
+    const lines = stdout.trim().split("\n");
     for (const line of lines) {
-      if (line.includes('LISTENING')) {
+      if (line.includes("LISTENING")) {
         const parts = line.trim().split(/\s+/);
         const pid = parts[parts.length - 1];
-        if (pid && pid !== '0') {
+        if (pid && pid !== "0") {
           await execAsync(`taskkill /F /PID ${pid}`);
           console.log(`Killed process ${pid} on port ${port}`);
         }
@@ -29,61 +37,61 @@ async function killPortOnWindows(port: string) {
   }
 }
 
-async function updateSessionStatus(sessionId: string, status: string) {
+async function updateSessionStatus(sessionId: string, status: SessionStatus) {
   try {
-    const sessionPath = path.join(SESSIONS_DIR, sessionId, 'session.json');
-    const data = await fs.readFile(sessionPath, 'utf-8');
+    const sessionPath = path.join(SESSIONS_DIR, sessionId, "session.json");
+    const data = await fs.readFile(sessionPath, "utf-8");
     const session: Session = JSON.parse(data);
-    session.status = status;
+    session.status = status as SessionStatus;
     session.updatedAt = new Date().toISOString();
-    await fs.writeFile(sessionPath, JSON.stringify(session, null, 2), 'utf-8');
+    await fs.writeFile(sessionPath, JSON.stringify(session, null, 2), "utf-8");
   } catch (err) {
-    console.error('Failed to update session status:', err);
+    console.error("Failed to update session status:", err);
   }
 }
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const { sessionId, testType, mode, tests, sessionName } = body;
-  
+
   if (!sessionId) {
-    throw createError({ statusCode: 400, statusMessage: 'Missing sessionId' });
+    throw createError({ statusCode: 400, statusMessage: "Missing sessionId" });
   }
-  
+
   // Clear any existing process for this session
   clearSessionProcesses(sessionId);
   const sessionProcs = getSessionProcesses(sessionId);
-  
+
   // Initialize log files
   await initLogStreams(sessionId);
 
   // Update status to Running
-  await updateSessionStatus(sessionId, 'Running');
-  
+  await updateSessionStatus(sessionId, "Running");
+
   const cwd = getSettings().e2ePath;
-  const isWindows = process.platform === 'win32';
-  const npmCmd = isWindows ? 'npm.cmd' : 'npm';
-  
-  let cliPort = '8080';
+  const isWindows = process.platform === "win32";
+  const npmCmd = isWindows ? "npm.cmd" : "npm";
+
+  let cliPort = "8080";
   let resolvedSessionName = sessionName;
   const parsedEnv: Record<string, string> = {};
 
   try {
-    const sessionPath = path.join(SESSIONS_DIR, sessionId, 'session.json');
-    const data = await fs.readFile(sessionPath, 'utf-8');
+    const sessionPath = path.join(SESSIONS_DIR, sessionId, "session.json");
+    const data = await fs.readFile(sessionPath, "utf-8");
     const session: Session = JSON.parse(data);
     if (!resolvedSessionName) resolvedSessionName = session.name;
-    
+
     if (session.envContent) {
-      session.envContent.split('\n').forEach(line => {
+      session.envContent.split("\n").forEach((line) => {
         const match = line.match(/^([^=]+)=(.*)$/);
         if (match) {
-          parsedEnv[match[1].trim()] = match[2].trim();
+          parsedEnv[match[1]!.trim()] = match[2]!.trim();
         }
       });
       // Ensure cliPort matches the user's config
-      if (parsedEnv['CLI_SERVER_PORT']) {
-        cliPort = parsedEnv['CLI_SERVER_PORT'];
+      if (parsedEnv["CLI_SERVER_PORT"]) {
+        cliPort = parsedEnv["CLI_SERVER_PORT"];
       }
     }
   } catch (e) {
@@ -91,106 +99,110 @@ export default defineEventHandler(async (event) => {
   }
 
   if (isWindows) {
-    writeLog(sessionId, 'backend', `[System] Killing any process on port ${cliPort}...\n`);
+    writeLog(
+      sessionId,
+      "backend",
+      `[System] Killing any process on port ${cliPort}...\n`,
+    );
     await killPortOnWindows(cliPort);
   }
 
   // 1. Start Backend Hono Process
-  const backendProc = spawn(npmCmd, ['run', 'dev'], { 
-    cwd, 
+  const backendProc = spawn(npmCmd, ["run", "dev"], {
+    cwd,
     shell: isWindows,
-    env: { ...process.env, ...parsedEnv, FORCE_COLOR: '1' } 
+    env: { ...process.env, ...parsedEnv, FORCE_COLOR: "1" },
   });
   sessionProcs.backendProcess = backendProc;
-  
-  backendProc.stdout.setEncoding('utf8');
-  backendProc.stderr.setEncoding('utf8');
-  backendProc.stdout.on('data', (data) => writeLog(sessionId, 'backend', data));
-  backendProc.stderr.on('data', (data) => writeLog(sessionId, 'backend', data));
-  backendProc.on('close', (code) => {
-    writeLog(sessionId, 'backend', `[Hono Backend] Exited with code ${code}\n`);
+
+  backendProc.stdout.setEncoding("utf8");
+  backendProc.stderr.setEncoding("utf8");
+  backendProc.stdout.on("data", (data) => writeLog(sessionId, "backend", data));
+  backendProc.stderr.on("data", (data) => writeLog(sessionId, "backend", data));
+  backendProc.on("close", (code) => {
+    writeLog(sessionId, "backend", `[Hono Backend] Exited with code ${code}\n`);
   });
 
   // 2. Start E2E Process
   let e2eArgs: string[] = [];
-  
-  if (mode === 'single') {
+
+  if (mode === "single") {
     const files = new Set<string>();
     const grepCases: string[] = [];
-    
+
     for (const test of tests) {
-      if (test.includes('::')) {
-        const [file, caseName] = test.split('::');
+      if (test.includes("::")) {
+        const [file, caseName] = test.split("::");
         files.add(file);
         // Escape regex specials just in case, though mostly they are safe
-        const escaped = caseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escaped = caseName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         // Add end anchor to ensure we don't partially match another test
         grepCases.push(`(${escaped}$)`);
       } else {
         files.add(test);
       }
     }
-    
-    e2eArgs = ['test', '--', ...Array.from(files)];
+
+    e2eArgs = ["test", "--", ...Array.from(files)];
     if (grepCases.length > 0) {
-      e2eArgs.push('-g', grepCases.join('|'));
+      e2eArgs.push("-g", grepCases.join("|"));
     }
-  } else if (mode === 'order') {
-    if (testType === 'release') {
-      e2eArgs = ['run', 'test:release'];
-      if (tests && typeof tests === 'string') {
-        e2eArgs.push('--', tests);
+  } else if (mode === "order") {
+    if (testType === "release") {
+      e2eArgs = ["run", "test:release"];
+      if (tests && typeof tests === "string") {
+        e2eArgs.push("--", tests);
       }
     } else {
-      e2eArgs = ['test'];
+      e2eArgs = ["test"];
     }
-  } else if (mode === 'rerun-failed') {
-    e2eArgs = ['run', 'test:rerun-failed'];
+  } else if (mode === "rerun-failed") {
+    e2eArgs = ["run", "test:rerun-failed"];
     if (resolvedSessionName) {
-      e2eArgs.push('--', '--session', `"${resolvedSessionName}"`);
+      e2eArgs.push("--", "--session", `"${resolvedSessionName}"`);
     }
   }
 
-  const e2eProc = spawn(npmCmd, e2eArgs, { 
-    cwd, 
+  const e2eProc = spawn(npmCmd, e2eArgs, {
+    cwd,
     shell: isWindows,
-    env: { ...process.env, ...parsedEnv, FORCE_COLOR: '1' } 
+    env: { ...process.env, ...parsedEnv, FORCE_COLOR: "1" },
   });
   sessionProcs.e2eProcess = e2eProc;
-  
+
   // Save PIDs to file for reliable process killing across hot-reloads
   saveProcessPids(sessionId, e2eProc.pid, backendProc.pid);
-  
-  e2eProc.stdout.setEncoding('utf8');
-  e2eProc.stderr.setEncoding('utf8');
-  e2eProc.stdout.on('data', (data) => writeLog(sessionId, 'e2e', data));
-  e2eProc.stderr.on('data', (data) => writeLog(sessionId, 'e2e', data));
-  e2eProc.on('close', async (code) => {
-    writeLog(sessionId, 'e2e', `[Test Runner] Exited with code ${code}\n`);
-    
-    let finalStatus = code === 0 ? 'Completed' : 'Failed';
-    
+
+  e2eProc.stdout.setEncoding("utf8");
+  e2eProc.stderr.setEncoding("utf8");
+  e2eProc.stdout.on("data", (data) => writeLog(sessionId, "e2e", data));
+  e2eProc.stderr.on("data", (data) => writeLog(sessionId, "e2e", data));
+  e2eProc.on("close", async (code) => {
+    writeLog(sessionId, "e2e", `[Test Runner] Exited with code ${code}\n`);
+
+    let finalStatus: SessionStatus = code === 0 ? "Completed" : "Failed";
+
     // If the process exited 0, double-check that all tests in the aggregated report passed
-    if (finalStatus === 'Completed') {
+    if (finalStatus === "Completed") {
       try {
-        const sessionPath = path.join(SESSIONS_DIR, sessionId, 'session.json');
-        const data = await fs.readFile(sessionPath, 'utf-8');
+        const sessionPath = path.join(SESSIONS_DIR, sessionId, "session.json");
+        const data = await fs.readFile(sessionPath, "utf-8");
         const session: Session = JSON.parse(data);
-        
+
         const aggregated = await getAggregatedReport(sessionId, session);
         if (aggregated._meta.failed > 0) {
-          finalStatus = 'Failed';
+          finalStatus = "Failed";
         }
       } catch (err) {
-        console.error('Failed to check aggregated report status:', err);
+        console.error("Failed to check aggregated report status:", err);
       }
     }
 
     // When E2E finishes, update status
     await updateSessionStatus(sessionId, finalStatus);
     // Also broadcast the state change to the frontend
-    sessionProcs.events.emit('status-update', finalStatus);
+    sessionProcs.events.emit("status-update", finalStatus);
   });
 
-  return { success: true, message: 'Processes started successfully' };
+  return { success: true, message: "Processes started successfully" };
 });

@@ -1,17 +1,20 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { getSettings } from '../../utils/settingsManager';
+import fs from "node:fs";
+import path from "node:path";
+import { getSettings } from "../../utils/settingsManager";
 
 export default defineEventHandler(async (event) => {
   try {
     const query = getQuery(event);
     const filename = query.filename as string;
-    
+
     if (!filename) {
-      throw createError({ statusCode: 400, statusMessage: 'No filename provided' });
+      throw createError({
+        statusCode: 400,
+        statusMessage: "No filename provided",
+      });
     }
 
-    const uploadDir = path.join(getSettings().e2ePath, 'upload');
+    const uploadDir = path.join(getSettings().e2ePath, "upload");
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -21,15 +24,15 @@ export default defineEventHandler(async (event) => {
     // Stream the raw body to the file
     await new Promise<void>((resolve, reject) => {
       const fileStream = fs.createWriteStream(filePath);
-      
+
       event.node.req.pipe(fileStream);
-      
-      event.node.req.on('end', () => {
+
+      event.node.req.on("end", () => {
         fileStream.close();
         resolve();
       });
-      
-      event.node.req.on('error', (err) => {
+
+      event.node.req.on("error", (err) => {
         fileStream.close();
         reject(err);
       });
@@ -37,7 +40,10 @@ export default defineEventHandler(async (event) => {
 
     return { success: true, filename };
   } catch (err: any) {
-    console.error('Upload error:', err);
-    throw createError({ statusCode: 500, statusMessage: err.message || 'Upload failed' });
+    console.error("Upload error:", err);
+    throw createError({
+      statusCode: 500,
+      statusMessage: err.message || "Upload failed",
+    });
   }
 });

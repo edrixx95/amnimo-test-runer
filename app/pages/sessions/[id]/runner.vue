@@ -13,7 +13,7 @@
         </NuxtLink>
         <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
           <Icon name="heroicons:play-circle" class="w-6 h-6 text-amnimo-500" />
-          {{ $t('runner.title') }}
+          {{ $t("runner.title") }}
           <span class="text-amnimo-600 font-semibold">{{
             session?.name || session?.id || "..."
           }}</span>
@@ -36,7 +36,7 @@
             class="w-4 h-4 animate-spin"
           />
           <Icon v-else name="heroicons:document-text" class="w-4 h-4" />
-          {{ $t('runner.report') }}
+          {{ $t("runner.report") }}
         </button>
         <NuxtLink
           v-if="session?.testType !== 'playground'"
@@ -44,14 +44,14 @@
           class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-slate-800 bg-white hover:bg-slate-50 hover:text-amnimo-700 border border-slate-300 rounded-xl transition-all shadow-sm active:scale-95"
         >
           <Icon name="heroicons:shield-check" class="w-4 h-4" />
-          {{ $t('runner.verifyEnv') }}
+          {{ $t("runner.verifyEnv") }}
         </NuxtLink>
         <button
           @click="showEnvModal = true"
           class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-slate-800 bg-white hover:bg-slate-50 hover:text-amnimo-700 border border-slate-300 rounded-xl transition-all shadow-sm active:scale-95"
         >
           <Icon name="heroicons:cog-8-tooth" class="w-4 h-4" />
-          {{ $t('runner.editEnv') }}
+          {{ $t("runner.editEnv") }}
         </button>
         <button
           v-if="session?.status !== 'Closed'"
@@ -59,7 +59,7 @@
           class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-rose-700 bg-white hover:bg-rose-50 hover:text-rose-800 border border-rose-200 rounded-xl transition-all shadow-sm active:scale-95"
         >
           <Icon name="heroicons:lock-closed" class="w-4 h-4" />
-          {{ $t('runner.closeSession') }}
+          {{ $t("runner.closeSession") }}
         </button>
         <span
           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-sm"
@@ -79,7 +79,13 @@
               'bg-emerald-500': !isTesting && session?.status !== 'Closed',
             }"
           ></span>
-          {{ isTesting ? $t('runner.statusRunning') : (session?.status ? $t('home.status.' + session.status.toLowerCase()) : $t('runner.statusReady')) }}
+          {{
+            isTesting
+              ? $t("runner.statusRunning")
+              : session?.status
+                ? $t("home.status." + session.status.toLowerCase())
+                : $t("runner.statusReady")
+          }}
         </span>
       </div>
     </header>
@@ -94,12 +100,12 @@
             class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2"
           >
             <Icon name="heroicons:adjustments-horizontal" class="w-4 h-4" />
-            {{ $t('runner.config') }}
+            {{ $t("runner.config") }}
           </h3>
 
           <div v-if="session?.testType === 'playground'" class="mb-5">
             <label class="block text-sm font-bold text-slate-800 mb-2">
-              {{ $t('runner.testSource') }}
+              {{ $t("runner.testSource") }}
             </label>
             <div class="flex rounded-xl bg-slate-200/60 p-1">
               <button
@@ -111,7 +117,7 @@
                     : 'text-slate-600 hover:text-slate-800'
                 "
               >
-                {{ $t('runner.release') }}
+                {{ $t("runner.release") }}
               </button>
               <button
                 @click="playgroundSource = 'system'"
@@ -122,16 +128,16 @@
                     : 'text-slate-600 hover:text-slate-800'
                 "
               >
-                {{ $t('runner.system') }}
+                {{ $t("runner.system") }}
               </button>
             </div>
           </div>
 
           <div class="space-y-5 flex-1 flex flex-col min-h-0">
             <div>
-              <label class="block text-sm font-bold text-slate-800 mb-2"
-                >{{ $t('runner.execMode') }}</label
-              >
+              <label class="block text-sm font-bold text-slate-800 mb-2">{{
+                $t("runner.execMode")
+              }}</label>
               <div class="flex rounded-xl bg-slate-200/60 p-1">
                 <button
                   @click="executionMode = 'single'"
@@ -142,7 +148,7 @@
                       : 'text-slate-600 hover:text-slate-800'
                   "
                 >
-                  {{ $t('runner.manual') }}
+                  {{ $t("runner.manual") }}
                 </button>
                 <button
                   @click="executionMode = 'order'"
@@ -153,7 +159,7 @@
                       : 'text-slate-600 hover:text-slate-800'
                   "
                 >
-                  {{ $t('runner.testOrder') }}
+                  {{ $t("runner.testOrder") }}
                 </button>
               </div>
             </div>
@@ -164,10 +170,32 @@
               class="flex flex-col min-h-0 flex-1 animate-fade-in"
             >
               <div class="flex items-center justify-between mb-2 shrink-0">
-                <label class="block text-sm font-bold text-slate-800">{{ $t('runner.availableTests') }}</label>
+                <label class="block text-sm font-bold text-slate-800">{{
+                  $t("runner.availableTests")
+                }}</label>
                 <div class="flex bg-slate-200/60 p-0.5 rounded-lg">
-                  <button @click="testViewMode = 'tree'" class="px-2 py-1 rounded text-xs font-bold transition-colors" :class="testViewMode === 'tree' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'">{{ $t('runner.tree') }}</button>
-                  <button @click="testViewMode = 'filter'" class="px-2 py-1 rounded text-xs font-bold transition-colors" :class="testViewMode === 'filter' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'">{{ $t('runner.filter') }}</button>
+                  <button
+                    @click="testViewMode = 'tree'"
+                    class="px-2 py-1 rounded text-xs font-bold transition-colors"
+                    :class="
+                      testViewMode === 'tree'
+                        ? 'bg-white shadow-sm text-slate-800'
+                        : 'text-slate-500 hover:text-slate-700'
+                    "
+                  >
+                    {{ $t("runner.tree") }}
+                  </button>
+                  <button
+                    @click="testViewMode = 'filter'"
+                    class="px-2 py-1 rounded text-xs font-bold transition-colors"
+                    :class="
+                      testViewMode === 'filter'
+                        ? 'bg-white shadow-sm text-slate-800'
+                        : 'text-slate-500 hover:text-slate-700'
+                    "
+                  >
+                    {{ $t("runner.filter") }}
+                  </button>
                 </div>
               </div>
 
@@ -188,32 +216,65 @@
                   v-else
                   class="text-sm font-medium text-slate-500 italic p-4 text-center"
                 >
-                  {{ $t('runner.noTestFiles') }}
+                  {{ $t("runner.noTestFiles") }}
                 </div>
               </div>
 
               <!-- Filter View -->
-              <div
-                v-else
-                class="flex flex-col min-h-0 flex-1 gap-2"
-              >
+              <div v-else class="flex flex-col min-h-0 flex-1 gap-2">
                 <div class="flex gap-2 shrink-0">
-                  <select v-model="filterCategory" class="flex-1 text-xs bg-white border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-amnimo-500 text-slate-700 font-medium">
+                  <select
+                    v-model="filterCategory"
+                    class="flex-1 text-xs bg-white border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-amnimo-500 text-slate-700 font-medium"
+                  >
                     <option value="">Category...</option>
-                    <option v-for="cat in filterCategories" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
+                    <option
+                      v-for="cat in filterCategories"
+                      :key="cat.name"
+                      :value="cat.name"
+                    >
+                      {{ cat.name }}
+                    </option>
                   </select>
-                  <select v-model="filterPage" :disabled="!filterCategory" class="flex-1 text-xs bg-white border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-amnimo-500 text-slate-700 font-medium disabled:bg-slate-50 disabled:opacity-50">
+                  <select
+                    v-model="filterPage"
+                    :disabled="!filterCategory"
+                    class="flex-1 text-xs bg-white border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-amnimo-500 text-slate-700 font-medium disabled:bg-slate-50 disabled:opacity-50"
+                  >
                     <option value="">Page...</option>
-                    <option v-for="page in filterPages" :key="page.name" :value="page.name">{{ page.name }}</option>
+                    <option
+                      v-for="page in filterPages"
+                      :key="page.name"
+                      :value="page.name"
+                    >
+                      {{ page.name }}
+                    </option>
                   </select>
                 </div>
-                
-                <div class="overflow-y-auto flex-1 pr-2 bg-slate-50/50 rounded-xl border border-slate-200 p-2 custom-scrollbar">
-                  <div v-if="!filterPage" class="text-xs text-slate-400 text-center italic mt-4">{{ $t('runner.selectPage') }}</div>
-                  <div v-else-if="filterFiles.length === 0" class="text-xs text-slate-400 text-center italic mt-4">{{ $t('runner.noTestsFound') }}</div>
+
+                <div
+                  class="overflow-y-auto flex-1 pr-2 bg-slate-50/50 rounded-xl border border-slate-200 p-2 custom-scrollbar"
+                >
+                  <div
+                    v-if="!filterPage"
+                    class="text-xs text-slate-400 text-center italic mt-4"
+                  >
+                    {{ $t("runner.selectPage") }}
+                  </div>
+                  <div
+                    v-else-if="filterFiles.length === 0"
+                    class="text-xs text-slate-400 text-center italic mt-4"
+                  >
+                    {{ $t("runner.noTestsFound") }}
+                  </div>
                   <div v-else class="space-y-3">
                     <div v-for="file in filterFiles" :key="file.path">
-                      <div class="flex items-center gap-2 mb-1 min-w-0" :class="{ 'opacity-50': selectedTests.includes(file.path!) }">
+                      <div
+                        class="flex items-center gap-2 mb-1 min-w-0"
+                        :class="{
+                          'opacity-50': selectedTests.includes(file.path!),
+                        }"
+                      >
                         <button
                           v-if="!selectedTests.includes(file.path!)"
                           @click="toggleFilterFile(file.path!)"
@@ -222,36 +283,91 @@
                         >
                           <Icon name="heroicons:plus" class="w-3 h-3" />
                         </button>
-                        <div v-else class="shrink-0 w-4 h-4 flex items-center justify-center rounded text-amnimo-500">
+                        <div
+                          v-else
+                          class="shrink-0 w-4 h-4 flex items-center justify-center rounded text-amnimo-500"
+                        >
                           <Icon name="heroicons:check" class="w-3.5 h-3.5" />
                         </div>
-                        
-                        <Icon name="heroicons:document-text" class="w-4 h-4 text-gray-500 shrink-0" />
-                        <span class="text-xs font-bold text-slate-700 truncate" :title="file.name">{{ file.name }}</span>
+
+                        <Icon
+                          name="heroicons:document-text"
+                          class="w-4 h-4 text-gray-500 shrink-0"
+                        />
+                        <span
+                          class="text-xs font-bold text-slate-700 truncate"
+                          :title="file.name"
+                          >{{ file.name }}</span
+                        >
                       </div>
                       <div class="pl-6 space-y-1">
-                        <div v-if="file.cases === undefined" class="flex items-center gap-2 text-xs text-slate-400 py-1">
-                          <Icon name="heroicons:arrow-path" class="w-3.5 h-3.5 animate-spin" />
-                          {{ $t('runner.loadingCases') }}
+                        <div
+                          v-if="file.cases === undefined"
+                          class="flex items-center gap-2 text-xs text-slate-400 py-1"
+                        >
+                          <Icon
+                            name="heroicons:arrow-path"
+                            class="w-3.5 h-3.5 animate-spin"
+                          />
+                          {{ $t("runner.loadingCases") }}
                         </div>
-                        <div v-else-if="file.cases.length === 0" class="flex items-center gap-2 text-xs text-slate-400 py-1">
-                          {{ $t('runner.noCasesFound') }}
+                        <div
+                          v-else-if="file.cases.length === 0"
+                          class="flex items-center gap-2 text-xs text-slate-400 py-1"
+                        >
+                          {{ $t("runner.noCasesFound") }}
                         </div>
-                        <div v-else v-for="tc in file.cases" :key="tc" class="flex items-start gap-2 group min-w-0" :class="{ 'opacity-50': selectedTests.includes(file.path! + '::' + tc) || selectedTests.includes(file.path!) }">
+                        <div
+                          v-else
+                          v-for="tc in file.cases"
+                          :key="tc"
+                          class="flex items-start gap-2 group min-w-0"
+                          :class="{
+                            'opacity-50':
+                              selectedTests.includes(file.path! + '::' + tc) ||
+                              selectedTests.includes(file.path!),
+                          }"
+                        >
                           <button
-                            v-if="!selectedTests.includes(file.path! + '::' + tc) && !selectedTests.includes(file.path!)"
-                            @click="!isTesting && !isParsingTests && toggleFilterTestCase(file.path!, tc)"
+                            v-if="
+                              !selectedTests.includes(file.path! + '::' + tc) &&
+                              !selectedTests.includes(file.path!)
+                            "
+                            @click="
+                              !isTesting &&
+                              !isParsingTests &&
+                              toggleFilterTestCase(file.path!, tc)
+                            "
                             class="shrink-0 w-4 h-4 mt-0.5 flex items-center justify-center bg-white border border-slate-300 hover:bg-purple-500 hover:text-white hover:border-purple-500 rounded text-slate-400 transition-colors"
-                            :disabled="isTesting || isParsingTests || selectedTests.includes(file.path!)"
+                            :disabled="
+                              isTesting ||
+                              isParsingTests ||
+                              selectedTests.includes(file.path!)
+                            "
                           >
                             <Icon name="heroicons:plus" class="w-3 h-3" />
                           </button>
-                          <div v-else class="shrink-0 w-4 h-4 mt-0.5 flex items-center justify-center rounded text-purple-500">
+                          <div
+                            v-else
+                            class="shrink-0 w-4 h-4 mt-0.5 flex items-center justify-center rounded text-purple-500"
+                          >
                             <Icon name="heroicons:check" class="w-3.5 h-3.5" />
                           </div>
-                          
-                          <Icon name="heroicons:beaker" class="w-3.5 h-3.5 text-gray-400 group-hover:text-purple-400 shrink-0 mt-0.5" />
-                          <span class="text-xs text-slate-600 group-hover:text-purple-600 leading-tight cursor-pointer" @click="!isTesting && !isParsingTests && !selectedTests.includes(file.path!) && toggleFilterTestCase(file.path!, tc)">{{ tc }}</span>
+
+                          <Icon
+                            name="heroicons:beaker"
+                            class="w-3.5 h-3.5 text-gray-400 group-hover:text-purple-400 shrink-0 mt-0.5"
+                          />
+                          <span
+                            class="text-xs text-slate-600 group-hover:text-purple-600 leading-tight cursor-pointer"
+                            @click="
+                              !isTesting &&
+                              !isParsingTests &&
+                              !selectedTests.includes(file.path!) &&
+                              toggleFilterTestCase(file.path!, tc)
+                            "
+                            >{{ tc }}</span
+                          >
                         </div>
                       </div>
                     </div>
@@ -267,7 +383,7 @@
             >
               <label
                 class="block text-sm font-bold text-slate-800 mb-2 shrink-0"
-                >{{ $t('runner.testOrders') }}</label
+                >{{ $t("runner.testOrders") }}</label
               >
               <div
                 class="space-y-2 overflow-y-auto flex-1 pr-2 custom-scrollbar"
@@ -301,14 +417,14 @@
                     }}</span>
                   </div>
                   <div class="text-xs font-semibold text-slate-500 mt-1.5 pl-8">
-                    {{ order.tests.length }} {{ $t('runner.tests') }}
+                    {{ order.tests.length }} {{ $t("runner.tests") }}
                   </div>
                 </div>
                 <div
                   v-if="testOrders.length === 0"
                   class="text-sm font-medium text-slate-500 italic p-4 text-center border border-dashed border-slate-300 rounded-xl"
                 >
-                  {{ $t('runner.noOrderFiles') }}
+                  {{ $t("runner.noOrderFiles") }}
                 </div>
               </div>
             </div>
@@ -350,27 +466,23 @@
             />
             {{
               session?.status === "Closed"
-                ? $t('runner.sessionClosed')
+                ? $t("runner.sessionClosed")
                 : isTesting
-                  ? $t('runner.stopExecution')
+                  ? $t("runner.stopExecution")
                   : isParsingTests
-                    ? $t('runner.parsing')
-                    : $t('runner.startTests')
+                    ? $t("runner.parsing")
+                    : $t("runner.startTests")
             }}
           </button>
-          
+
           <button
             v-if="session?.status === 'Failed'"
             @click="rerunFailed"
-            :disabled="
-              isTesting || 
-              session?.status === 'Closed' || 
-              isParsingTests
-            "
+            :disabled="isTesting || isParsingTests"
             class="w-full mt-3 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-sm active:scale-95 bg-amber-100 text-amber-700 border border-amber-200 hover:bg-amber-200 hover:shadow-amber-500/20 hover:shadow-md disabled:opacity-50 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:shadow-none"
           >
             <Icon name="heroicons:arrow-path-rounded-square" class="w-5 h-5" />
-            {{ $t('runner.rerunFailed') }}
+            {{ $t("runner.rerunFailed") }}
           </button>
         </div>
       </aside>
@@ -391,13 +503,22 @@
                 name="heroicons:command-line"
                 class="w-4 h-4 text-amnimo-400"
               />
-              <span>{{ $t('runner.playwrightEngine') }}</span>
+              <span>{{ $t("runner.playwrightEngine") }}</span>
             </div>
             <div class="flex gap-4">
-              <button @click="downloadLog('e2e')" class="text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                <Icon name="heroicons:arrow-down-tray" class="w-3 h-3" /> {{ $t('runner.save') }}
+              <button
+                @click="downloadLog('e2e')"
+                class="text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+              >
+                <Icon name="heroicons:arrow-down-tray" class="w-3 h-3" />
+                {{ $t("runner.save") }}
               </button>
-              <button @click="clearE2ELogs" class="text-xs font-medium text-slate-400 hover:text-white transition-colors">{{ $t('runner.clear') }}</button>
+              <button
+                @click="clearE2ELogs"
+                class="text-xs font-medium text-slate-400 hover:text-white transition-colors"
+              >
+                {{ $t("runner.clear") }}
+              </button>
             </div>
           </div>
           <div
@@ -413,7 +534,7 @@
               <span v-html="log.htmlText"></span>
             </div>
             <div v-if="e2eLogs.length === 0" class="text-slate-600 italic mt-2">
-              {{ $t('runner.readyToExec') }}
+              {{ $t("runner.readyToExec") }}
             </div>
           </div>
         </div>
@@ -429,13 +550,22 @@
               class="flex items-center gap-2 text-xs font-semibold text-slate-300 tracking-wide uppercase"
             >
               <Icon name="heroicons:server" class="w-4 h-4 text-emerald-400" />
-              <span>{{ $t('runner.backendEvents') }}</span>
+              <span>{{ $t("runner.backendEvents") }}</span>
             </div>
             <div class="flex gap-4">
-              <button @click="downloadLog('backend')" class="text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                <Icon name="heroicons:arrow-down-tray" class="w-3 h-3" /> {{ $t('runner.save') }}
+              <button
+                @click="downloadLog('backend')"
+                class="text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+              >
+                <Icon name="heroicons:arrow-down-tray" class="w-3 h-3" />
+                {{ $t("runner.save") }}
               </button>
-              <button @click="clearBackendLogs" class="text-xs font-medium text-slate-400 hover:text-white transition-colors">{{ $t('runner.clear') }}</button>
+              <button
+                @click="clearBackendLogs"
+                class="text-xs font-medium text-slate-400 hover:text-white transition-colors"
+              >
+                {{ $t("runner.clear") }}
+              </button>
             </div>
           </div>
           <div
@@ -454,7 +584,7 @@
               v-if="backendLogs.length === 0"
               class="text-slate-600 italic mt-2"
             >
-              {{ $t('runner.listeningBackend') }}
+              {{ $t("runner.listeningBackend") }}
             </div>
           </div>
         </div>
@@ -482,14 +612,16 @@
               class="w-10 h-10 animate-spin mb-4 text-amnimo-500"
             />
             <p class="text-sm font-bold text-slate-700">
-              {{ $t('runner.resolvingTestCases') }}
+              {{ $t("runner.resolvingTestCases") }}
             </p>
-            <p class="text-xs text-slate-400 mt-2">{{ $t('runner.fetchingSuites') }}</p>
+            <p class="text-xs text-slate-400 mt-2">
+              {{ $t("runner.fetchingSuites") }}
+            </p>
           </div>
-          <TestProgress 
-            v-else 
-            :specs="computedQueuedSpecs" 
-            :isTesting="isTesting" 
+          <TestProgress
+            v-else
+            :specs="computedQueuedSpecs"
+            :isTesting="isTesting"
             @remove-file="removeFileFromQueue"
             @remove-case="removeCaseFromQueue"
           />
@@ -520,7 +652,7 @@
                 name="heroicons:cog-8-tooth"
                 class="w-6 h-6 text-amnimo-500"
               />
-              {{ $t('runner.editEnvConfig') }}
+              {{ $t("runner.editEnvConfig") }}
             </h3>
             <button
               @click="showEnvModal = false"
@@ -532,7 +664,10 @@
           <div
             class="p-8 overflow-y-auto flex-1 bg-slate-50/50 custom-scrollbar"
           >
-            <EnvEditor v-model="tempEnvContent" :isPlayground="session?.testType === 'playground'" />
+            <EnvEditor
+              v-model="tempEnvContent"
+              :isPlayground="session?.testType === 'playground'"
+            />
           </div>
           <div
             class="px-8 py-5 border-t border-slate-100 flex justify-end gap-3 bg-slate-50 shrink-0"
@@ -541,7 +676,7 @@
               @click="showEnvModal = false"
               class="px-5 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm active:scale-95"
             >
-              {{ $t('runner.cancel') }}
+              {{ $t("runner.cancel") }}
             </button>
             <button
               @click="saveEnv"
@@ -553,7 +688,7 @@
                 name="heroicons:arrow-path"
                 class="w-4 h-4 animate-spin"
               />
-              {{ $t('runner.saveChanges') }}
+              {{ $t("runner.saveChanges") }}
             </button>
           </div>
         </div>
@@ -582,7 +717,7 @@ import { useRoute } from "vue-router";
 import type { Session } from "~~/shared/types";
 import TestProgress from "~/components/TestProgress.vue";
 import ConfirmModal from "~/components/ConfirmModal.vue";
-import { useToast } from '~/composables/useToast';
+import { useToast } from "~/composables/useToast";
 const { t } = useI18n();
 
 const { addToast } = useToast();
@@ -624,27 +759,30 @@ const loadCasesForPath = async (targetPath: string) => {
   if (isParsingTests.value) return;
   isParsingTests.value = true;
   try {
-    const type = session.value?.testType === "playground" ? playgroundSource.value : (session.value?.testType || 'release');
-    const res = await $fetch<Record<string, string[]>>('/api/tests/cases', {
+    const type =
+      session.value?.testType === "playground"
+        ? playgroundSource.value
+        : session.value?.testType || "release";
+    const res = await $fetch<Record<string, string[]>>("/api/tests/cases", {
       params: {
         type: type,
-        targetPath: targetPath
-      }
+        targetPath: targetPath,
+      },
     });
-    
+
     const updateNode = (nodes: FileNode[]) => {
       for (const node of nodes) {
-        if (node.type === 'file' && node.path && res[node.path]) {
+        if (node.type === "file" && node.path && res[node.path]) {
           node.cases = res[node.path];
-        } else if (node.type === 'folder' && node.children) {
+        } else if (node.type === "folder" && node.children) {
           updateNode(node.children);
         }
       }
     };
-    
+
     updateNode(availableTests.value);
   } catch (error) {
-    console.error('Failed to load test cases:', error);
+    console.error("Failed to load test cases:", error);
   } finally {
     isParsingTests.value = false;
   }
@@ -716,7 +854,7 @@ const toggleFilterTestCase = (path: string, tc: string) => {
 
 const removeFileFromQueue = (path: string) => {
   selectedTests.value = selectedTests.value.filter(
-    (t) => t !== path && !t.startsWith(path + "::")
+    (t) => t !== path && !t.startsWith(path + "::"),
   );
 };
 
@@ -727,7 +865,7 @@ const removeCaseFromQueue = (path: string, tc: string) => {
 
 const computedQueuedSpecs = computed(() => {
   if (isTesting.value) return queuedSpecs.value;
-  
+
   if (executionMode.value === "order") {
     if (!selectedOrder.value) return [];
     return selectedOrder.value.tests.map((t, idx) => ({
@@ -741,27 +879,27 @@ const computedQueuedSpecs = computed(() => {
   const map: Record<string, any> = {};
   for (const item of selectedTests.value) {
     let path = item;
-    let tc = '';
-    if (item.includes('::')) {
-      const parts = item.split('::');
-      path = parts[0];
-      tc = parts[1];
+    let tc = "";
+    if (item.includes("::")) {
+      const parts = item.split("::");
+      path = parts[0]!;
+      tc = parts[1]!;
     }
-    
+
     if (!map[path]) {
       map[path] = {
         id: Object.keys(map).length + 1,
         path: path,
-        status: 'waiting',
-        innerTests: []
+        status: "waiting",
+        innerTests: [],
       };
     }
-    
+
     if (tc) {
       map[path].innerTests.push({
-        id: '',
+        id: "",
         name: tc,
-        status: 'waiting'
+        status: "waiting",
       });
     }
   }
@@ -772,11 +910,19 @@ const executeTests = async () => {
   if (!session.value || isTesting.value) return;
 
   if (executionMode.value === "single" && selectedTests.value.length === 0) {
-    addToast({ title: t('runner.errorTitle'), message: t('runner.selectTestError'), type: 'error' });
+    addToast({
+      title: t("runner.errorTitle"),
+      message: t("runner.selectTestError"),
+      type: "error",
+    });
     return;
   }
   if (executionMode.value === "order" && !selectedOrder.value) {
-    addToast({ title: t('runner.errorTitle'), message: t('runner.selectOrderError'), type: 'error' });
+    addToast({
+      title: t("runner.errorTitle"),
+      message: t("runner.selectOrderError"),
+      type: "error",
+    });
     return;
   }
 
@@ -796,16 +942,20 @@ const executeTests = async () => {
     }
 
     await $fetch(`/api/tests/run`, {
-      method: 'POST',
+      method: "POST",
       body: {
         sessionId,
-        ...payload
-      }
+        ...payload,
+      },
     });
   } catch (err) {
     console.error("Failed to start tests:", err);
     isTesting.value = false;
-    addToast({ title: 'Error', message: "Failed to start tests. Check console.", type: 'error' });
+    addToast({
+      title: "Error",
+      message: "Failed to start tests. Check console.",
+      type: "error",
+    });
   }
 };
 
@@ -876,14 +1026,22 @@ const ansiToHtml = (text: string) => {
 };
 
 const parseLogLine = (line: string) => {
-  const cleanLine = line.replace(/\x1B(?:\[[0-9;]*[a-zA-Z]|\].*?\x07|\].*?\x1B\\)/g, "").trim();
+  const cleanLine = line
+    .replace(/\x1B(?:\[[0-9;]*[a-zA-Z]|\].*?\x07|\].*?\x1B\\)/g, "")
+    .trim();
 
-  if (cleanLine === "--- Executing Playwright Tests in Order ---" || cleanLine.startsWith("Failed tests to rerun:")) {
+  if (
+    cleanLine === "--- Executing Playwright Tests in Order ---" ||
+    cleanLine.startsWith("Failed tests to rerun:")
+  ) {
     parsingHeader = true;
     queuedSpecs.value = [];
     return;
   }
-  if (cleanLine.startsWith("-------------------------------------------") || (parsingHeader && cleanLine === "")) {
+  if (
+    cleanLine.startsWith("-------------------------------------------") ||
+    (parsingHeader && cleanLine === "")
+  ) {
     parsingHeader = false;
     return;
   }
@@ -892,18 +1050,18 @@ const parseLogLine = (line: string) => {
     const match = cleanLine.match(/^(\d+)\.\s+(.*\.spec\.ts)$/);
     if (match) {
       queuedSpecs.value.push({
-        id: parseInt(match[1]),
-        path: match[2],
+        id: parseInt(match[1]!),
+        path: match[2]!,
         status: "waiting",
         innerTests: [],
       });
       return;
     }
-    
+
     const matchRerun = cleanLine.match(/-\s+\w+:\s+.*\((.*\.spec\.ts):\d+\)/);
     if (matchRerun) {
-      const specPath = matchRerun[1];
-      if (!queuedSpecs.value.find(s => s.path === specPath)) {
+      const specPath = matchRerun[1]!;
+      if (!queuedSpecs.value.find((s) => s.path === specPath)) {
         queuedSpecs.value.push({
           id: queuedSpecs.value.length + 1,
           path: specPath,
@@ -919,13 +1077,13 @@ const parseLogLine = (line: string) => {
     /^\[(\d+)\/(\d+)\] Executing:\s+(.*?\.spec\.ts)(?::\d+)?$/,
   );
   if (execMatch) {
-    const index = parseInt(execMatch[1]) - 1;
+    const index = parseInt(execMatch[1]!) - 1;
     if (queuedSpecs.value[index]) {
       queuedSpecs.value[index].status = "running";
     } else {
       queuedSpecs.value.push({
         id: index + 1,
-        path: execMatch[3],
+        path: execMatch[3]!,
         status: "running",
         innerTests: [],
       });
@@ -937,13 +1095,13 @@ const parseLogLine = (line: string) => {
   if (testStartMatch) {
     const activeSpec = queuedSpecs.value.find((s) => s.status === "running");
     if (activeSpec) {
-      const testName = testStartMatch[2].trim();
+      const testName = testStartMatch[2]!.trim();
       const existing = activeSpec.innerTests.find((t) => t.name === testName);
       if (existing) {
         existing.status = "running";
       } else {
         activeSpec.innerTests.push({
-          id: testStartMatch[1].trim(),
+          id: testStartMatch[1]!.trim(),
           name: testName,
           status: "running",
         });
@@ -963,8 +1121,8 @@ const parseLogLine = (line: string) => {
         .reverse()
         .find((t) => t.status === "running");
       if (runningTest) {
-        runningTest.status = testEndMatch[1].trim() as any;
-        runningTest.duration = testEndMatch[2].trim();
+        runningTest.status = testEndMatch[1]!.trim() as any;
+        runningTest.duration = testEndMatch[2]!.trim();
       }
     }
     return;
@@ -977,7 +1135,7 @@ const parseLogLine = (line: string) => {
     const activeSpec = queuedSpecs.value.find((s) => s.status === "running");
     if (activeSpec) {
       activeSpec.status =
-        runFinishedMatch[1].trim() === "PASSED" ? "passed" : "failed";
+        runFinishedMatch[1]!.trim() === "PASSED" ? "passed" : "failed";
     }
   }
 };
@@ -1020,13 +1178,16 @@ const fetchTests = async () => {
   if (!session.value) return;
   isLoading.value = true;
   try {
-    const type = session.value.testType === "playground" ? playgroundSource.value : (session.value.testType || "release");
+    const type =
+      session.value.testType === "playground"
+        ? playgroundSource.value
+        : session.value.testType || "release";
     const orders = await $fetch<TestOrder[]>(`/api/tests/orders?type=${type}`);
     testOrders.value = orders;
 
     const tests = await $fetch<FileNode[]>(`/api/tests/files?type=${type}`);
     availableTests.value = tests;
-    
+
     selectedTests.value = [];
     selectedOrder.value = null;
   } catch (err) {
@@ -1077,7 +1238,11 @@ const saveEnv = async () => {
     showEnvModal.value = false;
   } catch (err) {
     console.error("Failed to save env", err);
-    addToast({ title: 'Error', message: "Failed to save configuration", type: 'error' });
+    addToast({
+      title: "Error",
+      message: "Failed to save configuration",
+      type: "error",
+    });
   } finally {
     isSavingEnv.value = false;
   }
@@ -1122,14 +1287,15 @@ const addBackendLog = (text: string) => {
 
 const downloadLog = async (type: "e2e" | "backend") => {
   try {
-    const rawText = type === "e2e" ? rawE2ELogs.join('') : rawBackendLogs.join('');
+    const rawText =
+      type === "e2e" ? rawE2ELogs.join("") : rawBackendLogs.join("");
     const cleanText = rawText.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "");
 
     const blob = new Blob([cleanText], { type: "text/plain" });
     const defaultName = `${type}-log-${new Date().toISOString().replace(/[:.]/g, "-")}.txt`;
 
-    if (window.showSaveFilePicker) {
-      const handle = await window.showSaveFilePicker({
+    if ((window as any).showSaveFilePicker) {
+      const handle = await (window as any).showSaveFilePicker({
         suggestedName: defaultName,
         types: [
           { description: "Text File", accept: { "text/plain": [".txt"] } },
@@ -1148,7 +1314,11 @@ const downloadLog = async (type: "e2e" | "backend") => {
     }
   } catch (err: any) {
     if (err.name !== "AbortError") {
-      addToast({ title: 'Error', message: "Failed to save log: " + err.message, type: 'error' });
+      addToast({
+        title: "Error",
+        message: "Failed to save log: " + err.message,
+        type: "error",
+      });
     }
   }
 };
@@ -1158,10 +1328,10 @@ const rerunFailed = async () => {
   isTesting.value = true;
   queuedSpecs.value = [];
   parsingHeader = false;
-  
+
   clearE2ELogs();
   clearBackendLogs();
-  
+
   try {
     await $fetch("/api/tests/run", {
       method: "POST",
@@ -1172,7 +1342,11 @@ const rerunFailed = async () => {
       },
     });
   } catch (err: any) {
-    addToast({ title: 'Error', message: "Failed to rerun tests: " + err.message, type: 'error' });
+    addToast({
+      title: "Error",
+      message: "Failed to rerun tests: " + err.message,
+      type: "error",
+    });
     isTesting.value = false;
   }
 };
@@ -1209,7 +1383,11 @@ const executeConfirm = async () => {
     await confirmModal.value.action();
     confirmModal.value.isOpen = false;
   } catch (err: any) {
-    addToast({ title: 'Error', message: `Operation failed: ${err.message || err.data?.message || err}`, type: 'error' });
+    addToast({
+      title: "Error",
+      message: `Operation failed: ${err.message || err.data?.message || err}`,
+      type: "error",
+    });
   } finally {
     confirmModal.value.isLoading = false;
   }

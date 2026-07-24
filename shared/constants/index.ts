@@ -36,10 +36,14 @@ export const DEFAULT_CHECKLIST = {
     { id: "usb", label: "Storage Device", icon: "heroicons:archive-box" },
     { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
     { id: "nx_witness", label: "Nx Witness", icon: "heroicons:video-camera" },
-    { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
+    {
+      id: "dhcp",
+      label: "DHCP client (Partner GW)",
+      icon: "heroicons:computer-desktop",
+    },
   ],
   partners: [],
-    manual: [
+  manual: [
     {
       id: "fw_prep",
       title: "【FWファイル準備】",
@@ -59,7 +63,11 @@ export const CHECKLISTS = {
       { id: "antenna", label: "Antenna", icon: "heroicons:signal" },
       { id: "poe_camera", label: "PoE Camera", icon: "heroicons:video-camera" },
       { id: "nx_witness", label: "Nx Witness", icon: "heroicons:video-camera" },
-      { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
+      {
+        id: "dhcp",
+        label: "DHCP client (Partner GW)",
+        icon: "heroicons:computer-desktop",
+      },
     ],
     partners: [],
     manual: [
@@ -79,7 +87,11 @@ export const CHECKLISTS = {
       { id: "usb", label: "Storage Device", icon: "heroicons:archive-box" },
       { id: "antenna", label: "Antenna", icon: "heroicons:signal" },
       { id: "nx_witness", label: "Nx Witness", icon: "heroicons:video-camera" },
-      { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
+      {
+        id: "dhcp",
+        label: "DHCP client (Partner GW)",
+        icon: "heroicons:computer-desktop",
+      },
     ],
     partners: [],
     manual: [
@@ -96,7 +108,11 @@ export const CHECKLISTS = {
   AR10: {
     peripherals: [
       { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
-      { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
+      {
+        id: "dhcp",
+        label: "DHCP client (Partner GW)",
+        icon: "heroicons:computer-desktop",
+      },
     ],
     partners: [],
     manual: [
@@ -143,7 +159,11 @@ export const CHECKLISTS = {
   AC10: {
     peripherals: [
       { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
-      { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
+      {
+        id: "dhcp",
+        label: "DHCP client (Partner GW)",
+        icon: "heroicons:computer-desktop",
+      },
     ],
     partners: [],
     manual: [
@@ -160,7 +180,11 @@ export const CHECKLISTS = {
   AC15: {
     peripherals: [
       { id: "sim", label: "SIM", icon: "heroicons:credit-card" },
-      { id: "dhcp", label: "DHCP client (Partner GW)", icon: "heroicons:computer-desktop" },
+      {
+        id: "dhcp",
+        label: "DHCP client (Partner GW)",
+        icon: "heroicons:computer-desktop",
+      },
     ],
     partners: [],
     manual: [

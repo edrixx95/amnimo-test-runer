@@ -16,16 +16,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent; 
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1; 
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8; 
+  background: #94a3b8;
 }
 
 /* For Firefox */
@@ -53,7 +53,9 @@
 /* Animate Backdrop separately */
 .modal-enter-active .modal-backdrop,
 .modal-leave-active .modal-backdrop {
-  transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    backdrop-filter 0.3s ease;
 }
 .modal-enter-from .modal-backdrop,
 .modal-leave-to .modal-backdrop {
@@ -64,7 +66,9 @@
 /* Animate Content separately */
 .modal-enter-active .modal-content,
 .modal-leave-active .modal-content {
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out;
 }
 .modal-enter-from .modal-content,
 .modal-leave-to .modal-content {
@@ -75,7 +79,9 @@
 /* Page Transition */
 .page-enter-active,
 .page-leave-active {
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transition:
+    opacity 0.3s ease-in-out,
+    transform 0.3s ease-in-out;
 }
 .page-enter-from,
 .page-leave-to {

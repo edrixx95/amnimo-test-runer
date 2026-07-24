@@ -4,7 +4,7 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 const { t } = useI18n();
 
 const props = defineProps<{
-  modelValue: boolean;
+  modelValue?: boolean;
   baseUrl: string;
 }>();
 
@@ -12,22 +12,24 @@ const emit = defineEmits<{
   "update:modelValue": [value: boolean];
 }>();
 
-const status = ref<'idle' | 'configuring' | 'waiting_client' | 'connected' | 'error'>('idle');
+const status = ref<
+  "idle" | "configuring" | "waiting_client" | "connected" | "error"
+>("idle");
 const errorMessage = ref("");
 let pollingInterval: any = null;
 
 const nxLink = computed(() => {
   try {
     const url = new URL(props.baseUrl);
-    url.port = '7001';
-    return url.toString().replace(/\/$/, '');
+    url.port = "7001";
+    return url.toString().replace(/\/$/, "");
   } catch (e) {
     return `${props.baseUrl}:7001`;
   }
 });
 
 const startProcess = async () => {
-  status.value = 'configuring';
+  status.value = "configuring";
   errorMessage.value = "";
   emit("update:modelValue", false);
 
@@ -35,10 +37,10 @@ const startProcess = async () => {
     // 1. Authenticate, GET current config, and PUT new config on the router
     const setupRes = await $fetch<any>("/api/proxy/configs/nxwitness-setup", {
       method: "POST",
-      body: { 
+      body: {
         targetUrl: props.baseUrl,
         username: "admin",
-        password: "yoko1234"
+        password: "yoko1234",
       },
       timeout: 20000,
     });
@@ -51,36 +53,41 @@ const startProcess = async () => {
       let lastError = "";
       while (!registered && attempts < 5) {
         try {
-          await new Promise(res => setTimeout(res, 3000));
+          await new Promise((res) => setTimeout(res, 3000));
           await $fetch<any>("/api/proxy/configs/nxwitness-register", {
             method: "POST",
             body: {
               targetUrl: props.baseUrl,
               defaultPassword: "admin",
               newPassword: "yoko1234",
-              systemName: "amnimo"
+              systemName: "amnimo",
             },
             timeout: 20000,
           });
           registered = true;
         } catch (err: any) {
           attempts++;
-          lastError = err?.data?.statusMessage || err.message || "Unknown error";
+          lastError =
+            err?.data?.statusMessage || err.message || "Unknown error";
           if (attempts >= 5) {
-            throw new Error(t('peripheralNxWitnessCheck.errorInit', { lastError }));
+            throw new Error(
+              t("peripheralNxWitnessCheck.errorInit", { lastError }),
+            );
           }
         }
       }
     }
 
     // 3. Start polling netstat to verify client login
-    status.value = 'waiting_client';
+    status.value = "waiting_client";
     startPolling();
-
   } catch (err: any) {
     console.error("Nx Witness Setup Error:", err);
-    status.value = 'error';
-    errorMessage.value = err?.data?.statusMessage || err.message || t('peripheralNxWitnessCheck.errorConfig');
+    status.value = "error";
+    errorMessage.value =
+      err?.data?.statusMessage ||
+      err.message ||
+      t("peripheralNxWitnessCheck.errorConfig");
   }
 };
 
@@ -95,13 +102,13 @@ const checkClientConnection = async () => {
     const res = await $fetch<any>("/api/local/netstat", {
       params: {
         targetIp,
-        targetPort: 7001
+        targetPort: 7001,
       },
-      timeout: 3000
+      timeout: 3000,
     });
 
     if (res?.connected) {
-      status.value = 'connected';
+      status.value = "connected";
       emit("update:modelValue", true);
       stopPolling();
     }
@@ -130,7 +137,7 @@ onUnmounted(() => {
 });
 
 onMounted(() => {
-  if (status.value === 'idle') {
+  if (status.value === "idle") {
     startProcess();
   }
 });
@@ -143,10 +150,10 @@ onMounted(() => {
       status === 'connected'
         ? 'border-emerald-300 bg-emerald-50/40'
         : status === 'waiting_client'
-        ? 'border-indigo-300 bg-indigo-50/30'
-        : status === 'error'
-        ? 'border-amber-300 bg-amber-50/30'
-        : 'border-slate-200 bg-white hover:border-amnimo-300 hover:shadow-md'
+          ? 'border-indigo-300 bg-indigo-50/30'
+          : status === 'error'
+            ? 'border-amber-300 bg-amber-50/30'
+            : 'border-slate-200 bg-white hover:border-amnimo-300 hover:shadow-md',
     ]"
   >
     <!-- Header -->
@@ -158,10 +165,10 @@ onMounted(() => {
             status === 'connected'
               ? 'bg-emerald-100 text-emerald-600'
               : status === 'waiting_client' || status === 'configuring'
-              ? 'bg-indigo-100 text-indigo-600'
-              : status === 'error'
-              ? 'bg-amber-100 text-amber-600'
-              : 'bg-slate-100 text-slate-500 group-hover:text-amnimo-600 group-hover:bg-amnimo-50'
+                ? 'bg-indigo-100 text-indigo-600'
+                : status === 'error'
+                  ? 'bg-amber-100 text-amber-600'
+                  : 'bg-slate-100 text-slate-500 group-hover:text-amnimo-600 group-hover:bg-amnimo-50',
           ]"
         >
           <Icon name="heroicons:video-camera" class="w-6 h-6" />
@@ -169,11 +176,22 @@ onMounted(() => {
         <div>
           <h4
             class="font-bold text-lg transition-colors duration-300 flex items-center gap-2"
-            :class="status === 'connected' ? 'text-emerald-800' : 'text-slate-900'"
+            :class="
+              status === 'connected' ? 'text-emerald-800' : 'text-slate-900'
+            "
           >
-            {{ $t('peripheralNxWitnessCheck.title') }}
-            <a :href="nxLink" target="_blank" @click.stop class="text-xs font-semibold text-amnimo-500 hover:text-amnimo-600 bg-amnimo-50 hover:bg-amnimo-100 px-2 py-0.5 rounded-md transition-colors flex items-center gap-1 border border-amnimo-100">
-              {{ $t('peripheralNxWitnessCheck.webClient') }} <Icon name="heroicons:arrow-top-right-on-square" class="w-3 h-3" />
+            {{ $t("peripheralNxWitnessCheck.title") }}
+            <a
+              :href="nxLink"
+              target="_blank"
+              @click.stop
+              class="text-xs font-semibold text-amnimo-500 hover:text-amnimo-600 bg-amnimo-50 hover:bg-amnimo-100 px-2 py-0.5 rounded-md transition-colors flex items-center gap-1 border border-amnimo-100"
+            >
+              {{ $t("peripheralNxWitnessCheck.webClient") }}
+              <Icon
+                name="heroicons:arrow-top-right-on-square"
+                class="w-3 h-3"
+              />
             </a>
           </h4>
           <p
@@ -182,22 +200,22 @@ onMounted(() => {
               status === 'connected'
                 ? 'text-emerald-600'
                 : status === 'waiting_client'
-                ? 'text-indigo-600'
-                : status === 'error'
-                ? 'text-amber-600'
-                : 'text-slate-500'
+                  ? 'text-indigo-600'
+                  : status === 'error'
+                    ? 'text-amber-600'
+                    : 'text-slate-500'
             "
           >
             {{
-              status === 'idle'
-                ? $t('peripheralNxWitnessCheck.ready')
-                : status === 'configuring'
-                ? $t('peripheralNxWitnessCheck.configuring')
-                : status === 'waiting_client'
-                ? $t('peripheralNxWitnessCheck.waiting')
-                : status === 'connected'
-                ? $t('peripheralNxWitnessCheck.connected')
-                : errorMessage
+              status === "idle"
+                ? $t("peripheralNxWitnessCheck.ready")
+                : status === "configuring"
+                  ? $t("peripheralNxWitnessCheck.configuring")
+                  : status === "waiting_client"
+                    ? $t("peripheralNxWitnessCheck.waiting")
+                    : status === "connected"
+                      ? $t("peripheralNxWitnessCheck.connected")
+                      : errorMessage
             }}
           </p>
         </div>
@@ -210,9 +228,12 @@ onMounted(() => {
         @click="startProcess"
         class="px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-bold shadow-sm transition-all active:scale-95"
       >
-        {{ $t('peripheralNxWitnessCheck.setup') }}
+        {{ $t("peripheralNxWitnessCheck.setup") }}
       </button>
-      <div v-else-if="status === 'configuring' || status === 'waiting_client'" class="p-2 text-indigo-500">
+      <div
+        v-else-if="status === 'configuring' || status === 'waiting_client'"
+        class="p-2 text-indigo-500"
+      >
         <Icon name="heroicons:arrow-path" class="w-5 h-5 animate-spin" />
       </div>
       <div v-else-if="status === 'connected'" class="p-2 text-emerald-500">
@@ -222,33 +243,60 @@ onMounted(() => {
 
     <!-- Status Details -->
     <div class="mt-auto flex flex-col gap-3">
-      <div 
+      <div
         class="flex items-center justify-between p-3 rounded-xl border transition-colors"
-        :class="status === 'connected' ? 'bg-emerald-50 border-emerald-200' : (status === 'waiting_client' ? 'bg-indigo-50/50 border-indigo-100' : 'bg-slate-50 border-slate-100')"
+        :class="
+          status === 'connected'
+            ? 'bg-emerald-50 border-emerald-200'
+            : status === 'waiting_client'
+              ? 'bg-indigo-50/50 border-indigo-100'
+              : 'bg-slate-50 border-slate-100'
+        "
       >
         <div class="flex items-center gap-3">
-          <div 
+          <div
             class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors"
-            :class="status === 'connected' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200 text-slate-400'"
+            :class="
+              status === 'connected'
+                ? 'bg-emerald-100 text-emerald-600'
+                : 'bg-slate-200 text-slate-400'
+            "
           >
             <Icon name="heroicons:computer-desktop" class="w-5 h-5" />
           </div>
           <div>
             <span class="block font-bold text-sm text-slate-700">
-              {{ $t('peripheralNxWitnessCheck.pcConnection') }}
+              {{ $t("peripheralNxWitnessCheck.pcConnection") }}
             </span>
             <span class="block text-xs font-medium text-slate-500 mt-0.5">
-              {{ status === 'connected' ? $t('peripheralNxWitnessCheck.established') : $t('peripheralNxWitnessCheck.noConnection') }}
+              {{
+                status === "connected"
+                  ? $t("peripheralNxWitnessCheck.established")
+                  : $t("peripheralNxWitnessCheck.noConnection")
+              }}
             </span>
           </div>
         </div>
-        
+
         <div class="shrink-0 text-slate-400">
-          <Icon v-if="status === 'connected'" name="heroicons:check" class="w-5 h-5 text-emerald-500" />
+          <Icon
+            v-if="status === 'connected'"
+            name="heroicons:check"
+            class="w-5 h-5 text-emerald-500"
+          />
           <div v-else-if="status === 'waiting_client'" class="flex gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style="animation-delay: 0s"></span>
-            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style="animation-delay: 0.2s"></span>
-            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style="animation-delay: 0.4s"></span>
+            <span
+              class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"
+              style="animation-delay: 0s"
+            ></span>
+            <span
+              class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"
+              style="animation-delay: 0.2s"
+            ></span>
+            <span
+              class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"
+              style="animation-delay: 0.4s"
+            ></span>
           </div>
           <Icon v-else name="heroicons:minus" class="w-5 h-5" />
         </div>

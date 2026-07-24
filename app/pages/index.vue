@@ -262,9 +262,8 @@
                 >
               </div>
 
-              <!-- Live Progress -->
               <div
-                v-if="session.status === 'Running' && session.meta"
+                v-if="session.meta && session.status !== 'Closed'"
                 class="pt-3 mt-3 border-t border-gray-200/50 space-y-2"
               >
                 <div
@@ -283,10 +282,12 @@
                   <div
                     class="h-1.5 rounded-full transition-all duration-500"
                     :class="
+                      session.status === 'Failed' ||
                       session.meta.testCounts?.failed > 0
                         ? 'bg-red-500'
-                        : session.meta.specCounts?.completed ===
-                            session.meta.specCounts?.total
+                        : session.status === 'Completed' ||
+                            session.meta.specCounts?.completed ===
+                              session.meta.specCounts?.total
                           ? 'bg-green-500'
                           : 'bg-blue-500'
                     "

@@ -1,12 +1,17 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import fs from "node:fs/promises";
+import path from "node:path";
 
-const SESSIONS_DIR = process.env.APP_DATA_PATH ? path.join(process.env.APP_DATA_PATH, 'sessions') : path.resolve(process.cwd(), 'sessions');
+const SESSIONS_DIR = process.env.APP_DATA_PATH
+  ? path.join(process.env.APP_DATA_PATH, "sessions")
+  : path.resolve(process.cwd(), "sessions");
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id');
+  const id = getRouterParam(event, "id");
   if (!id) {
-    throw createError({ statusCode: 400, statusMessage: 'Session ID is required' });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Session ID is required",
+    });
   }
 
   try {
@@ -15,10 +20,10 @@ export default defineEventHandler(async (event) => {
     await fs.rm(sessionDir, { recursive: true, force: true });
     return { success: true };
   } catch (error: any) {
-    console.error('Failed to delete session:', error);
+    console.error("Failed to delete session:", error);
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to delete session',
+      statusMessage: "Failed to delete session",
     });
   }
 });

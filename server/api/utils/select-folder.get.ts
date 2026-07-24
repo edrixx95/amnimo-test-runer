@@ -1,5 +1,5 @@
-import { exec } from 'node:child_process';
-import { promisify } from 'node:util';
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
 
@@ -20,13 +20,18 @@ if ($result -eq 'OK') {
 }
 `;
 
-    const encodedCommand = Buffer.from(script, 'utf16le').toString('base64');
-    const { stdout } = await execAsync(`powershell.exe -STA -NoProfile -EncodedCommand ${encodedCommand}`);
-    
+    const encodedCommand = Buffer.from(script, "utf16le").toString("base64");
+    const { stdout } = await execAsync(
+      `powershell.exe -STA -NoProfile -EncodedCommand ${encodedCommand}`,
+    );
+
     const selectedPath = stdout.trim();
     return { path: selectedPath || null };
   } catch (err: any) {
-    console.error('Folder picker error:', err);
-    throw createError({ statusCode: 500, statusMessage: err.message || 'Failed to open folder picker' });
+    console.error("Folder picker error:", err);
+    throw createError({
+      statusCode: 500,
+      statusMessage: err.message || "Failed to open folder picker",
+    });
   }
 });

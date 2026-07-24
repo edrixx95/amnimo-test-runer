@@ -12,7 +12,7 @@
           <Icon name="heroicons:arrow-left" class="w-5 h-5" />
         </NuxtLink>
         <h2 class="text-lg font-bold text-slate-800 tracking-tight">
-          {{ $t('setup.title') }}
+          {{ $t("setup.title") }}
           <span class="text-amnimo-600 font-semibold">{{
             session?.name || session?.id || "..."
           }}</span>
@@ -21,7 +21,12 @@
       <div class="flex items-center gap-2">
         <span
           class="text-xs font-semibold text-amnimo-600 bg-amnimo-50 px-3 py-1.5 rounded-full uppercase tracking-wider"
-          >{{ $t('setup.stepProgress', { current: currentStep, total: steps.length }) }}</span
+          >{{
+            $t("setup.stepProgress", {
+              current: currentStep,
+              total: steps.length,
+            })
+          }}</span
         >
       </div>
     </header>
@@ -117,14 +122,16 @@
                     <h3
                       class="text-2xl font-bold text-slate-900 tracking-tight mb-2"
                     >
-                      {{ $t('setup.step1Title') }}
+                      {{ $t("setup.step1Title") }}
                     </h3>
                     <p class="text-slate-500">
-                      {{ $t('setup.step1Desc') }}
+                      {{ $t("setup.step1Desc") }}
                     </p>
                   </div>
 
-                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                  >
                     <div
                       @click="formData.testType = 'release'"
                       class="relative rounded-2xl border p-8 cursor-pointer focus:outline-none transition-all duration-300 flex flex-col items-center text-center group"
@@ -155,12 +162,12 @@
                       <h4
                         class="font-bold text-xl text-slate-900 mb-3 group-hover:text-amnimo-700 transition-colors"
                       >
-                        {{ $t('setup.releaseTest') }}
+                        {{ $t("setup.releaseTest") }}
                       </h4>
                       <p
                         class="text-sm text-slate-500 leading-relaxed font-medium"
                       >
-                        {{ $t('setup.releaseTestDesc') }}
+                        {{ $t("setup.releaseTestDesc") }}
                       </p>
                     </div>
 
@@ -194,12 +201,12 @@
                       <h4
                         class="font-bold text-xl text-slate-900 mb-3 group-hover:text-amnimo-700 transition-colors"
                       >
-                        {{ $t('setup.systemTest') }}
+                        {{ $t("setup.systemTest") }}
                       </h4>
                       <p
                         class="text-sm text-slate-500 leading-relaxed font-medium"
                       >
-                        {{ $t('setup.systemTestDesc') }}
+                        {{ $t("setup.systemTestDesc") }}
                       </p>
                     </div>
 
@@ -234,12 +241,12 @@
                       <h4
                         class="font-bold text-xl text-slate-900 mb-3 group-hover:text-amnimo-700 transition-colors"
                       >
-                        {{ $t('setup.playground') }}
+                        {{ $t("setup.playground") }}
                       </h4>
                       <p
                         class="text-sm text-slate-500 leading-relaxed font-medium"
                       >
-                        {{ $t('setup.playgroundDesc') }}
+                        {{ $t("setup.playgroundDesc") }}
                       </p>
                     </div>
                   </div>
@@ -255,10 +262,10 @@
                     <h3
                       class="text-2xl font-bold text-slate-900 tracking-tight mb-2"
                     >
-                      {{ $t('setup.step2Title') }}
+                      {{ $t("setup.step2Title") }}
                     </h3>
                     <p class="text-slate-500">
-                      {{ $t('setup.step2Desc') }}
+                      {{ $t("setup.step2Desc") }}
                     </p>
                   </div>
 
@@ -266,7 +273,7 @@
                   <div>
                     <label
                       class="block text-sm font-semibold text-slate-700 mb-3"
-                      >{{ $t('setup.deviceSeriesBoard') }}</label
+                      >{{ $t("setup.deviceSeriesBoard") }}</label
                     >
                     <div class="space-y-8">
                       <div
@@ -336,7 +343,10 @@
                                 <div
                                   v-for="dtype in DEVICE_TYPES[board]"
                                   :key="dtype"
-                                  @click.stop="formData.deviceType = formData.deviceType === dtype ? '' : dtype"
+                                  @click.stop="
+                                    formData.deviceType =
+                                      formData.deviceType === dtype ? '' : dtype
+                                  "
                                   class="rounded-lg px-2.5 py-1 text-xs font-bold cursor-pointer transition-all duration-200 border"
                                   :class="
                                     formData.deviceType === dtype
@@ -374,7 +384,7 @@
                   <div>
                     <label
                       class="block text-sm font-semibold text-slate-700 mb-2"
-                      >{{ $t('setup.baseUrl') }}</label
+                      >{{ $t("setup.baseUrl") }}</label
                     >
                     <input
                       v-model="formData.baseUrl"
@@ -397,10 +407,10 @@
                       <h3
                         class="text-2xl font-bold text-slate-900 tracking-tight mb-2"
                       >
-                        {{ $t('setup.step3Title') }}
+                        {{ $t("setup.step3Title") }}
                       </h3>
                       <p class="text-slate-500">
-                        {{ $t('setup.step3Desc') }}
+                        {{ $t("setup.step3Desc") }}
                       </p>
                     </div>
                     <button
@@ -408,14 +418,18 @@
                       @click="resetEnv"
                       class="text-sm font-bold text-amnimo-600 bg-amnimo-50 hover:bg-amnimo-100 px-4 py-2 rounded-xl flex items-center gap-2 transition-colors"
                     >
-                      <Icon name="heroicons:arrow-path" class="w-4 h-4" /> {{ $t('setup.reset') }}
+                      <Icon name="heroicons:arrow-path" class="w-4 h-4" />
+                      {{ $t("setup.reset") }}
                     </button>
                   </div>
 
                   <div
                     class="rounded-2xl shadow-soft border-slate-200 bg-white"
                   >
-                    <EnvEditor v-model="formData.envContent" :isPlayground="formData.testType === 'playground'" />
+                    <EnvEditor
+                      v-model="formData.envContent"
+                      :isPlayground="formData.testType === 'playground'"
+                    />
                   </div>
                 </div>
 
@@ -425,10 +439,10 @@
                     <h3
                       class="text-2xl font-bold text-slate-900 tracking-tight mb-2"
                     >
-                      {{ $t('setup.step4Title') }}
+                      {{ $t("setup.step4Title") }}
                     </h3>
                     <p class="text-slate-500">
-                      {{ $t('setup.step4Desc') }}
+                      {{ $t("setup.step4Desc") }}
                     </p>
                   </div>
 
@@ -467,7 +481,7 @@
                                   : 'text-amnimo-500'
                             "
                           />
-                          {{ $t('setup.connectionStatus') }}
+                          {{ $t("setup.connectionStatus") }}
                         </h4>
                         <span
                           v-if="pingStatus === 'success'"
@@ -477,9 +491,9 @@
                             name="heroicons:check-badge"
                             class="w-5 h-5 text-emerald-600"
                           />
-                          <span class="tracking-wide uppercase text-xs"
-                            >{{ $t('setup.online') }}</span
-                          >
+                          <span class="tracking-wide uppercase text-xs">{{
+                            $t("setup.online")
+                          }}</span>
                         </span>
                         <span
                           v-else-if="pingStatus === 'failed'"
@@ -489,7 +503,7 @@
                             name="heroicons:exclamation-triangle"
                             class="w-5 h-5"
                           />
-                          {{ $t('setup.offline') }}
+                          {{ $t("setup.offline") }}
                         </span>
                       </div>
 
@@ -501,16 +515,18 @@
                         }"
                       >
                         <div class="flex justify-between items-center">
-                          <span class="text-slate-500 font-medium">{{ $t('setup.device') }}</span>
+                          <span class="text-slate-500 font-medium">{{
+                            $t("setup.device")
+                          }}</span>
                           <span class="font-bold text-slate-800"
                             >{{ formData.series }} / {{ formData.board }}
                             {{ formData.deviceType }}</span
                           >
                         </div>
                         <div class="flex justify-between items-center">
-                          <span class="text-slate-500 font-medium"
-                            >{{ $t('setup.targetUrl') }}</span
-                          >
+                          <span class="text-slate-500 font-medium">{{
+                            $t("setup.targetUrl")
+                          }}</span>
                           <div class="flex items-center gap-2">
                             <a
                               :href="formData.baseUrl"
@@ -530,7 +546,7 @@
                       <div class="flex justify-end">
                         <button
                           type="button"
-                          @click="pingDevice"
+                          @click="() => pingDevice()"
                           :disabled="isPinging"
                           class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-amnimo-600 hover:border-amnimo-200 disabled:opacity-50 transition-all duration-300 shadow-sm active:scale-95"
                         >
@@ -540,7 +556,7 @@
                             name="heroicons:signal"
                             class="w-5 h-5"
                           />
-                          {{ $t('setup.pingDevice') }}
+                          {{ $t("setup.pingDevice") }}
                         </button>
                       </div>
                     </div>
@@ -552,7 +568,7 @@
                       <PeripheralSimCheck
                         v-if="
                           currentChecklist.peripherals?.some(
-                            (p) => p.id === 'sim',
+                            (p: any) => p.id === 'sim',
                           )
                         "
                         :base-url="formData.baseUrl"
@@ -564,7 +580,7 @@
                       <PeripheralPoeCheck
                         v-if="
                           currentChecklist.peripherals?.some(
-                            (p) => p.id === 'poe_camera',
+                            (p: any) => p.id === 'poe_camera',
                           )
                         "
                         :base-url="formData.baseUrl"
@@ -576,7 +592,7 @@
                       <PeripheralStorageCheck
                         v-if="
                           currentChecklist.peripherals?.some(
-                            (p) => p.id === 'usb',
+                            (p: any) => p.id === 'usb',
                           )
                         "
                         :base-url="formData.baseUrl"
@@ -589,7 +605,7 @@
                       <PeripheralNxWitnessCheck
                         v-if="
                           currentChecklist.peripherals?.some(
-                            (p) => p.id === 'nx_witness',
+                            (p: any) => p.id === 'nx_witness',
                           )
                         "
                         :base-url="formData.baseUrl"
@@ -601,7 +617,7 @@
                       <PeripheralDhcpCheck
                         v-if="
                           currentChecklist.peripherals?.some(
-                            (p) => p.id === 'dhcp',
+                            (p: any) => p.id === 'dhcp',
                           )
                         "
                         :base-url="formData.baseUrl"
@@ -616,7 +632,7 @@
                       <template
                         v-if="
                           currentChecklist.peripherals?.filter(
-                            (p) =>
+                            (p: any) =>
                               ![
                                 'sim',
                                 'poe_camera',
@@ -632,7 +648,7 @@
                       >
                         <div
                           v-for="item in currentChecklist.peripherals.filter(
-                            (p) =>
+                            (p: any) =>
                               ![
                                 'sim',
                                 'poe_camera',
@@ -909,7 +925,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useToast } from '~/composables/useToast';
+import { useToast } from "~/composables/useToast";
 const { t } = useI18n();
 import {
   BOARDS,
@@ -932,18 +948,18 @@ const { addToast } = useToast();
 const currentStep = ref(1);
 
 const steps = computed(() => {
-  if (formData.value.testType === 'playground') {
+  if (formData.value.testType === "playground") {
     return [
-      { name: t('setup.stepScope'), description: t('setup.stepScopeDescPg') },
-      { name: t('setup.stepTarget'), description: t('setup.stepTargetDesc') },
-      { name: t('setup.stepEnv'), description: t('setup.stepEnvDesc') }
+      { name: t("setup.stepScope"), description: t("setup.stepScopeDescPg") },
+      { name: t("setup.stepTarget"), description: t("setup.stepTargetDesc") },
+      { name: t("setup.stepEnv"), description: t("setup.stepEnvDesc") },
     ];
   }
   return [
-    { name: t('setup.stepScope'), description: t('setup.stepScopeDesc') },
-    { name: t('setup.stepTarget'), description: t('setup.stepTargetDesc') },
-    { name: t('setup.stepEnv'), description: t('setup.stepEnvDesc') },
-    { name: t('setup.stepCheck'), description: t('setup.stepCheckDesc') },
+    { name: t("setup.stepScope"), description: t("setup.stepScopeDesc") },
+    { name: t("setup.stepTarget"), description: t("setup.stepTargetDesc") },
+    { name: t("setup.stepEnv"), description: t("setup.stepEnvDesc") },
+    { name: t("setup.stepCheck"), description: t("setup.stepCheckDesc") },
   ];
 });
 
@@ -959,27 +975,27 @@ const formData = ref({
 // Extract firmwares for step 4 firmware preparation
 const extractedPrevFw = computed(() => {
   const match = formData.value.envContent.match(/^PREV_FIRMWARE_NAME=(.*)$/m);
-  return match ? match[1].trim() : "";
+  return match ? match[1]!.trim() : "";
 });
 
 const extractedTestFw = computed(() => {
   const match = formData.value.envContent.match(/^TEST_FIRMWARE_NAME=(.*)$/m);
-  return match ? match[1].trim() : "";
+  return match ? match[1]!.trim() : "";
 });
 
 const extractedDhcpIp = computed(() => {
   const match = formData.value.envContent.match(/^DHCP_CLIENT_IP=(.*)$/m);
-  return match ? match[1].trim() : "";
+  return match ? match[1]!.trim() : "";
 });
 
 const extractedUsername = computed(() => {
   const match = formData.value.envContent.match(/^TEST_USERNAME=(.*)$/m);
-  return match ? match[1].trim() : "admin";
+  return match ? match[1]!.trim() : "admin";
 });
 
 const extractedPassword = computed(() => {
   const match = formData.value.envContent.match(/^TEST_PASSWORD=(.*)$/m);
-  return match ? match[1].trim() : "yoko1234";
+  return match ? match[1]!.trim() : "yoko1234";
 });
 
 // Load session data
@@ -1002,7 +1018,11 @@ onMounted(async () => {
     }
   } catch (err) {
     console.error("Failed to load session:", err);
-    addToast({ title: t('setup.errorTitle'), message: t('setup.sessionNotFound'), type: 'error' });
+    addToast({
+      title: t("setup.errorTitle"),
+      message: t("setup.sessionNotFound"),
+      type: "error",
+    });
     router.push("/");
   } finally {
     isLoadingSession.value = false;
@@ -1041,7 +1061,11 @@ const currentChecklistKey = computed(() => {
 });
 
 const currentChecklist = computed(() => {
-  return (CHECKLISTS as any)[currentChecklistKey.value] || (CHECKLISTS as any)[formData.value.board] || DEFAULT_CHECKLIST;
+  return (
+    (CHECKLISTS as any)[currentChecklistKey.value] ||
+    (CHECKLISTS as any)[formData.value.board] ||
+    DEFAULT_CHECKLIST
+  );
 });
 
 // Reset checklist state when device changes
@@ -1222,7 +1246,7 @@ const updateEnvVariables = () => {
 
   let deviceTypeValue = formData.value.deviceType || "";
   upsert("DEVICE_TYPE", deviceTypeValue);
-  
+
   upsert("BASE_URL", formData.value.baseUrl);
 
   try {
@@ -1270,7 +1294,11 @@ const isStepValid = computed(() => {
   if (currentStep.value === 2) {
     // Target Device
     if (!formData.value.board || !formData.value.baseUrl) return false;
-    if (availableDeviceTypes.value.length > 0 && formData.value.board !== 'AR10' && !formData.value.deviceType)
+    if (
+      availableDeviceTypes.value.length > 0 &&
+      formData.value.board !== "AR10" &&
+      !formData.value.deviceType
+    )
       return false;
     return true;
   }
@@ -1403,7 +1431,8 @@ const finishSetup = async () => {
   if (!isStepValid.value) return;
   await saveProgress();
   // Status is now preparing or ready
-  const nextStatus = formData.value.testType === 'playground' ? 'Ready' : 'Preparing';
+  const nextStatus =
+    formData.value.testType === "playground" ? "Ready" : "Preparing";
   await $fetch(`/api/sessions/${sessionId}`, {
     method: "PUT",
     body: { status: nextStatus },

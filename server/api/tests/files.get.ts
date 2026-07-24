@@ -1,20 +1,23 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
-import { getSettings } from '../../utils/settingsManager';
+import path from "node:path";
+import fs from "node:fs/promises";
+import { getSettings } from "../../utils/settingsManager";
 
 type FileNode = {
   name: string;
-  type: 'file' | 'folder';
+  type: "file" | "folder";
   path?: string;
   children?: FileNode[];
   cases?: string[];
 };
 
-async function buildFileTree(dir: string, baseDir: string): Promise<FileNode[]> {
+async function buildFileTree(
+  dir: string,
+  baseDir: string,
+): Promise<FileNode[]> {
   const nodes: FileNode[] = [];
   try {
     const list = await fs.readdir(dir, { withFileTypes: true });
-    
+
     // Sort directories first, then files
     list.sort((a, b) => {
       if (a.isDirectory() === b.isDirectory()) {
@@ -25,23 +28,25 @@ async function buildFileTree(dir: string, baseDir: string): Promise<FileNode[]> 
 
     for (const file of list) {
       const fullPath = path.join(dir, file.name);
-      
+
       if (file.isDirectory()) {
         const children = await buildFileTree(fullPath, baseDir);
         if (children.length > 0) {
           nodes.push({
             name: file.name,
-            type: 'folder',
-            children
+            type: "folder",
+            children,
           });
         }
-      } else if (file.name.endsWith('.spec.ts')) {
-        const relativePath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
+      } else if (file.name.endsWith(".spec.ts")) {
+        const relativePath = path
+          .relative(baseDir, fullPath)
+          .replace(/\\/g, "/");
         nodes.push({
           name: file.name,
-          type: 'file',
+          type: "file",
           path: relativePath,
-          cases: undefined // Undefined indicates cases haven't been loaded yet
+          cases: undefined, // Undefined indicates cases haven't been loaded yet
         });
       }
     }
@@ -53,18 +58,21 @@ async function buildFileTree(dir: string, baseDir: string): Promise<FileNode[]> 
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
-  let type = query.type as string || 'release';
-  if (type === 'playground') {
-    type = 'release';
+  let type = (query.type as string) || "release";
+  if (type === "playground") {
+    type = "release";
   }
   const e2eDir = getSettings().e2ePath;
   const targetDir = path.join(e2eDir, `playwright/tests/${type}`);
-  
+
   try {
     const rootNodes = await buildFileTree(targetDir, targetDir);
     return rootNodes;
   } catch (error: any) {
-    console.error('Failed to read test files:', error);
-    throw createError({ statusCode: 500, statusMessage: error.message || String(error) });
+    console.error("Failed to read test files:", error);
+    throw createError({
+      statusCode: 500,
+      statusMessage: error.message || String(error),
+    });
   }
 });

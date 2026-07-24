@@ -1,4 +1,4 @@
-import { updateSettings } from '../../utils/settingsManager';
+import { updateSettings } from "../../utils/settingsManager";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);

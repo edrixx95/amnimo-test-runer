@@ -1,4 +1,4 @@
-import { getAvailablePort } from '../../utils/portFinder';
+import { getAvailablePort } from "../../utils/portFinder";
 
 export default defineEventHandler(async (event) => {
   const ports: number[] = [];
@@ -14,8 +14,8 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to find available ports',
-      data: error.message
+      statusMessage: "Failed to find available ports",
+      data: error.message,
     });
   }
 });
