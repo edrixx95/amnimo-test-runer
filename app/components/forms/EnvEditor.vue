@@ -1,3 +1,44 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+<script setup lang="ts">
+/* eslint-disable */
+import { toRef } from "vue";
+import {
+  useEnvEditor,
+  block1Row1Keys,
+  block1Row2Keys,
+  block2Keys,
+  block3Keys,
+} from "~/composables/env/useEnvEditor";
+
+const props = defineProps<{
+  modelValue: string;
+  isPlayground?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: "update:modelValue", value: string): void;
+}>();
+
+const modelValueRef = toRef(props, "modelValue");
+
+const {
+  parsedEnv,
+  envComments,
+  focusedField,
+  isScanningIIS,
+  iisSites,
+  showIISDropdown,
+  iisTargetKey,
+  scanIIS,
+  selectIISSite,
+  toggleDropdown,
+  handleBlur,
+  selectOption,
+  getOptions,
+  emitChange,
+} = useEnvEditor(modelValueRef, emit as any);
+</script>
+
 <template>
   <div class="space-y-6">
     <!-- Block 1 -->
@@ -40,28 +81,28 @@
                   </div>
                   <div
                     class="w-2 h-2 bg-slate-800 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2"
-                  ></div>
+                  />
                 </div>
               </div>
             </label>
             <template v-if="!isPlayground">
               <input
-                type="text"
                 v-model="parsedEnv[key]"
+                type="text"
                 readonly
                 class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 cursor-not-allowed outline-none"
-              />
+              >
             </template>
             <template v-else>
               <div class="relative">
                 <input
-                  type="text"
                   v-model="parsedEnv[key]"
+                  type="text"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
                   @click="toggleDropdown(key)"
                   @blur="handleBlur"
                   @input="emitChange"
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
-                />
+                >
                 <div
                   class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
                 >
@@ -93,13 +134,13 @@
                     <li
                       v-for="opt in getOptions(key)"
                       :key="opt"
-                      @mousedown.prevent="selectOption(key, opt)"
                       :class="[
                         'px-4 py-2 text-sm cursor-pointer transition-colors break-all',
                         parsedEnv[key] === opt
                           ? 'bg-amnimo-50 text-amnimo-600 font-bold'
                           : 'text-slate-700 hover:bg-amnimo-50 hover:text-amnimo-600',
                       ]"
+                      @mousedown.prevent="selectOption(key, opt)"
                     >
                       {{ opt || $t("envEditor.empty") }}
                     </li>
@@ -135,7 +176,7 @@
                   </div>
                   <div
                     class="w-2 h-2 bg-slate-800 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2"
-                  ></div>
+                  />
                 </div>
               </div>
             </label>
@@ -144,10 +185,10 @@
                 type="text"
                 :value="parsedEnv[key]"
                 readonly
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-800 cursor-pointer focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
                 @click="toggleDropdown(key)"
                 @blur="handleBlur"
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-800 cursor-pointer focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
-              />
+              >
               <div
                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
               >
@@ -179,13 +220,13 @@
                   <li
                     v-for="opt in getOptions(key)"
                     :key="opt"
-                    @mousedown.prevent="selectOption(key, opt)"
                     :class="[
                       'px-4 py-2 text-sm cursor-pointer transition-colors break-all',
                       parsedEnv[key] === opt
                         ? 'bg-amnimo-50 text-amnimo-600 font-bold'
                         : 'text-slate-700 hover:bg-amnimo-50 hover:text-amnimo-600',
                     ]"
+                    @mousedown.prevent="selectOption(key, opt)"
                   >
                     {{ opt }}
                   </li>
@@ -235,27 +276,27 @@
                 </div>
                 <div
                   class="w-2 h-2 bg-slate-800 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2"
-                ></div>
+                />
               </div>
             </div>
           </label>
           <div class="relative">
             <input
-              type="text"
               v-model="parsedEnv[key]"
-              @input="emitChange"
+              type="text"
               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
               :class="{
                 'pr-12': key === 'PC_SERVER_PORT' || key === 'PC_SERVER_URL',
               }"
-            />
+              @input="emitChange"
+            >
 
             <button
               v-if="key === 'PC_SERVER_URL'"
-              @click="scanIIS(key)"
               :disabled="isScanningIIS"
               class="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
               :title="$t('envEditor.scanIisSites')"
+              @click="scanIIS(key)"
             >
               <Icon
                 :name="
@@ -289,8 +330,8 @@
                   <li
                     v-for="site in iisSites"
                     :key="site.name"
-                    @click="selectIISSite(site)"
                     class="px-4 py-2 text-sm cursor-pointer transition-colors border-b last:border-b-0 border-slate-100 hover:bg-indigo-50 group flex items-center justify-between"
+                    @click="selectIISSite(site)"
                   >
                     <div>
                       <span
@@ -359,19 +400,19 @@
                 </div>
                 <div
                   class="w-2 h-2 bg-slate-800 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2"
-                ></div>
+                />
               </div>
             </div>
           </label>
           <div class="relative">
             <input
-              type="text"
               v-model="parsedEnv[key]"
+              type="text"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
               @click="toggleDropdown(key)"
               @blur="handleBlur"
               @input="emitChange"
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
-            />
+            >
             <div
               v-if="getOptions(key).length > 0"
               class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
@@ -402,13 +443,13 @@
                 <li
                   v-for="opt in getOptions(key)"
                   :key="opt"
-                  @mousedown.prevent="selectOption(key, opt)"
                   :class="[
                     'px-4 py-2 text-sm cursor-pointer transition-colors break-all',
                     parsedEnv[key] === opt
                       ? 'bg-amnimo-50 text-amnimo-600 font-bold'
                       : 'text-slate-700 hover:bg-amnimo-50 hover:text-amnimo-600',
                   ]"
+                  @mousedown.prevent="selectOption(key, opt)"
                 >
                   {{ opt || $t("envEditor.empty") }}
                 </li>
@@ -420,42 +461,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { toRef } from "vue";
-import {
-  useEnvEditor,
-  block1Row1Keys,
-  block1Row2Keys,
-  block2Keys,
-  block3Keys,
-} from "~/composables/env/useEnvEditor";
-
-const props = defineProps<{
-  modelValue: string;
-  isPlayground?: boolean;
-}>();
-
-const emit = defineEmits<{
-  (e: "update:modelValue", value: string): void;
-}>();
-
-const modelValueRef = toRef(props, "modelValue");
-
-const {
-  parsedEnv,
-  envComments,
-  focusedField,
-  isScanningIIS,
-  iisSites,
-  showIISDropdown,
-  iisTargetKey,
-  scanIIS,
-  selectIISSite,
-  toggleDropdown,
-  handleBlur,
-  selectOption,
-  getOptions,
-  emitChange,
-} = useEnvEditor(modelValueRef, emit as any);
-</script>

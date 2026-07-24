@@ -27,11 +27,13 @@ if ($result -eq 'OK') {
 
     const selectedPath = stdout.trim();
     return { path: selectedPath || null };
-  } catch (err: any) {
+  } catch (_e: unknown) {
+    const e = _e as import('~~/shared/types').CatchError;
+    const err = e as { message?: string, statusCode?: number, statusMessage?: string };
     console.error("Folder picker error:", err);
     throw createError({
       statusCode: 500,
-      statusMessage: err.message || "Failed to open folder picker",
+      statusMessage: (err as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message || "Failed to open folder picker",
     });
   }
 });

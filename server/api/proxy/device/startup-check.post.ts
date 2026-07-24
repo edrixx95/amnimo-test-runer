@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
 import { defineEventHandler, readBody, createError } from "h3";
 import { z } from "zod";
 

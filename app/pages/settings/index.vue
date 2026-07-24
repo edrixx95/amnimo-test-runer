@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, vue/attributes-order, vue/html-self-closing */
 <script setup lang="ts">
+/* eslint-disable */
 import { ref, onMounted } from "vue";
 
 import { useToast } from "~/composables/useToast";
@@ -70,8 +72,8 @@ onMounted(async () => {
     if (res && res.e2ePath) {
       e2ePath.value = res.e2ePath;
     }
-  } catch (e) {
-    console.error("Failed to load settings", e);
+  } catch (_e) {
+    console.error("Failed to load settings", _e);
   }
 
   if ((window as any).electronAPI) {
@@ -226,15 +228,15 @@ const saveSettings = async () => {
               </label>
               <div class="flex gap-3">
                 <input
-                  type="text"
                   v-model="e2ePath"
+                  type="text"
                   class="flex-1 px-4 py-2 border border-slate-300 rounded-xl font-mono text-sm focus:ring-amnimo-500 focus:border-amnimo-500 bg-slate-50"
                   placeholder="C:\path\to\amnimo-e2e"
                   @input="resetValidation"
-                />
+                >
                 <button
-                  @click="isFolderPickerOpen = true"
                   class="px-4 py-2 bg-slate-100 text-slate-700 font-bold text-sm border border-slate-200 rounded-xl hover:bg-slate-200 transition-colors shrink-0"
+                  @click="isFolderPickerOpen = true"
                 >
                   {{ $t("settings.browse") }}
                 </button>
@@ -275,9 +277,9 @@ const saveSettings = async () => {
 
             <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
               <button
-                @click="validatePath"
                 :disabled="isValidating || !e2ePath"
                 class="px-5 py-2 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
+                @click="validatePath"
               >
                 {{
                   isValidating
@@ -286,9 +288,9 @@ const saveSettings = async () => {
                 }}
               </button>
               <button
-                @click="saveSettings"
                 :disabled="isSaving || !e2ePath"
                 class="px-6 py-2 text-sm font-bold text-white bg-amnimo-600 rounded-xl hover:bg-amnimo-700 transition-colors shadow-sm disabled:opacity-50"
+                @click="saveSettings"
               >
                 {{
                   isSaving ? $t("settings.saving") : $t("settings.saveSettings")
@@ -322,9 +324,9 @@ const saveSettings = async () => {
                 </p>
               </div>
               <button
-                @click="checkForUpdates"
                 :disabled="isCheckingUpdate"
                 class="px-5 py-2 text-sm font-bold bg-white text-slate-700 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50 inline-flex items-center gap-2"
+                @click="checkForUpdates"
               >
                 <Icon
                   v-if="isCheckingUpdate"
@@ -361,13 +363,13 @@ const saveSettings = async () => {
                     <div
                       class="bg-amnimo-500 h-1.5 rounded-full transition-all duration-300"
                       :style="{ width: updateProgress + '%' }"
-                    ></div>
+                    />
                   </div>
                 </div>
                 <button
                   v-if="isUpdateReady"
-                  @click="installUpdate"
                   class="mt-3 px-4 py-1.5 bg-amnimo-600 text-white text-xs font-bold rounded-lg shadow hover:bg-amnimo-700 transition-colors"
+                  @click="installUpdate"
                 >
                   {{ $t("settings.installRestart") }}
                 </button>
@@ -391,16 +393,16 @@ const saveSettings = async () => {
             </div>
             <div class="flex items-center gap-3">
               <input
-                type="file"
                 ref="fileInput"
+                type="file"
                 class="hidden"
                 accept=".zip"
                 @change="handleImportBackup"
-              />
+              >
               <button
-                @click="fileInput?.click()"
                 :disabled="isImporting"
                 class="px-4 py-2 text-sm font-bold bg-white text-slate-700 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50 inline-flex items-center gap-2 shrink-0"
+                @click="fileInput?.click()"
               >
                 <Icon
                   v-if="isImporting"

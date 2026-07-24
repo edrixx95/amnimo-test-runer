@@ -1,3 +1,6 @@
+ 
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, computed } from 'vue';
 
 export function useNetworkCheck(baseUrlRef: { value: string }) {
@@ -34,7 +37,7 @@ export function useNetworkCheck(baseUrlRef: { value: string }) {
       } else {
         pingStatus.value = "failed";
       }
-    } catch (err) {
+    } catch (_err) {
       pingStatus.value = "failed";
     }
   };

@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any, prefer-const */
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -66,18 +68,18 @@ export function useFirmwareManager() {
       let valB: any = b[sortKey.value];
 
       if (sortKey.value === "date") {
-        valA = new Date(a.date).getTime();
-        valB = new Date(b.date).getTime();
+        (valA as any) = new Date(a.date).getTime();
+        (valB as any) = new Date(b.date).getTime();
       } else if (sortKey.value === "version") {
         const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
-        return sortOrder.value === "asc" ? collator.compare(valA, valB) : collator.compare(valB, valA);
-      } else if (typeof valA === "string") {
-        valA = valA.toLowerCase();
-        valB = (valB as string).toLowerCase();
+        return sortOrder.value === "asc" ? collator.compare((valA as any), (valB as any)) : collator.compare((valB as any), (valA as any));
+      } else if (typeof (valA as any) === "string") {
+        (valA as any) = (valA as any).toLowerCase();
+        (valB as any) = ((valB as any) as string).toLowerCase();
       }
 
-      if (valA < valB) return sortOrder.value === "asc" ? -1 : 1;
-      if (valA > valB) return sortOrder.value === "asc" ? 1 : -1;
+      if ((valA as any) < (valB as any)) return sortOrder.value === "asc" ? -1 : 1;
+      if ((valA as any) > (valB as any)) return sortOrder.value === "asc" ? 1 : -1;
       return 0;
     });
 

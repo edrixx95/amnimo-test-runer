@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const { testType, mode, tests } = body;
 
   const cwd = getSettings().e2ePath;
-  const isWindows = process.platform === "win32";
+  const _isWindows = process.platform === "win32";
 
   // Resolve files
   let items: string[] = [];
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
     try {
       const content = await fs.readFile(orderFilePath, "utf-8");
       items = JSON.parse(content);
-    } catch (e) {
+    } catch (_e) {
       // Fallback
       items = [];
     }
@@ -66,9 +66,11 @@ export default defineEventHandler(async (event) => {
   try {
     // Note: playwright test --list might exit with code 0.
     await execAsync(cmd, { cwd, env, maxBuffer: 10 * 1024 * 1024 });
-  } catch (err: any) {
+  } catch (_e: unknown) {
+    const e = _e as import('~~/shared/types').CatchError;
+    const err = e as { message?: string, statusCode?: number, statusMessage?: string };
     // If it fails (e.g. some files missing), it might still generate the json or throw
-    console.error("Playwright parse error:", err.message);
+    console.error("Playwright parse error:", (err as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message);
   }
 
   let result = { config: {}, suites: [] };

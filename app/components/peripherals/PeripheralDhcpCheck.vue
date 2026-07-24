@@ -1,3 +1,110 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, vue/attributes-order, vue/block-order */
+<script setup lang="ts">
+/* eslint-disable */
+import { ref, computed, onMounted } from "vue";
+
+const { t } = useI18n();
+
+const props = defineProps<{
+  baseUrl: string;
+  dhcpClientIp: string;
+  username?: string;
+  password?: string;
+  modelValue?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void;
+}>();
+
+const pingStatus = ref<"idle" | "running" | "success" | "failed">("idle");
+const apiStatus = ref<"idle" | "running" | "success" | "failed">("idle");
+const errorMsg = ref("");
+const configData = ref<any>(null);
+
+const isRunning = computed(
+  () => pingStatus.value === "running" || apiStatus.value === "running",
+);
+
+const runCheck = async () => {
+  if (!props.dhcpClientIp) {
+    errorMsg.value = t("peripheralDhcpCheck.errorNoIp");
+    pingStatus.value = "failed";
+    return;
+  }
+
+  errorMsg.value = "";
+  configData.value = null;
+  apiStatus.value = "idle";
+  pingStatus.value = "running";
+
+  try {
+    // Step 1: Ping
+    const pingRes = await $fetch<{ success: boolean }>("/api/network/ping", {
+      method: "POST",
+      body: { ip: props.dhcpClientIp },
+    });
+
+    if (!pingRes.success) {
+      pingStatus.value = "failed";
+      errorMsg.value = t("peripheralDhcpCheck.errorPing");
+      return;
+    }
+
+    pingStatus.value = "success";
+
+    // Step 2: API check
+    apiStatus.value = "running";
+
+    const apiRes = await $fetch<{
+      success: boolean;
+      message?: string;
+      config?: any;
+    }>("/api/proxy/device/dhcp-partner", {
+      method: "POST",
+      body: {
+        targetUrl: `https://${props.dhcpClientIp}`,
+        username: props.username || "admin",
+        password: props.password || "yoko1234",
+      },
+    });
+
+    if (apiRes.config) {
+      configData.value = apiRes.config;
+    }
+
+    if (apiRes.success) {
+      apiStatus.value = "success";
+      emit("update:modelValue", true);
+    } else {
+      apiStatus.value = "failed";
+      errorMsg.value = apiRes.message || t("peripheralDhcpCheck.errorVerify");
+    }
+  } catch (err: any) {
+    if (pingStatus.value === "running") {
+      pingStatus.value = "failed";
+      errorMsg.value = t("peripheralDhcpCheck.errorPingExec");
+    } else {
+      apiStatus.value = "failed";
+      errorMsg.value =
+        err.data?.statusMessage ||
+        err.message ||
+        t("peripheralDhcpCheck.errorUnknown");
+    }
+  }
+};
+
+const skipCheck = () => {
+  emit("update:modelValue", true);
+};
+
+onMounted(() => {
+  if (!props.modelValue && props.dhcpClientIp) {
+    runCheck();
+  }
+});
+</script>
+
 <template>
   <div
     class="rounded-2xl border-2 p-6 shadow-soft transition-all duration-300"
@@ -219,17 +326,17 @@
     <div class="flex justify-between items-center">
       <button
         type="button"
-        @click="skipCheck"
         class="text-sm font-medium text-slate-500 hover:text-slate-700 underline underline-offset-2 transition-colors"
+        @click="skipCheck"
       >
         {{ $t("peripheralDhcpCheck.skip") }}
       </button>
 
       <button
         type="button"
-        @click="runCheck"
         :disabled="isRunning || !dhcpClientIp"
         class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-slate-800 rounded-xl hover:bg-slate-900 disabled:opacity-50 transition-all duration-300 shadow-sm shadow-slate-200 active:scale-95"
+        @click="runCheck"
       >
         <AppSpinner v-if="isRunning" size="sm" class="text-white" />
         <Icon v-else name="heroicons:play" class="w-4 h-4" />
@@ -244,111 +351,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-
-const { t } = useI18n();
-
-const props = defineProps<{
-  baseUrl: string;
-  dhcpClientIp: string;
-  username?: string;
-  password?: string;
-  modelValue?: boolean;
-}>();
-
-const emit = defineEmits<{
-  (e: "update:modelValue", value: boolean): void;
-}>();
-
-const pingStatus = ref<"idle" | "running" | "success" | "failed">("idle");
-const apiStatus = ref<"idle" | "running" | "success" | "failed">("idle");
-const errorMsg = ref("");
-const configData = ref<any>(null);
-
-const isRunning = computed(
-  () => pingStatus.value === "running" || apiStatus.value === "running",
-);
-
-const runCheck = async () => {
-  if (!props.dhcpClientIp) {
-    errorMsg.value = t("peripheralDhcpCheck.errorNoIp");
-    pingStatus.value = "failed";
-    return;
-  }
-
-  errorMsg.value = "";
-  configData.value = null;
-  apiStatus.value = "idle";
-  pingStatus.value = "running";
-
-  try {
-    // Step 1: Ping
-    const pingRes = await $fetch<{ success: boolean }>("/api/network/ping", {
-      method: "POST",
-      body: { ip: props.dhcpClientIp },
-    });
-
-    if (!pingRes.success) {
-      pingStatus.value = "failed";
-      errorMsg.value = t("peripheralDhcpCheck.errorPing");
-      return;
-    }
-
-    pingStatus.value = "success";
-
-    // Step 2: API check
-    apiStatus.value = "running";
-
-    const apiRes = await $fetch<{
-      success: boolean;
-      message?: string;
-      config?: any;
-    }>("/api/proxy/device/dhcp-partner", {
-      method: "POST",
-      body: {
-        targetUrl: `https://${props.dhcpClientIp}`,
-        username: props.username || "admin",
-        password: props.password || "yoko1234",
-      },
-    });
-
-    if (apiRes.config) {
-      configData.value = apiRes.config;
-    }
-
-    if (apiRes.success) {
-      apiStatus.value = "success";
-      emit("update:modelValue", true);
-    } else {
-      apiStatus.value = "failed";
-      errorMsg.value = apiRes.message || t("peripheralDhcpCheck.errorVerify");
-    }
-  } catch (err: any) {
-    if (pingStatus.value === "running") {
-      pingStatus.value = "failed";
-      errorMsg.value = t("peripheralDhcpCheck.errorPingExec");
-    } else {
-      apiStatus.value = "failed";
-      errorMsg.value =
-        err.data?.statusMessage ||
-        err.message ||
-        t("peripheralDhcpCheck.errorUnknown");
-    }
-  }
-};
-
-const skipCheck = () => {
-  emit("update:modelValue", true);
-};
-
-onMounted(() => {
-  if (!props.modelValue && props.dhcpClientIp) {
-    runCheck();
-  }
-});
-</script>
 
 <style scoped>
 .fade-enter-active,

@@ -1,3 +1,70 @@
+<script setup lang="ts">
+import { computed } from "vue";
+
+type InnerTest = {
+  id: string;
+  name: string;
+  status: "waiting" | "running" | "PASSED" | "FAILED" | "SKIPPED";
+  duration?: string;
+};
+
+type Spec = {
+  id: number;
+  path: string;
+  status: "waiting" | "running" | "passed" | "failed";
+  innerTests: InnerTest[];
+};
+
+const props = defineProps<{
+  specs: Spec[];
+  isTesting: boolean;
+}>();
+
+const _emit = defineEmits<{
+  (e: "remove-file", path: string): void;
+  (e: "remove-case", path: string, caseName: string): void;
+}>();
+
+const completedSpecs = computed(
+  () =>
+    props.specs.filter((s) => s.status === "passed" || s.status === "failed")
+      .length,
+);
+const hasFailed = computed(() =>
+  props.specs.some((s) => s.status === "failed"),
+);
+
+const testSummary = computed(() => {
+  let passed = 0;
+  let failed = 0;
+  let skipped = 0;
+  for (const spec of props.specs) {
+    for (const test of spec.innerTests) {
+      if (test.status === "PASSED") passed++;
+      else if (test.status === "FAILED") failed++;
+      else if (test.status === "SKIPPED") skipped++;
+    }
+  }
+  return { passed, failed, skipped };
+});
+
+const progressPercentage = computed(() => {
+  if (props.specs.length === 0) return 0;
+  return (completedSpecs.value / props.specs.length) * 100;
+});
+
+const progressColorClass = computed(() => {
+  if (hasFailed.value) return "bg-red-500";
+  if (progressPercentage.value === 100) return "bg-green-500";
+  return "bg-blue-500";
+});
+
+const formatSpecName = (pathStr: string) => {
+  const parts = pathStr.split(/[\\/]/);
+  return parts.slice(-2).join("/") || pathStr;
+};
+</script>
+
 <template>
   <div
     class="flex flex-col h-full bg-white border border-slate-200 overflow-hidden shadow-soft"
@@ -50,11 +117,11 @@
           <div
             v-if="isTesting"
             class="absolute inset-0 bg-white/20 animate-[pulse_2s_ease-in-out_infinite]"
-          ></div>
+          />
           <div
             v-if="isTesting"
             class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]"
-          ></div>
+          />
         </div>
       </div>
     </div>
@@ -120,9 +187,9 @@
           </div>
           <div v-if="!isTesting" class="shrink-0 flex items-center">
             <button
-              @click.stop="$emit('remove-file', spec.path)"
               class="w-6 h-6 flex items-center justify-center bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-lg transition-colors"
               :title="$t('testProgress.removeFile')"
+              @click.stop="$emit('remove-file', spec.path)"
             >
               <Icon name="heroicons:minus" class="w-4 h-4" />
             </button>
@@ -184,9 +251,9 @@
                 </p>
                 <button
                   v-if="!isTesting"
-                  @click.stop="$emit('remove-case', spec.path, test.name)"
                   class="shrink-0 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded transition-colors"
                   :title="$t('testProgress.removeCase')"
+                  @click.stop="$emit('remove-case', spec.path, test.name)"
                 >
                   <Icon name="heroicons:minus" class="w-3.5 h-3.5" />
                 </button>
@@ -198,70 +265,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { computed } from "vue";
-
-type InnerTest = {
-  id: string;
-  name: string;
-  status: "waiting" | "running" | "PASSED" | "FAILED" | "SKIPPED";
-  duration?: string;
-};
-
-type Spec = {
-  id: number;
-  path: string;
-  status: "waiting" | "running" | "passed" | "failed";
-  innerTests: InnerTest[];
-};
-
-const props = defineProps<{
-  specs: Spec[];
-  isTesting: boolean;
-}>();
-
-const emit = defineEmits<{
-  (e: "remove-file", path: string): void;
-  (e: "remove-case", path: string, caseName: string): void;
-}>();
-
-const completedSpecs = computed(
-  () =>
-    props.specs.filter((s) => s.status === "passed" || s.status === "failed")
-      .length,
-);
-const hasFailed = computed(() =>
-  props.specs.some((s) => s.status === "failed"),
-);
-
-const testSummary = computed(() => {
-  let passed = 0;
-  let failed = 0;
-  let skipped = 0;
-  for (const spec of props.specs) {
-    for (const test of spec.innerTests) {
-      if (test.status === "PASSED") passed++;
-      else if (test.status === "FAILED") failed++;
-      else if (test.status === "SKIPPED") skipped++;
-    }
-  }
-  return { passed, failed, skipped };
-});
-
-const progressPercentage = computed(() => {
-  if (props.specs.length === 0) return 0;
-  return (completedSpecs.value / props.specs.length) * 100;
-});
-
-const progressColorClass = computed(() => {
-  if (hasFailed.value) return "bg-red-500";
-  if (progressPercentage.value === 100) return "bg-green-500";
-  return "bg-blue-500";
-});
-
-const formatSpecName = (pathStr: string) => {
-  const parts = pathStr.split(/[\\/]/);
-  return parts.slice(-2).join("/") || pathStr;
-};
-</script>

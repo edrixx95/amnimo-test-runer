@@ -61,10 +61,12 @@ export default defineEventHandler(async (event) => {
     });
 
     return storageResponse;
-  } catch (error: any) {
+  } catch (_e: unknown) {
+    const e = _e as import('~~/shared/types').CatchError;
+    const error = e as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string };
     console.error("Storage check proxy error:", error);
     throw createError({
-      statusCode: error.statusCode || 500,
+      statusCode: (error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).statusCode || 500,
       statusMessage: error.statusMessage || "Failed to communicate with device",
     });
   }

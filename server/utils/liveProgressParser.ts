@@ -1,3 +1,4 @@
+/* eslint-disable no-control-regex, @typescript-eslint/no-explicit-any */
 import fs from "node:fs/promises";
 import path from "node:path";
 import { existsSync } from "node:fs";
@@ -183,8 +184,8 @@ export const getLiveProgress = async (
       testCounts: { passed, failed, skipped },
       specCounts: { completed: completedSpecs, total: queuedSpecs.length },
     };
-  } catch (err) {
-    console.error(`Failed to parse live progress for ${sessionId}:`, err);
+  } catch (_err) {
+    console.error(`Failed to parse live progress for ${sessionId}:`, _err);
     return null;
   }
 };

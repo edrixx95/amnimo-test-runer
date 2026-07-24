@@ -1,9 +1,10 @@
-import { ChildProcess } from "node:child_process";
+import { execSync } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import EventEmitter from "node:events";
 import fs from "node:fs";
 import path from "node:path";
 import fsPromises from "node:fs/promises";
-import { execSync } from "node:child_process";
+
 
 type TestSessionProcesses = {
   e2eProcess?: ChildProcess;
@@ -139,23 +140,23 @@ export const killProcessesByFile = async (sessionId: string) => {
         if (e2ePid) {
           try {
             execSync(`taskkill /pid ${e2ePid} /t /f`);
-          } catch (e) {}
+          } catch (_e) { /* ignore */ }
         }
         if (backendPid) {
           try {
             execSync(`taskkill /pid ${backendPid} /t /f`);
-          } catch (e) {}
+          } catch (_e) { /* ignore */ }
         }
       } else {
         if (e2ePid) {
           try {
             process.kill(e2ePid, "SIGKILL");
-          } catch (e) {}
+          } catch (_e) { /* ignore */ }
         }
         if (backendPid) {
           try {
             process.kill(backendPid, "SIGKILL");
-          } catch (e) {}
+          } catch (_e) { /* ignore */ }
         }
       }
 

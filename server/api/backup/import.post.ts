@@ -33,11 +33,12 @@ export default defineEventHandler(async (event) => {
     zip.extractAllTo(sessionsDir, true);
 
     return { success: true, message: "Backup imported successfully" };
-  } catch (e: any) {
+  } catch (_e: unknown) {
+    const e = _e as import('~~/shared/types').CatchError;
     console.error("Import backup failed:", e);
     throw createError({
       statusCode: 500,
-      statusMessage: `Failed to import backup: ${e.message}`,
+      statusMessage: `Failed to import backup: ${(e as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message}`,
     });
   }
 });

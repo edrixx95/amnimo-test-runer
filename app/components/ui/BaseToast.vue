@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import { useToast } from "~/composables/useToast";
+
+const { toasts, removeToast } = useToast();
+</script>
+
 <template>
   <div
     class="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none w-full max-w-sm"
@@ -54,8 +60,8 @@
         </div>
 
         <button
-          @click="removeToast(toast.id)"
           class="shrink-0 p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors -mr-2 -mt-2"
+          @click="removeToast(toast.id)"
         >
           <Icon name="heroicons:x-mark" class="w-5 h-5" />
         </button>
@@ -63,12 +69,6 @@
     </TransitionGroup>
   </div>
 </template>
-
-<script setup lang="ts">
-import { useToast } from "~/composables/useToast";
-
-const { toasts, removeToast } = useToast();
-</script>
 
 <style scoped>
 .toast-move {

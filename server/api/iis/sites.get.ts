@@ -20,7 +20,7 @@ function getLocalIp() {
   return ip;
 }
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (_event) => {
   try {
     const { stdout: siteOut } = await execAsync(
       "%SystemRoot%\\System32\\inetsrv\\appcmd.exe list site",
@@ -61,8 +61,9 @@ export default defineEventHandler(async (event) => {
       }
     }
     return sites;
-  } catch (error: any) {
-    console.error("Failed to get IIS sites:", error.message);
+  } catch (e: unknown) {
+    const error = e as import('~~/shared/types').CatchError;
+    console.error("Failed to get IIS sites:", (error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message);
     throw createError({
       statusCode: 500,
       statusMessage:

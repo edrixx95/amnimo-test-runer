@@ -58,8 +58,8 @@ onMounted(() => {
           </div>
           <button
             v-if="selectedSource"
-            @click="fetchFirmwares"
             class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-amnimo-700 px-4 py-2 rounded-xl font-medium transition-all shadow-sm"
+            @click="fetchFirmwares"
           >
             <Icon
               name="heroicons:arrow-path"
@@ -76,12 +76,12 @@ onMounted(() => {
             class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-12"
           >
             <div
-              @click="selectSource('staging')"
               class="group bg-white rounded-3xl p-8 border-2 border-transparent hover:border-amber-400 hover:shadow-glass hover:-translate-y-1 transition-all duration-300 cursor-pointer text-center relative overflow-hidden"
+              @click="selectSource('staging')"
             >
               <div
                 class="absolute -right-10 -top-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"
-              ></div>
+              />
               <div
                 class="w-20 h-20 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
               >
@@ -96,12 +96,12 @@ onMounted(() => {
             </div>
 
             <div
-              @click="selectSource('production')"
               class="group bg-white rounded-3xl p-8 border-2 border-transparent hover:border-emerald-400 hover:shadow-glass hover:-translate-y-1 transition-all duration-300 cursor-pointer text-center relative overflow-hidden"
+              @click="selectSource('production')"
             >
               <div
                 class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-50 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"
-              ></div>
+              />
               <div
                 class="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
               >
@@ -121,8 +121,8 @@ onMounted(() => {
         <div v-else class="animate-fade-in">
           <div class="mb-6 flex gap-4">
             <button
-              @click="clearSource"
               class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-xl font-medium transition-colors shadow-sm"
+              @click="clearSource"
             >
               <Icon name="heroicons:arrow-left" class="w-5 h-5" />
               {{ $t("firmware.back") }}
@@ -142,10 +142,10 @@ onMounted(() => {
                   type="text"
                   :placeholder="$t('firmware.searchPlaceholder')"
                   class="block w-full pl-10 pr-3 py-2 border-none focus:ring-0 text-sm bg-transparent"
-                />
+                >
               </div>
 
-              <div class="w-px bg-slate-200 my-1"></div>
+              <div class="w-px bg-slate-200 my-1"/>
 
               <div class="relative w-48 shrink-0 flex items-center">
                 <div
@@ -157,8 +157,8 @@ onMounted(() => {
                   />
                 </div>
                 <button
-                  @click="isBoardDropdownOpen = !isBoardDropdownOpen"
                   class="w-full py-2 pl-8 pr-3 text-left bg-transparent text-sm font-bold text-slate-700 outline-none flex items-center justify-between hover:bg-slate-50 rounded-lg transition-colors"
+                  @click="isBoardDropdownOpen = !isBoardDropdownOpen"
                 >
                   <span class="truncate">{{
                     filterBoard === "all"
@@ -175,9 +175,9 @@ onMounted(() => {
                 <!-- Click outside overlay -->
                 <div
                   v-if="isBoardDropdownOpen"
-                  @click="isBoardDropdownOpen = false"
                   class="fixed inset-0 z-40"
-                ></div>
+                  @click="isBoardDropdownOpen = false"
+                />
 
                 <!-- Dropdown menu -->
                 <transition
@@ -194,13 +194,13 @@ onMounted(() => {
                   >
                     <div class="max-h-60 overflow-y-auto custom-scrollbar px-1">
                       <button
-                        @click="selectBoardFilter('all')"
                         class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors mb-1"
                         :class="
                           filterBoard === 'all'
                             ? 'text-amnimo-700 bg-amnimo-50 font-bold'
                             : 'text-slate-600 hover:bg-slate-50 font-medium hover:text-slate-900'
                         "
+                        @click="selectBoardFilter('all')"
                       >
                         <Icon
                           name="heroicons:square-3-stack-3d"
@@ -214,18 +214,18 @@ onMounted(() => {
                         {{ $t("firmware.allBoards") }}
                       </button>
 
-                      <div class="h-px bg-slate-100 my-1 mx-2"></div>
+                      <div class="h-px bg-slate-100 my-1 mx-2"/>
 
                       <button
                         v-for="board in BOARD_LIST"
                         :key="board"
-                        @click="selectBoardFilter(board)"
                         class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
                         :class="
                           filterBoard === board
                             ? 'text-amnimo-700 bg-amnimo-50 font-bold'
                             : 'text-slate-600 hover:bg-slate-50 font-medium hover:text-slate-900'
                         "
+                        @click="selectBoardFilter(board)"
                       >
                         <Icon
                           name="heroicons:cpu-chip"
@@ -477,15 +477,15 @@ onMounted(() => {
                     <td class="px-6 py-4">
                       <div class="flex flex-col">
                         <span
-                          class="font-mono text-sm text-slate-800 font-bold"
                           v-if="
                             fw.version && fw.version.toLowerCase() !== 'modem'
                           "
+                          class="font-mono text-sm text-slate-800 font-bold"
                           >{{ fw.version }}</span
                         >
                         <span
-                          class="font-mono text-sm text-slate-400 font-bold italic"
                           v-else
+                          class="font-mono text-sm text-slate-400 font-bold italic"
                           >N/A</span
                         >
                         <span

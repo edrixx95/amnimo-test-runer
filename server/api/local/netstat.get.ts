@@ -31,13 +31,15 @@ export default defineEventHandler(async (event) => {
     } else {
       return { connected: false };
     }
-  } catch (error: any) {
+  } catch (_e: unknown) {
+    const e = _e as import('~~/shared/types').CatchError;
+    const error = e as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string };
     // findstr returns exit code 1 if no match is found, which throws an error in exec.
     // We treat exit code 1 as simply "not connected".
-    if (error.code === 1) {
+    if ((error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string | number }).code === 1) {
       return { connected: false };
     }
-    console.error("Netstat Error:", error.message);
+    console.error("Netstat Error:", (error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string | number }).message);
     throw createError({
       statusCode: 500,
       statusMessage: "Failed to run netstat command",

@@ -1,3 +1,25 @@
+<script setup lang="ts">
+import { ref, watch } from "vue";
+
+const props = defineProps<{
+  modelValue: boolean;
+  url: string;
+}>();
+
+const _emit = defineEmits(["update:modelValue"]);
+
+const isLoading = ref(true);
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      isLoading.value = true;
+    }
+  },
+);
+</script>
+
 <template>
   <Transition name="modal">
     <div
@@ -7,7 +29,7 @@
       <div
         class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm transform-gpu will-change-opacity"
         @click="$emit('update:modelValue', false)"
-      ></div>
+      />
       <div
         class="modal-content relative bg-white rounded-2xl shadow-glass w-full max-w-7xl h-[95vh] flex flex-col overflow-hidden"
       >
@@ -31,8 +53,8 @@
               {{ $t("htmlReportViewer.openInNewTab") }}
             </a>
             <button
-              @click="$emit('update:modelValue', false)"
               class="text-slate-400 hover:text-amnimo-600 bg-slate-50 hover:bg-amnimo-50 p-2 rounded-xl transition-colors"
+              @click="$emit('update:modelValue', false)"
             >
               <Icon name="heroicons:x-mark" class="w-5 h-5" />
             </button>
@@ -51,31 +73,9 @@
             :src="url"
             class="w-full h-full border-none relative z-20"
             @load="isLoading = false"
-          ></iframe>
+          />
         </div>
       </div>
     </div>
   </Transition>
 </template>
-
-<script setup lang="ts">
-import { ref, watch } from "vue";
-
-const props = defineProps<{
-  modelValue: boolean;
-  url: string;
-}>();
-
-const emit = defineEmits(["update:modelValue"]);
-
-const isLoading = ref(true);
-
-watch(
-  () => props.modelValue,
-  (isOpen) => {
-    if (isOpen) {
-      isLoading.value = true;
-    }
-  },
-);
-</script>

@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
     }
 
     return { allExist };
-  } catch (err) {
+  } catch (_err) {
     return { allExist: false };
   }
 });

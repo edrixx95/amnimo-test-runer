@@ -1,3 +1,6 @@
+ 
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, watch, onMounted, nextTick } from "vue";
 import { useToast } from "~/composables/useToast";
 import { getFirmwarePrefix } from "~~/shared/constants";
@@ -79,7 +82,7 @@ export function useEnvEditor(
         } else if (urlObj.port) {
           parsedEnv.value["PC_SERVER_PORT"] = urlObj.port;
         }
-      } catch (e) {
+      } catch (_e) {
         if (iisTargetKey.value === "PC_SERVER_PORT" && site.port) {
           parsedEnv.value["PC_SERVER_PORT"] = site.port.toString();
         } else if (iisTargetKey.value === "PC_SERVER_URL" && site.url) {
@@ -267,8 +270,8 @@ export function useEnvEditor(
     try {
       const fwList = await $fetch<string[]>("/api/firmwares");
       firmwares.value = fwList;
-    } catch (err) {
-      console.error("Failed to load firmwares", err);
+    } catch (_err) {
+      console.error("Failed to load firmwares", _err);
     }
 
     try {
@@ -279,8 +282,8 @@ export function useEnvEditor(
         parsedEnv.value["CLI_SERVER_PORT"] = availablePorts.value[0]!;
         emitChange();
       }
-    } catch (err) {
-      console.error("Failed to load available ports", err);
+    } catch (_err) {
+      console.error("Failed to load available ports", _err);
     }
   });
 

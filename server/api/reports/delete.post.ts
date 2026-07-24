@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
     try {
       await fs.promises.rm(targetDir, { recursive: true, force: true });
       return { success: true };
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Failed to delete report:", e);
       throw createError({
         statusCode: 500,

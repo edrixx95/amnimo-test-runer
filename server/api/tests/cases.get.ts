@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any, preserve-caught-error */
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";

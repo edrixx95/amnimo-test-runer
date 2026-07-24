@@ -41,10 +41,12 @@ export default defineEventHandler((event) => {
       parentPath: hasParent ? parentPath : null,
       folders,
     };
-  } catch (err: any) {
+  } catch (_e: unknown) {
+    const e = _e as import('~~/shared/types').CatchError;
+    const err = e as { message?: string, statusCode?: number, statusMessage?: string };
     throw createError({
       statusCode: 400,
-      statusMessage: err.message || "Access denied or invalid path",
+      statusMessage: (err as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message || "Access denied or invalid path",
     });
   }
 });

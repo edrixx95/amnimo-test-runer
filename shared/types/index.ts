@@ -1,4 +1,4 @@
-import { SESSION_STATUS, DEVICE_SERIES } from "../constants";
+import type { SESSION_STATUS, DEVICE_SERIES } from "../constants";
 
 export type SessionStatus =
   (typeof SESSION_STATUS)[keyof typeof SESSION_STATUS];
@@ -40,3 +40,67 @@ export type Session = SessionMetadata & {
   summary?: SessionSummary;
   meta?: SessionMeta;
 };
+
+export type InnerTest = {
+  id?: string | number;
+  name: string;
+  status: "running" | "PASSED" | "FAILED" | "SKIPPED";
+};
+
+export type Spec = {
+  id: string | number;
+  path: string;
+  title?: string;
+  status: "waiting" | "running" | "passed" | "failed";
+  innerTests: InnerTest[];
+};
+
+export type LogEntry = {
+  id: string | number;
+  type: string;
+  message: string;
+  timestamp: string;
+};
+
+export type WsMessage = {
+  type?: string;
+  status?: string;
+  sessionName?: string;
+  testType?: string;
+  message?: string;
+  [key: string]: unknown;
+};
+
+export type FileNode = {
+  name: string;
+  path: string;
+  type: "file" | "directory";
+  children?: FileNode[];
+};
+
+export type TestOrder = {
+  id: string;
+  name: string;
+  description?: string;
+  specs?: string[];
+  suites?: unknown[];
+};
+
+
+export interface CatchError extends Error {
+  response?: {
+    status?: number;
+    _data?: unknown;
+  };
+  statusCode?: number;
+  statusMessage?: string;
+  code?: string | number;
+  content?: unknown;
+  token?: string;
+  type?: string;
+  result?: string;
+  suite?: string;
+  data?: {
+    statusMessage?: string;
+  };
+}

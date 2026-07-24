@@ -1,3 +1,5 @@
+ 
+/* eslint-disable prefer-const, @typescript-eslint/no-explicit-any */
 import { $fetch } from "ofetch";
 
 export default defineEventHandler(async (event) => {

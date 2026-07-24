@@ -63,8 +63,8 @@ const { confirmModal, executeConfirm } = useConfirmModal();
             <p class="text-slate-500 mt-1">{{ $t("home.description") }}</p>
           </div>
           <button
-            @click="openCreateModal"
             class="inline-flex items-center gap-2 bg-amnimo-600 hover:bg-amnimo-700 hover:shadow-lg hover:shadow-amnimo-500/30 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+            @click="openCreateModal"
           >
             <Icon name="heroicons:plus" class="w-5 h-5" />
             {{ $t("home.newSession") }}
@@ -87,7 +87,7 @@ const { confirmModal, executeConfirm } = useConfirmModal();
               type="text"
               :placeholder="$t('home.searchPlaceholder')"
               class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-amnimo-500 focus:ring-1 focus:ring-amnimo-500 transition-all outline-none"
-            />
+            >
           </div>
 
           <!-- Filters -->
@@ -123,7 +123,7 @@ const { confirmModal, executeConfirm } = useConfirmModal();
                 v-model="dateRange.start"
                 type="date"
                 class="bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer"
-              />
+              >
               <span class="text-slate-400 text-xs font-medium">{{
                 $t("home.to")
               }}</span>
@@ -131,19 +131,19 @@ const { confirmModal, executeConfirm } = useConfirmModal();
                 v-model="dateRange.end"
                 type="date"
                 class="bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer"
-              />
+              >
               <!-- Clear date button -->
               <button
                 v-if="dateRange.start || dateRange.end"
-                @click="dateRange = { start: '', end: '' }"
                 class="ml-1 text-slate-400 hover:text-rose-500"
                 title="Clear Dates"
+                @click="dateRange = { start: '', end: '' }"
               >
                 <Icon name="heroicons:x-mark" class="w-4 h-4" />
               </button>
             </div>
 
-            <div class="h-6 w-px bg-slate-200 mx-1"></div>
+            <div class="h-6 w-px bg-slate-200 mx-1"/>
 
             <CustomSelect
               v-model="sortBy"
@@ -197,15 +197,15 @@ const { confirmModal, executeConfirm } = useConfirmModal();
             </p>
             <button
               v-if="sessionStore.sessions.length === 0"
-              @click="openCreateModal"
               class="inline-flex items-center justify-center bg-amnimo-50 text-amnimo-700 hover:bg-amnimo-100 hover:text-amnimo-800 px-5 py-2.5 rounded-xl font-medium transition-colors"
+              @click="openCreateModal"
             >
               {{ $t("home.newSession") }}
             </button>
             <button
               v-else
-              @click="resetFilters"
               class="inline-flex items-center justify-center bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 px-5 py-2.5 rounded-xl font-medium transition-colors"
+              @click="resetFilters"
             >
               {{ $t("home.clearFilters") }}
             </button>
@@ -214,13 +214,13 @@ const { confirmModal, executeConfirm } = useConfirmModal();
           <div
             v-for="session in filteredSessions"
             :key="session.id"
-            @click="session.status !== 'Closed' && navigateToSession(session)"
             :class="[
               session.status === 'Closed'
                 ? 'border-slate-300 bg-slate-200/80 opacity-80 grayscale'
                 : 'bg-white shadow-soft hover:shadow-glass hover:border-amnimo-200 border-gray-100 hover:-translate-y-1 cursor-pointer',
               'group flex flex-col rounded-2xl border overflow-hidden transition-all duration-300',
             ]"
+            @click="session.status !== 'Closed' && navigateToSession(session)"
           >
             <div
               class="px-5 py-4 border-b border-gray-50/80"
@@ -339,7 +339,7 @@ const { confirmModal, executeConfirm } = useConfirmModal();
                         ? `${(session.meta.specCounts.completed / session.meta.specCounts.total) * 100}%`
                         : '0%',
                     }"
-                  ></div>
+                  />
                 </div>
                 <div class="flex gap-2 pt-1">
                   <div
@@ -377,38 +377,38 @@ const { confirmModal, executeConfirm } = useConfirmModal();
                 class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               >
                 <button
-                  @click.stop="handleDeleteSession(session.id)"
                   class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   title="Delete Session"
+                  @click.stop="handleDeleteSession(session.id)"
                 >
                   <Icon name="heroicons:trash" class="w-4 h-4" />
                 </button>
                 <button
                   v-if="session.status !== 'Closed'"
-                  @click.stop="handleCloseSession(session.id)"
                   class="p-2 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                   title="Close Session"
+                  @click.stop="handleCloseSession(session.id)"
                 >
                   <Icon name="heroicons:lock-closed" class="w-4 h-4" />
                 </button>
               </div>
               <div class="flex gap-2">
                 <button
-                  @click.stop="openReport(session.id)"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors shadow-sm hover:shadow-md"
+                  @click.stop="openReport(session.id)"
                 >
                   <Icon name="heroicons:document-text" class="w-4 h-4" />
                   {{ $t("home.viewReport") }}
                 </button>
                 <NuxtLink
                   v-if="session.status !== 'Closed'"
-                  @click.stop
                   :to="
                     session.status === 'Draft'
                       ? `/sessions/${session.id}/setup`
                       : `/sessions/${session.id}/runner`
                   "
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-amnimo-600 hover:bg-amnimo-700 rounded-lg shadow-sm hover:shadow-md transition-all"
+                  @click.stop
                 >
                   <Icon name="heroicons:arrow-right" class="w-4 h-4" />
                   {{ session.status === "Draft" ? "Setup" : "Open" }}
@@ -429,7 +429,7 @@ const { confirmModal, executeConfirm } = useConfirmModal();
         <div
           class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm transform-gpu will-change-opacity"
           @click="closeModal"
-        ></div>
+        />
 
         <div
           class="modal-content relative bg-white rounded-2xl shadow-glass w-full max-w-md overflow-hidden border border-slate-200"
@@ -440,7 +440,7 @@ const { confirmModal, executeConfirm } = useConfirmModal();
             </h3>
           </div>
 
-          <form @submit.prevent="handleCreateSession" class="p-6">
+          <form class="p-6" @submit.prevent="handleCreateSession">
             <div class="space-y-4">
               <div>
                 <label
@@ -454,7 +454,7 @@ const { confirmModal, executeConfirm } = useConfirmModal();
                   type="text"
                   class="block w-full rounded-xl border-slate-300 bg-white text-slate-900 shadow-sm focus:border-amnimo-500 focus:ring-amnimo-500 sm:text-sm py-2.5 px-3 border transition-colors outline-none focus:ring-2 focus:ring-opacity-50"
                   required
-                />
+                >
               </div>
               <p class="text-sm font-medium text-slate-500">
                 {{ $t("home.modal.description") }}
@@ -464,8 +464,8 @@ const { confirmModal, executeConfirm } = useConfirmModal();
             <div class="mt-8 flex justify-end gap-3">
               <button
                 type="button"
-                @click="closeModal"
                 class="px-5 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm active:scale-95"
+                @click="closeModal"
               >
                 {{ $t("home.modal.cancel") }}
               </button>
@@ -484,13 +484,13 @@ const { confirmModal, executeConfirm } = useConfirmModal();
     </Transition>
 
     <!-- Report Modal -->
-    <ReportModal v-model="showReportModal" :sessionId="reportSessionId" />
+    <ReportModal v-model="showReportModal" :session-id="reportSessionId" />
 
     <!-- Aggregated Data Viewer -->
     <ExcelJsonViewer
       v-model="showDataViewer"
-      :jsonUrl="dataViewerUrl"
-      @openHtmlReport="openHtmlReportDialog"
+      :json-url="dataViewerUrl"
+      @open-html-report="openHtmlReportDialog"
     />
 
     <HtmlReportViewer
@@ -504,9 +504,9 @@ const { confirmModal, executeConfirm } = useConfirmModal();
       v-model="confirmModal.isOpen"
       :title="confirmModal.title"
       :message="confirmModal.message"
-      :confirmText="confirmModal.confirmText"
+      :confirm-text="confirmModal.confirmText"
       :type="confirmModal.type"
-      :isLoading="confirmModal.isLoading"
+      :is-loading="confirmModal.isLoading"
       @confirm="executeConfirm"
     />
   </div>

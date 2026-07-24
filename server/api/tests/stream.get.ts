@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
           data: JSON.stringify({ source: "e2e", text: e2eData }),
         });
       }
-    } catch (e) {}
+    } catch (_e) { /* ignore */ }
 
     try {
       const backendData = await fs.readFile(backendLogPath, "utf-8");
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
           data: JSON.stringify({ source: "backend", text: backendData }),
         });
       }
-    } catch (e) {}
+    } catch (_e) { /* ignore */ }
   } catch (err) {
     console.error("Failed to read historical logs", err);
   }

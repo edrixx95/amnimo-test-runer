@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, globalShortcut } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, _globalShortcut } from "electron";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import http from "http";
@@ -39,7 +39,7 @@ async function startNitroServer() {
 
 function waitForServer(port, callback) {
   const check = () => {
-    const req = http.get(`http://127.0.0.1:${port}`, (res) => {
+    const req = http.get(`http://127.0.0.1:${port}`, (_res) => {
       // Any response means the server is up
       callback();
     });
@@ -158,7 +158,7 @@ app.whenReady().then(async () => {
       if (mainWindow) mainWindow.webContents.send('update-status', { status: 'available', version: info.version });
     });
 
-    autoUpdater.on('update-not-available', (info) => {
+    autoUpdater.on('update-not-available', (_info) => {
       if (mainWindow) mainWindow.webContents.send('update-status', { status: 'not-available' });
     });
 
@@ -175,7 +175,7 @@ app.whenReady().then(async () => {
     });
 
     // Handle generic downloads
-    mainWindow.webContents.session.on('will-download', (event, item, webContents) => {
+    mainWindow._webContents.session.on('will-download', (event, item, _webContents) => {
       item.on('updated', (event, state) => {
         if (state === 'progressing') {
           if (!item.isPaused() && mainWindow) {

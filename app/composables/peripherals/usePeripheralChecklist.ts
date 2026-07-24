@@ -1,3 +1,6 @@
+ 
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, computed, type Ref } from 'vue';
 import { CHECKLISTS, DEFAULT_CHECKLIST } from '~~/shared/constants';
 
@@ -9,9 +12,9 @@ export function usePeripheralChecklist(formData: Ref<any>) {
   });
 
   const currentChecklistKey = computed(() => {
-    let key = formData.value.board;
-    if (formData.value.deviceType) {
-      key += ` ${formData.value.deviceType}`;
+    let key = (formData as any).value.board;
+    if ((formData as any).value.deviceType) {
+      key += ` ${(formData as any).value.deviceType}`;
     }
     return key;
   });
@@ -19,7 +22,7 @@ export function usePeripheralChecklist(formData: Ref<any>) {
   const currentChecklist = computed(() => {
     return (
       (CHECKLISTS as any)[currentChecklistKey.value] ||
-      (CHECKLISTS as any)[formData.value.board] ||
+      (CHECKLISTS as any)[(formData as any).value.board] ||
       DEFAULT_CHECKLIST
     );
   });

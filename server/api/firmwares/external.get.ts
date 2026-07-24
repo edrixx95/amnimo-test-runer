@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (_event) => {
   const authHeader = "Basic YW1uaW1vOmFlbWUyRm9hOUdlU2VpYWo="; // base64 of amnimo:aeme2Foa9GeSeiaj
 
   const sources = [
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
         let board = "Unknown";
         let version = "Unknown";
         let build = "Unknown";
-        let isModem = filename.toLowerCase().includes("modem");
+        const isModem = filename.toLowerCase().includes("modem");
 
         if (fileMatch) {
           board = fileMatch[1]!.toUpperCase();

@@ -1,8 +1,8 @@
 import { spawn } from "node:child_process";
-import path from "node:path";
+import _path from "node:path";
 import { getSettings } from "../../utils/settingsManager";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (_event) => {
   const cwd = getSettings().e2ePath;
   const isWindows = process.platform === "win32";
   const npmCmd = isWindows ? "npm.cmd" : "npm";

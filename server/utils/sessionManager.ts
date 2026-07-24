@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { Session, SessionStatus } from "../../shared/types";
+import type { Session } from "../../shared/types";
 import { SESSION_STATUS } from "../../shared/constants";
 import { randomUUID } from "node:crypto";
 import { getSettings } from "./settingsManager";
@@ -39,7 +39,7 @@ export const sessionManager = {
     try {
       const e2eEnvPath = path.join(getSettings().e2ePath, ".env");
       initialEnv = await fs.readFile(e2eEnvPath, "utf-8");
-    } catch (e) {
+    } catch (_e) {
       // Ignored
     }
 

@@ -114,13 +114,15 @@ export default defineEventHandler(async (event) => {
       message: "Nx Witness media server successfully registered",
       alreadyRegistered: false,
     };
-  } catch (error: any) {
+  } catch (_e: unknown) {
+    const e = _e as import('~~/shared/types').CatchError;
+    const error = e as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string };
     console.error("Nx Witness register proxy error:", error);
     throw createError({
-      statusCode: error.response?.status || error.statusCode || 500,
+      statusCode: (error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).response?.status || (error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).statusCode || 500,
       statusMessage:
-        error.message ||
-        error.statusMessage ||
+        (error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message ||
+        (error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).statusMessage ||
         "Failed to communicate with Nx Witness server",
     });
   }

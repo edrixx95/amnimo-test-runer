@@ -1,3 +1,31 @@
+<script setup lang="ts">
+import { computed } from "vue";
+
+const props = defineProps({
+  size: {
+    type: String as () => "sm" | "md" | "lg",
+    default: "lg",
+  },
+  text: {
+    type: String,
+    default: "Loading...",
+  },
+});
+
+const sizeClass = computed(() => {
+  switch (props.size) {
+    case "sm":
+      return "w-8 h-8";
+    case "md":
+      return "w-10 h-10";
+    case "lg":
+      return "w-14 h-14";
+    default:
+      return "w-14 h-14";
+  }
+});
+</script>
+
 <template>
   <div class="flex flex-col items-center justify-center gap-4 py-8">
     <div
@@ -31,29 +59,3 @@
     </span>
   </div>
 </template>
-
-<script setup lang="ts">
-import { computed } from "vue";
-
-const props = defineProps({
-  size: {
-    type: String as () => "sm" | "md" | "lg",
-    default: "lg",
-  },
-  text: {
-    type: String,
-    default: "Loading...",
-  },
-});
-
-const sizeClass = computed(() => {
-  switch (props.size) {
-    case "sm":
-      return "w-8 h-8";
-    case "md":
-      return "w-10 h-10";
-    case "lg":
-      return "w-14 h-14";
-  }
-});
-</script>

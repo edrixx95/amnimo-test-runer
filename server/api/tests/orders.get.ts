@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getSettings } from "../../utils/settingsManager";
@@ -23,14 +25,15 @@ export default defineEventHandler(async (event) => {
           name: file,
           tests: Array.isArray(tests) ? tests : [],
         });
-      } catch (e) {
+      } catch (_e: unknown) {
         console.error(`Invalid JSON in ${file}`);
       }
     }
 
     return results;
-  } catch (error: any) {
-    if (error.code === "ENOENT") {
+  } catch (e: unknown) {
+    const error = e as any;
+    if ((error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).code === "ENOENT") {
       return []; // No test orders yet
     }
     console.error("Failed to read test orders:", error);

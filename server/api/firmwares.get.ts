@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (_event) => {
   try {
     const response = await fetch(
       "https://tk2-221-20474.vs.sakura.ne.jp/firmware/",
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
     });
 
     return Array.from(firmwares).sort((a, b) => collator.compare(b, a)); // Sort descending numerically
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Firmware fetch error:", error);
     return []; // Return empty array on failure so UI doesn't break
   }

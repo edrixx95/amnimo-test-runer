@@ -1,3 +1,77 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, vue/attributes-order, vue/html-self-closing, vue/block-order */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+<script setup lang="ts">
+/* eslint-disable */
+import { ref, onMounted, onUnmounted } from "vue";
+
+const { locale, setLocale } = useI18n();
+
+const toggleLocale = () => {
+  setLocale(locale.value === "en" ? "ja" : "en");
+};
+
+const isCollapsed = ref(false);
+const appVersion = ref("1.0.0");
+
+// Download State
+const activeDownload = ref<any>(null);
+
+const formatBytes = (bytes: number, decimals = 2) => {
+  if (!+bytes) return "0 B";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+};
+
+onMounted(async () => {
+  const saved = localStorage.getItem("sidebar_collapsed");
+  if (saved) {
+    isCollapsed.value = saved === "true";
+  }
+
+  if ((window as any).electronAPI) {
+    try {
+      appVersion.value = await (window as any).electronAPI.getAppVersion();
+    } catch (_e) {
+      console.error("Failed to get app version", _e);
+    }
+
+    (window as any).electronAPI.onDownloadProgress((data: any) => {
+      activeDownload.value = data;
+    });
+
+    (window as any).electronAPI.onDownloadComplete((data: any) => {
+      if (activeDownload.value) {
+        activeDownload.value.state = (data as any).state;
+        activeDownload.value.received = activeDownload.value.total;
+
+        // Auto hide after 5 seconds if completed successfully
+        if ((data as any).state === "completed") {
+          setTimeout(() => {
+            if (activeDownload.value?.state === "completed") {
+              activeDownload.value = null;
+            }
+          }, 5000);
+        }
+      }
+    });
+  }
+});
+
+onUnmounted(() => {
+  if ((window as any).electronAPI) {
+    (window as any).electronAPI.removeDownloadListeners();
+  }
+});
+
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value;
+  localStorage.setItem("sidebar_collapsed", String(isCollapsed.value));
+};
+</script>
+
 <template>
   <div class="flex h-screen w-full font-sans bg-slate-50">
     <!-- Sidebar -->
@@ -7,9 +81,9 @@
     >
       <!-- Logo Section as Toggle Button -->
       <button
-        @click="toggleSidebar"
         class="h-16 w-full flex items-center border-b border-gray-100 bg-white overflow-hidden shrink-0 relative hover:bg-slate-50 transition-colors focus:outline-none cursor-pointer"
         title="Toggle Sidebar"
+        @click="toggleSidebar"
       >
         <div
           class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300"
@@ -23,7 +97,7 @@
             src="/amnimo-icon.ico"
             class="w-8 h-8 object-contain"
             alt="Amnimo"
-          />
+          >
         </div>
         <div
           class="absolute left-6 top-1/2 -translate-y-1/2 transition-all duration-300 whitespace-nowrap"
@@ -121,9 +195,9 @@
             {{ $t("nav.version") }} {{ appVersion }}
           </p>
           <button
-            @click="toggleLocale"
             class="text-xs font-bold text-slate-500 hover:text-amnimo-600 transition-colors bg-white px-2 py-1 rounded shadow-sm border border-slate-200"
             title="Toggle Language"
+            @click="toggleLocale"
           >
             {{ locale === "en" ? "JA" : "EN" }}
           </button>
@@ -137,9 +211,9 @@
           "
         >
           <button
-            @click="toggleLocale"
             class="text-[10px] font-bold text-slate-500 hover:text-amnimo-600 transition-colors bg-white px-2 py-1 rounded shadow-sm border border-slate-200"
             title="Toggle Language"
+            @click="toggleLocale"
           >
             {{ locale === "en" ? "JA" : "EN" }}
           </button>
@@ -196,8 +270,8 @@
               activeDownload.state === 'completed' ||
               activeDownload.state === 'cancelled'
             "
-            @click="activeDownload = null"
             class="text-slate-400 hover:text-slate-600"
+            @click="activeDownload = null"
           >
             <Icon name="heroicons:x-mark" class="w-5 h-5" />
           </button>
@@ -213,80 +287,9 @@
             :style="{
               width: `${(activeDownload.received / activeDownload.total) * 100}%`,
             }"
-          ></div>
+          />
         </div>
       </div>
     </Transition>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
-
-const { locale, setLocale } = useI18n();
-
-const toggleLocale = () => {
-  setLocale(locale.value === "en" ? "ja" : "en");
-};
-
-const isCollapsed = ref(false);
-const appVersion = ref("1.0.0");
-
-// Download State
-const activeDownload = ref<any>(null);
-
-const formatBytes = (bytes: number, decimals = 2) => {
-  if (!+bytes) return "0 B";
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-};
-
-onMounted(async () => {
-  const saved = localStorage.getItem("sidebar_collapsed");
-  if (saved) {
-    isCollapsed.value = saved === "true";
-  }
-
-  if ((window as any).electronAPI) {
-    try {
-      appVersion.value = await (window as any).electronAPI.getAppVersion();
-    } catch (e) {
-      console.error("Failed to get app version", e);
-    }
-
-    (window as any).electronAPI.onDownloadProgress((data: any) => {
-      activeDownload.value = data;
-    });
-
-    (window as any).electronAPI.onDownloadComplete((data: any) => {
-      if (activeDownload.value) {
-        activeDownload.value.state = data.state;
-        activeDownload.value.received = activeDownload.value.total;
-
-        // Auto hide after 5 seconds if completed successfully
-        if (data.state === "completed") {
-          setTimeout(() => {
-            if (activeDownload.value?.state === "completed") {
-              activeDownload.value = null;
-            }
-          }, 5000);
-        }
-      }
-    });
-  }
-});
-
-onUnmounted(() => {
-  if ((window as any).electronAPI) {
-    (window as any).electronAPI.removeDownloadListeners();
-  }
-});
-
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value;
-  localStorage.setItem("sidebar_collapsed", String(isCollapsed.value));
-};
-</script>

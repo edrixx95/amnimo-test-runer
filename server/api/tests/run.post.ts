@@ -11,7 +11,6 @@ import {
 } from "../../utils/processManager";
 import type { Session, SessionStatus } from "../../../shared/types";
 import { getSettings } from "../../utils/settingsManager";
-import { getAvailablePort } from "../../utils/portFinder";
 
 const execAsync = promisify(exec);
 const SESSIONS_DIR = process.env.APP_DATA_PATH
@@ -32,7 +31,7 @@ async function killPortOnWindows(port: string) {
         }
       }
     }
-  } catch (err) {
+  } catch (_err) {
     // If command fails, port might not be in use. Ignore.
   }
 }
@@ -94,7 +93,7 @@ export default defineEventHandler(async (event) => {
         cliPort = parsedEnv["CLI_SERVER_PORT"];
       }
     }
-  } catch (e) {
+  } catch (_e) {
     // ignored
   }
 

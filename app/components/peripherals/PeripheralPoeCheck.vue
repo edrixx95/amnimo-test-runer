@@ -1,3 +1,99 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, vue/html-self-closing, vue/attributes-order, vue/block-order */
+<script setup lang="ts">
+/* eslint-disable */
+import { ref, watch, onMounted } from "vue";
+
+const { t } = useI18n();
+
+const props = defineProps<{ baseUrl: string; modelValue?: boolean }>();
+const emit = defineEmits<{ (e: "update:modelValue", val: boolean): void }>();
+
+const isChecking = ref(false);
+const needsLogin = ref(false);
+const errorMsg = ref("");
+const username = ref("admin");
+const password = ref("yoko1234");
+
+const poeInfo = ref<any>(null);
+
+onMounted(() => {
+  if (props.baseUrl) {
+    checkPoe();
+  }
+});
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (!newVal) {
+      poeInfo.value = null;
+      errorMsg.value = "";
+      needsLogin.value = false;
+    }
+  },
+);
+
+async function checkPoe() {
+  if (!props.baseUrl) {
+    errorMsg.value = t("peripheralPoeCheck.errorNoUrl");
+    return;
+  }
+
+  isChecking.value = true;
+  errorMsg.value = "";
+  needsLogin.value = false;
+  poeInfo.value = null;
+  emit("update:modelValue", false);
+
+  try {
+    const res = await $fetch("/api/proxy/device/poe", {
+      method: "POST",
+      body: {
+        baseUrl: props.baseUrl,
+        username: username.value,
+        password: password.value,
+      },
+    });
+
+    const poes = res?.content?.poes;
+    if (!poes || !Array.isArray(poes)) {
+      throw new Error(t("peripheralPoeCheck.errorInvalidFormat"));
+    }
+
+    if (poes.length > 0) {
+      const lan1 = poes.find((p: any) => p.name === "lan1");
+
+      if (lan1) {
+        poeInfo.value = lan1;
+        if (lan1.state === "connected") {
+          emit("update:modelValue", true);
+        } else {
+          errorMsg.value = t("peripheralPoeCheck.errorState", {
+            state: lan1.state,
+          });
+        }
+      } else {
+        errorMsg.value = t("peripheralPoeCheck.errorNotFound");
+      }
+    } else {
+      errorMsg.value = t("peripheralPoeCheck.errorNoInterfaces");
+    }
+  } catch (err: any) {
+    if (err.data?.statusCode === 401) {
+      errorMsg.value = t("peripheralPoeCheck.errorAuth");
+      needsLogin.value = true;
+    } else {
+      errorMsg.value =
+        err.data?.statusMessage ||
+        err.message ||
+        t("peripheralPoeCheck.errorConnect");
+    }
+  } finally {
+    isChecking.value = false;
+  }
+}
+</script>
+
 <template>
   <div
     class="rounded-2xl border-2 p-6 shadow-soft transition-all duration-300"
@@ -99,7 +195,7 @@
                 :placeholder="$t('peripheralPoeCheck.username')"
                 class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-amnimo-500 focus:border-amnimo-500 bg-transparent"
                 @keyup.enter="checkPoe"
-              />
+              >
             </div>
             <div class="relative flex-1">
               <div
@@ -113,11 +209,11 @@
                 :placeholder="$t('peripheralPoeCheck.password')"
                 class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-amnimo-500 focus:border-amnimo-500 bg-transparent"
                 @keyup.enter="checkPoe"
-              />
+              >
             </div>
             <button
-              @click="checkPoe"
               class="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-rose-700 transition-colors shrink-0 flex items-center gap-2"
+              @click="checkPoe"
             >
               <AppSpinner v-if="isChecking" size="sm" />
               {{ $t("peripheralPoeCheck.loginRetry") }}
@@ -201,9 +297,9 @@
     <div class="flex justify-end">
       <button
         type="button"
-        @click="checkPoe"
         :disabled="isChecking"
         class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-amnimo-600 hover:border-amnimo-200 disabled:opacity-50 transition-all duration-300 shadow-sm active:scale-95"
+        @click="checkPoe"
       >
         <AppSpinner v-if="isChecking" size="md" />
         <Icon v-else name="heroicons:arrow-path" class="w-5 h-5" />
@@ -212,100 +308,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
-
-const { t } = useI18n();
-
-const props = defineProps<{ baseUrl: string; modelValue?: boolean }>();
-const emit = defineEmits<{ (e: "update:modelValue", val: boolean): void }>();
-
-const isChecking = ref(false);
-const needsLogin = ref(false);
-const errorMsg = ref("");
-const username = ref("admin");
-const password = ref("yoko1234");
-
-const poeInfo = ref<any>(null);
-
-onMounted(() => {
-  if (props.baseUrl) {
-    checkPoe();
-  }
-});
-
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    if (!newVal) {
-      poeInfo.value = null;
-      errorMsg.value = "";
-      needsLogin.value = false;
-    }
-  },
-);
-
-async function checkPoe() {
-  if (!props.baseUrl) {
-    errorMsg.value = t("peripheralPoeCheck.errorNoUrl");
-    return;
-  }
-
-  isChecking.value = true;
-  errorMsg.value = "";
-  needsLogin.value = false;
-  poeInfo.value = null;
-  emit("update:modelValue", false);
-
-  try {
-    const res = await $fetch("/api/proxy/device/poe", {
-      method: "POST",
-      body: {
-        baseUrl: props.baseUrl,
-        username: username.value,
-        password: password.value,
-      },
-    });
-
-    const poes = res?.content?.poes;
-    if (!poes || !Array.isArray(poes)) {
-      throw new Error(t("peripheralPoeCheck.errorInvalidFormat"));
-    }
-
-    if (poes.length > 0) {
-      const lan1 = poes.find((p: any) => p.name === "lan1");
-
-      if (lan1) {
-        poeInfo.value = lan1;
-        if (lan1.state === "connected") {
-          emit("update:modelValue", true);
-        } else {
-          errorMsg.value = t("peripheralPoeCheck.errorState", {
-            state: lan1.state,
-          });
-        }
-      } else {
-        errorMsg.value = t("peripheralPoeCheck.errorNotFound");
-      }
-    } else {
-      errorMsg.value = t("peripheralPoeCheck.errorNoInterfaces");
-    }
-  } catch (err: any) {
-    if (err.data?.statusCode === 401) {
-      errorMsg.value = t("peripheralPoeCheck.errorAuth");
-      needsLogin.value = true;
-    } else {
-      errorMsg.value =
-        err.data?.statusMessage ||
-        err.message ||
-        t("peripheralPoeCheck.errorConnect");
-    }
-  } finally {
-    isChecking.value = false;
-  }
-}
-</script>
 
 <style scoped>
 .fade-enter-active,

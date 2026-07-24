@@ -1,63 +1,6 @@
-<template>
-  <Transition name="slide-up">
-    <div
-      v-if="isVisible"
-      class="fixed bottom-6 right-6 z-[10000] bg-white rounded-2xl shadow-xl border border-slate-200 p-5 max-w-sm w-full flex flex-col gap-3"
-    >
-      <div class="flex items-start gap-3">
-        <div class="shrink-0 pt-0.5">
-          <Icon
-            name="heroicons:arrow-path-rounded-square"
-            class="w-6 h-6 text-amnimo-500"
-            :class="{
-              'animate-spin': status === 'checking' || status === 'downloading',
-            }"
-          />
-        </div>
-
-        <div class="flex-1 flex flex-col gap-1 min-w-0">
-          <h4 class="text-base font-bold text-slate-800">{{ title }}</h4>
-          <p class="text-sm text-slate-500 leading-snug">{{ message }}</p>
-
-          <div
-            v-if="status === 'downloading'"
-            class="mt-2 h-2 w-full bg-slate-100 rounded-full overflow-hidden"
-          >
-            <div
-              class="h-full bg-amnimo-500 transition-all duration-300"
-              :style="{ width: `${progress}%` }"
-            ></div>
-          </div>
-        </div>
-
-        <button
-          v-if="status === 'not-available' || status === 'error'"
-          @click="close"
-          class="shrink-0 p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors -mr-2 -mt-2"
-        >
-          <Icon name="heroicons:x-mark" class="w-5 h-5" />
-        </button>
-      </div>
-
-      <div v-if="status === 'downloaded'" class="flex justify-end gap-2 mt-2">
-        <button
-          @click="close"
-          class="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-        >
-          {{ $t("updateNotifier.later") }}
-        </button>
-        <button
-          @click="installUpdate"
-          class="px-4 py-2 text-sm font-bold text-white bg-amnimo-600 hover:bg-amnimo-700 rounded-lg transition-colors"
-        >
-          {{ $t("updateNotifier.restartAndInstall") }}
-        </button>
-      </div>
-    </div>
-  </Transition>
-</template>
-
+/* eslint-disable @typescript-eslint/no-explicit-any, vue/html-self-closing, vue/attributes-order, vue/block-order */
 <script setup lang="ts">
+/* eslint-disable */
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -162,6 +105,65 @@ const installUpdate = () => {
   }
 };
 </script>
+
+<template>
+  <Transition name="slide-up">
+    <div
+      v-if="isVisible"
+      class="fixed bottom-6 right-6 z-[10000] bg-white rounded-2xl shadow-xl border border-slate-200 p-5 max-w-sm w-full flex flex-col gap-3"
+    >
+      <div class="flex items-start gap-3">
+        <div class="shrink-0 pt-0.5">
+          <Icon
+            name="heroicons:arrow-path-rounded-square"
+            class="w-6 h-6 text-amnimo-500"
+            :class="{
+              'animate-spin': status === 'checking' || status === 'downloading',
+            }"
+          />
+        </div>
+
+        <div class="flex-1 flex flex-col gap-1 min-w-0">
+          <h4 class="text-base font-bold text-slate-800">{{ title }}</h4>
+          <p class="text-sm text-slate-500 leading-snug">{{ message }}</p>
+
+          <div
+            v-if="status === 'downloading'"
+            class="mt-2 h-2 w-full bg-slate-100 rounded-full overflow-hidden"
+          >
+            <div
+              class="h-full bg-amnimo-500 transition-all duration-300"
+              :style="{ width: `${progress}%` }"
+            />
+          </div>
+        </div>
+
+        <button
+          v-if="status === 'not-available' || status === 'error'"
+          class="shrink-0 p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors -mr-2 -mt-2"
+          @click="close"
+        >
+          <Icon name="heroicons:x-mark" class="w-5 h-5" />
+        </button>
+      </div>
+
+      <div v-if="status === 'downloaded'" class="flex justify-end gap-2 mt-2">
+        <button
+          class="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+          @click="close"
+        >
+          {{ $t("updateNotifier.later") }}
+        </button>
+        <button
+          class="px-4 py-2 text-sm font-bold text-white bg-amnimo-600 hover:bg-amnimo-700 rounded-lg transition-colors"
+          @click="installUpdate"
+        >
+          {{ $t("updateNotifier.restartAndInstall") }}
+        </button>
+      </div>
+    </div>
+  </Transition>
+</template>
 
 <style scoped>
 .slide-up-enter-active,

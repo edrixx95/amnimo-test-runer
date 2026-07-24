@@ -12,7 +12,7 @@ export default defineWebSocketHandler({
     console.log("[ws] Message received:", message.text());
     // We can handle incoming messages if needed, e.g. ping/pong
   },
-  close(peer, event) {
+  close(peer, _event) {
     console.log("[ws] Client disconnected:", peer.id);
   },
   error(peer, error) {

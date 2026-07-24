@@ -1,3 +1,134 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+<script setup lang="ts">
+/* eslint-disable */
+import { ref, watch, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { useToast } from "~/composables/useToast";
+import { useRouter } from "vue-router";
+
+const { t } = useI18n();
+const { addToast } = useToast();
+
+
+const router = useRouter();
+
+const props = defineProps<{
+  modelValue: boolean;
+  sessionId: string;
+}>();
+
+const emit = defineEmits(["update:modelValue"]);
+
+type ReportData = {
+  id: string;
+  name: string;
+  createdAt: string;
+  excelJsonUrl?: string;
+  htmlReportUrl?: string;
+  failedCount?: number;
+  passedCount?: number;
+  totalCount?: number;
+};
+
+const isLoading = ref(false);
+const reports = ref<ReportData[]>([]);
+
+const isJsonViewerOpen = ref(false);
+const activeJsonUrl = ref("");
+
+const openJsonViewer = (url: string) => {
+  activeJsonUrl.value = url;
+  isJsonViewerOpen.value = true;
+};
+
+const isHtmlViewerOpen = ref(false);
+const activeHtmlUrl = ref("");
+
+const openHtmlViewer = (url: string) => {
+  activeHtmlUrl.value = url;
+  isHtmlViewerOpen.value = true;
+};
+
+const fetchReports = async () => {
+  if (props.sessionId) {
+    isLoading.value = true;
+    try {
+      reports.value = await $fetch<ReportData[]>(
+        `/api/sessions/${props.sessionId}/reports`,
+      );
+    } catch (e: any) {
+      console.error("Failed to load reports", e);
+      reports.value = [];
+    } finally {
+      isLoading.value = false;
+    }
+  }
+};
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      fetchReports();
+    }
+  },
+);
+
+const isRerunning = ref(false);
+
+const rerunFailedTests = async (reportName: string) => {
+  if (!props.sessionId || isRerunning.value) return;
+  isRerunning.value = true;
+  try {
+    await $fetch("/api/tests/run", {
+      method: "POST",
+      body: {
+        sessionId: props.sessionId,
+        testType: "release",
+        mode: "rerun-failed",
+        sessionName: reportName,
+      },
+    });
+    emit("update:modelValue", false);
+    router.push(`/sessions/${props.sessionId}/runner`);
+  } catch (e: any) {
+    addToast({
+      title: t("reportModal.error"),
+      message: t("reportModal.failedToRerun") + e.message,
+      type: "error",
+    });
+  } finally {
+    isRerunning.value = false;
+  }
+};
+
+const reportToDelete = ref<ReportData | null>(null);
+const isDeleting = ref(false);
+
+const confirmDeleteReport = async () => {
+  if (!reportToDelete.value || isDeleting.value) return;
+  isDeleting.value = true;
+  try {
+    await $fetch("/api/reports/delete", {
+      method: "POST",
+      body: { reportId: reportToDelete.value.id },
+    });
+    // Successfully deleted, refresh list
+    await fetchReports();
+  } catch (e: any) {
+    addToast({
+      title: t("reportModal.error"),
+      message:
+        t("reportModal.failedToDelete") + (e.data?.statusMessage || e.message),
+      type: "error",
+    });
+  } finally {
+    isDeleting.value = false;
+    reportToDelete.value = null;
+  }
+};
+</script>
+
 <template>
   <Transition name="modal">
     <div
@@ -7,7 +138,7 @@
       <div
         class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm transform-gpu will-change-opacity"
         @click="$emit('update:modelValue', false)"
-      ></div>
+      />
       <div
         class="modal-content relative bg-white rounded-2xl shadow-glass w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden"
       >
@@ -23,8 +154,8 @@
           </h3>
           <div class="flex items-center gap-3">
             <button
-              @click="$emit('update:modelValue', false)"
               class="text-slate-400 hover:text-amnimo-600 bg-slate-50 hover:bg-amnimo-50 p-2 rounded-xl transition-colors"
+              @click="$emit('update:modelValue', false)"
             >
               <Icon name="heroicons:x-mark" class="w-5 h-5" />
             </button>
@@ -119,9 +250,9 @@
               <div class="flex flex-wrap gap-3 sm:shrink-0">
                 <button
                   v-if="report.failedCount && report.failedCount > 0"
-                  @click="rerunFailedTests(report.name)"
                   :disabled="isRerunning"
                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 hover:text-amber-800 transition-colors shadow-sm active:scale-95 disabled:opacity-50"
+                  @click="rerunFailedTests(report.name)"
                 >
                   <Icon
                     v-if="isRerunning"
@@ -137,24 +268,24 @@
                 </button>
                 <button
                   v-if="report.htmlReportUrl"
-                  @click="openHtmlViewer(report.htmlReportUrl)"
                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-800 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-amnimo-600 transition-colors shadow-sm active:scale-95"
+                  @click="openHtmlViewer(report.htmlReportUrl)"
                 >
                   <Icon name="heroicons:chart-bar-square" class="w-5 h-5" />
                   {{ $t("reportModal.htmlReport") }}
                 </button>
                 <button
                   v-if="report.excelJsonUrl"
-                  @click="openJsonViewer(report.excelJsonUrl)"
                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-amnimo-600 border border-transparent rounded-xl hover:bg-amnimo-700 transition-colors shadow-sm hover:shadow-lg hover:shadow-amnimo-500/30 active:scale-95"
+                  @click="openJsonViewer(report.excelJsonUrl)"
                 >
                   <Icon name="heroicons:table-cells" class="w-5 h-5" />
                   {{ $t("reportModal.viewData") }}
                 </button>
                 <button
-                  @click="reportToDelete = report"
                   class="inline-flex items-center justify-center w-9 h-9 text-slate-400 bg-white border border-slate-200 rounded-xl hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm active:scale-95"
                   :title="$t('reportModal.deleteReportTitle')"
+                  @click="reportToDelete = report"
                 >
                   <Icon name="heroicons:trash" class="w-4 h-4" />
                 </button>
@@ -172,7 +303,7 @@
             <div
               class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-2xl"
               @click="reportToDelete = null"
-            ></div>
+            />
             <div
               class="relative bg-white border border-slate-200 shadow-xl rounded-2xl p-6 max-w-sm w-full mx-4 text-center transform transition-all"
             >
@@ -191,15 +322,15 @@
               </p>
               <div class="flex gap-3 justify-center">
                 <button
-                  @click="reportToDelete = null"
                   class="px-5 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors active:scale-95"
+                  @click="reportToDelete = null"
                 >
                   {{ $t("reportModal.cancel") }}
                 </button>
                 <button
-                  @click="confirmDeleteReport"
                   :disabled="isDeleting"
                   class="inline-flex items-center justify-center gap-2 px-5 py-2 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors shadow-sm active:scale-95 disabled:opacity-50"
+                  @click="confirmDeleteReport"
                 >
                   <Icon
                     v-if="isDeleting"
@@ -215,137 +346,8 @@
         </Transition>
       </div>
 
-      <ExcelJsonViewer v-model="isJsonViewerOpen" :jsonUrl="activeJsonUrl" />
+      <ExcelJsonViewer v-model="isJsonViewerOpen" :json-url="activeJsonUrl" />
       <HtmlReportViewer v-model="isHtmlViewerOpen" :url="activeHtmlUrl" />
     </div>
   </Transition>
 </template>
-
-<script setup lang="ts">
-import { ref, watch, computed } from "vue";
-import { useI18n } from "vue-i18n";
-import { useToast } from "~/composables/useToast";
-
-const { t } = useI18n();
-const { addToast } = useToast();
-import { useRouter } from "vue-router";
-
-
-const router = useRouter();
-
-const props = defineProps<{
-  modelValue: boolean;
-  sessionId: string;
-}>();
-
-const emit = defineEmits(["update:modelValue"]);
-
-type ReportData = {
-  id: string;
-  name: string;
-  createdAt: string;
-  excelJsonUrl?: string;
-  htmlReportUrl?: string;
-  failedCount?: number;
-  passedCount?: number;
-  totalCount?: number;
-};
-
-const isLoading = ref(false);
-const reports = ref<ReportData[]>([]);
-
-const isJsonViewerOpen = ref(false);
-const activeJsonUrl = ref("");
-
-const openJsonViewer = (url: string) => {
-  activeJsonUrl.value = url;
-  isJsonViewerOpen.value = true;
-};
-
-const isHtmlViewerOpen = ref(false);
-const activeHtmlUrl = ref("");
-
-const openHtmlViewer = (url: string) => {
-  activeHtmlUrl.value = url;
-  isHtmlViewerOpen.value = true;
-};
-
-const fetchReports = async () => {
-  if (props.sessionId) {
-    isLoading.value = true;
-    try {
-      reports.value = await $fetch<ReportData[]>(
-        `/api/sessions/${props.sessionId}/reports`,
-      );
-    } catch (e) {
-      console.error("Failed to load reports", e);
-      reports.value = [];
-    } finally {
-      isLoading.value = false;
-    }
-  }
-};
-
-watch(
-  () => props.modelValue,
-  (isOpen) => {
-    if (isOpen) {
-      fetchReports();
-    }
-  },
-);
-
-const isRerunning = ref(false);
-
-const rerunFailedTests = async (reportName: string) => {
-  if (!props.sessionId || isRerunning.value) return;
-  isRerunning.value = true;
-  try {
-    await $fetch("/api/tests/run", {
-      method: "POST",
-      body: {
-        sessionId: props.sessionId,
-        testType: "release",
-        mode: "rerun-failed",
-        sessionName: reportName,
-      },
-    });
-    emit("update:modelValue", false);
-    router.push(`/sessions/${props.sessionId}/runner`);
-  } catch (e: any) {
-    addToast({
-      title: t("reportModal.error"),
-      message: t("reportModal.failedToRerun") + e.message,
-      type: "error",
-    });
-  } finally {
-    isRerunning.value = false;
-  }
-};
-
-const reportToDelete = ref<ReportData | null>(null);
-const isDeleting = ref(false);
-
-const confirmDeleteReport = async () => {
-  if (!reportToDelete.value || isDeleting.value) return;
-  isDeleting.value = true;
-  try {
-    await $fetch("/api/reports/delete", {
-      method: "POST",
-      body: { reportId: reportToDelete.value.id },
-    });
-    // Successfully deleted, refresh list
-    await fetchReports();
-  } catch (e: any) {
-    addToast({
-      title: t("reportModal.error"),
-      message:
-        t("reportModal.failedToDelete") + (e.data?.statusMessage || e.message),
-      type: "error",
-    });
-  } finally {
-    isDeleting.value = false;
-    reportToDelete.value = null;
-  }
-};
-</script>

@@ -1,3 +1,4 @@
+import type { CatchError } from "~~/shared/types";
 import { defineEventHandler, readBody, createError } from "h3";
 import { z } from "zod";
 
@@ -29,7 +30,6 @@ export default defineEventHandler(async (event) => {
       body: { username, password },
       ignoreResponseError: true,
       timeout: 10000,
-      // @ts-ignore
       rejectUnauthorized: false,
     });
 
@@ -52,13 +52,15 @@ export default defineEventHandler(async (event) => {
 
     // 2. Fetch current Nx Witness config (to get database & datetime)
     const configUrl = new URL("/api/configs/nxwitness", targetUrl).toString();
-    const getConfig = await $fetch<any>(configUrl, {
+    const getConfig = await $fetch<{
+      content?: { database?: string; datetime?: string; enabled?: boolean };
+    }>(configUrl, {
       method: "GET",
       headers: {
         Cookie: sessionId,
       },
       timeout: 10000,
-      // @ts-ignore
+      // @ts-expect-error type missing
       rejectUnauthorized: false,
     });
 
@@ -86,7 +88,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // 3. PUT new config to enable and set password
-    const putResponse = await $fetch<any>(configUrl, {
+    const putResponse = await $fetch<unknown>(configUrl, {
       method: "PUT",
       headers: {
         Cookie: sessionId,
@@ -104,12 +106,14 @@ export default defineEventHandler(async (event) => {
         "re-archive": false,
       },
       timeout: 15000,
-      // @ts-ignore
+      // @ts-expect-error type missing
       rejectUnauthorized: false,
     });
 
     return putResponse;
-  } catch (error: any) {
+  } catch (_e: unknown) {
+    const e = _e as import("~~/shared/types").CatchError;
+    const error = e as CatchError;
     console.error("Nx Witness setup proxy error:", error);
     throw createError({
       statusCode: error.response?.status || error.statusCode || 500,

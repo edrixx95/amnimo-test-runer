@@ -39,11 +39,12 @@ export default defineEventHandler(async (event) => {
     });
 
     return { success: true, filename };
-  } catch (err: any) {
+  } catch (e: unknown) {
+    const err = e as import('~~/shared/types').CatchError;
     console.error("Upload error:", err);
     throw createError({
       statusCode: 500,
-      statusMessage: err.message || "Upload failed",
+      statusMessage: (err as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message || "Upload failed",
     });
   }
 });

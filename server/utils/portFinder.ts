@@ -10,9 +10,9 @@ export function getAvailablePort(startingAt: number = 8080): Promise<number> {
     const server = net.createServer();
     server.unref();
 
-    server.on("error", (e: any) => {
+    server.on("error", (e: unknown) => {
       // Nếu cổng đã bị chiếm (EADDRINUSE), thử tiếp với cổng tiếp theo
-      if (e.code === "EADDRINUSE") {
+      if ((e as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).code === "EADDRINUSE") {
         getAvailablePort(startingAt + 1)
           .then(resolve)
           .catch(reject);

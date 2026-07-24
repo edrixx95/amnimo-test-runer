@@ -32,7 +32,7 @@ export const useSessionStore = defineStore("session", () => {
       });
       sessions.value.unshift(newSession);
       return newSession;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to create session:", err);
       hasError.value = true;
       return null;
@@ -48,7 +48,7 @@ export const useSessionStore = defineStore("session", () => {
       });
       sessions.value = sessions.value.filter((s) => s.id !== id);
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to delete session:", err);
       return false;
     }

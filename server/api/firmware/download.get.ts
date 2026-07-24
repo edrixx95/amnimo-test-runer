@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
   const res = event.node.res;
 
-  const sendEvent = (eventName: string, data: any) => {
+  const sendEvent = (eventName: string, data: unknown) => {
     res.write(`event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
@@ -69,9 +69,10 @@ export default defineEventHandler(async (event) => {
 
       fileStream.end();
       sendEvent("complete", { success: true });
-    } catch (err: any) {
+    } catch (e: unknown) {
+    const err = e as import('~~/shared/types').CatchError;
       console.error("Download error:", err);
-      sendEvent("error", { message: err.message });
+      sendEvent("error", { message: (err as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message });
     } finally {
       res.end();
     }

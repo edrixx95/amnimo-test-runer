@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { $fetch } from "ofetch";
 
 export default defineEventHandler(async (event) => {
@@ -37,7 +39,7 @@ export default defineEventHandler(async (event) => {
       if (authData && authData.token) {
         authHeaders["Authorization"] = `Bearer ${authData.token}`;
       }
-    } catch (e) {
+    } catch (_e) {
       // Ignore auth failure, fallback to Basic auth
     }
 

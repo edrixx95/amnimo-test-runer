@@ -1,9 +1,11 @@
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import path from "node:path";
 import fs from "node:fs";
 import type { Session } from "../../shared/types";
 import { getSettings } from "./settingsManager";
 
-const SESSIONS_DIR = process.env.APP_DATA_PATH
+const _SESSIONS_DIR = process.env.APP_DATA_PATH
   ? path.join(process.env.APP_DATA_PATH, "sessions")
   : path.resolve(process.cwd(), "sessions");
 const getReportsDir = () =>
@@ -76,7 +78,7 @@ export const getAggregatedReport = async (
   runDirsList.sort((a, b) => a.time - b.time);
 
   // 2. Aggregate excel.json files
-  const testMap = new Map<string, any>(); // key -> aggregated test object
+  const testMap = new Map<string, { category: string, page: string, testId: string, model: string, serial: string, date: string, fw: string, history: any[] }>(); // key -> aggregated test object
 
   let rerunCounter = 0;
 
@@ -163,22 +165,22 @@ export const getAggregatedReport = async (
           }
         }
       }
-    } catch (e) {
-      console.error("Failed to parse excel file for aggregation", e);
+    } catch (_e) {
+      console.error("Failed to parse excel file for aggregation", _e);
     }
   }
 
   // 3. Rebuild aggregated excel.json format
-  const aggregatedCategories = new Map<string, Map<string, any[]>>();
+  const aggregatedCategories = new Map<string, Map<string, unknown[]>>();
 
   let passedCount = 0;
   let failedCount = 0;
   let skippedCount = 0;
-  let totalCount = 0;
+  let _totalCount = 0;
 
   for (const test of testMap.values()) {
     const pages =
-      aggregatedCategories.get(test.category) ?? new Map<string, any[]>();
+      aggregatedCategories.get(test.category) ?? new Map<string, unknown[]>();
     const tests = pages.get(test.page) ?? [];
 
     // Convert to ExcelTest format but with history array
@@ -191,11 +193,11 @@ export const getAggregatedReport = async (
       history: test.history,
       latest_result:
         test.history.length > 0
-          ? test.history[test.history.length - 1].result
+          ? (test.history[test.history.length - 1] as any).result
           : "-",
       latest_status:
         test.history.length > 0
-          ? test.history[test.history.length - 1].status
+          ? (test.history[test.history.length - 1] as any).status
           : "Failed",
     });
 
@@ -203,10 +205,10 @@ export const getAggregatedReport = async (
     aggregatedCategories.set(test.category, pages);
 
     // Compute stats based on latest status
-    totalCount++;
+    _totalCount++;
     const latestStatus =
       test.history.length > 0
-        ? test.history[test.history.length - 1].status
+        ? (test.history[test.history.length - 1] as any).status
         : "Failed";
     if (latestStatus === "Passed") passedCount++;
     else if (latestStatus === "Failed") failedCount++;

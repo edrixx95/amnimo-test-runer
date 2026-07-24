@@ -31,11 +31,12 @@ export default defineEventHandler(async (event) => {
     }
 
     return { success: true, copiedFiles };
-  } catch (err: any) {
+  } catch (e: unknown) {
+    const err = e as import('~~/shared/types').CatchError;
     console.error("Copy from server error:", err);
     throw createError({
       statusCode: 500,
-      statusMessage: err.message || "Copy failed",
+      statusMessage: (err as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message || "Copy failed",
     });
   }
 });

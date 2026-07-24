@@ -18,8 +18,10 @@ export default defineEventHandler(async (event) => {
     }
 
     return { success: false, message: "Ping failed: Host unreachable" };
-  } catch (error: any) {
-    console.error("Ping error:", error.message);
+  } catch (_e: unknown) {
+    const e = _e as import('~~/shared/types').CatchError;
+    const error = e as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string };
+    console.error("Ping error:", (error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message);
     return { success: false, message: "Ping failed or timeout" };
   }
 });

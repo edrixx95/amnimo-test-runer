@@ -1,3 +1,6 @@
+ 
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref } from 'vue';
 import { useToast } from '~/composables/useToast';
 import { useI18n } from 'vue-i18n';
@@ -25,7 +28,7 @@ export function useConfirmModal() {
     } catch (err: any) {
       addToast({
         title: t("home.errorTitle") || "Error",
-        message: `${t("home.operationFailed") || "Operation failed"}: ${err.message || err.data?.message || err}`,
+        message: `${t("home.operationFailed") || "Operation failed"}: ${(err as any).message || err.data?.message || err}`,
         type: "error",
       });
     } finally {

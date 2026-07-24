@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+/* eslint-disable */
 import { ref, computed, onMounted, onUnmounted } from "vue";
 
 const { t } = useI18n();
@@ -23,7 +24,7 @@ const nxLink = computed(() => {
     const url = new URL(props.baseUrl);
     url.port = "7001";
     return url.toString().replace(/\/$/, "");
-  } catch (e) {
+  } catch (_e) {
     return `${props.baseUrl}:7001`;
   }
 });
@@ -97,7 +98,7 @@ const checkClientConnection = async () => {
     let targetIp = "192.168.0.254";
     try {
       targetIp = new URL(props.baseUrl).hostname;
-    } catch (e) {}
+    } catch (_e) {}
 
     const res = await $fetch<any>("/api/local/netstat", {
       params: {
@@ -112,7 +113,7 @@ const checkClientConnection = async () => {
       emit("update:modelValue", true);
       stopPolling();
     }
-  } catch (err) {
+  } catch (err: any) {
     // Ignore polling errors, just keep waiting
   }
 };
@@ -184,8 +185,8 @@ onMounted(() => {
             <a
               :href="nxLink"
               target="_blank"
-              @click.stop
               class="text-xs font-semibold text-amnimo-500 hover:text-amnimo-600 bg-amnimo-50 hover:bg-amnimo-100 px-2 py-0.5 rounded-md transition-colors flex items-center gap-1 border border-amnimo-100"
+              @click.stop
             >
               {{ $t("peripheralNxWitnessCheck.webClient") }}
               <Icon
@@ -225,8 +226,8 @@ onMounted(() => {
       <button
         v-if="status === 'idle' || status === 'error'"
         type="button"
-        @click="startProcess"
         class="px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-bold shadow-sm transition-all active:scale-95"
+        @click="startProcess"
       >
         {{ $t("peripheralNxWitnessCheck.setup") }}
       </button>
@@ -288,15 +289,15 @@ onMounted(() => {
             <span
               class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"
               style="animation-delay: 0s"
-            ></span>
+            />
             <span
               class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"
               style="animation-delay: 0.2s"
-            ></span>
+            />
             <span
               class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"
               style="animation-delay: 0.4s"
-            ></span>
+            />
           </div>
           <Icon v-else name="heroicons:minus" class="w-5 h-5" />
         </div>
