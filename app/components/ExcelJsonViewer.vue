@@ -7,12 +7,12 @@
         <div class="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
           <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
             <Icon name="heroicons:table-cells" class="w-6 h-6 text-emerald-500" />
-            Excel JSON Data
+            {{ $t('excelJsonViewer.title') }}
           </h3>
           <div class="flex items-center gap-3">
             <a :href="jsonUrl" download class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl hover:bg-white hover:text-amnimo-600 hover:border-amnimo-200 transition-all shadow-sm active:scale-95">
               <Icon name="heroicons:arrow-down-tray" class="w-5 h-5" />
-              Download JSON
+              {{ $t('excelJsonViewer.downloadJson') }}
             </a>
             <button @click="$emit('update:modelValue', false)" class="text-slate-400 hover:text-amnimo-600 bg-slate-50 hover:bg-amnimo-50 p-2 rounded-xl transition-colors">
               <Icon name="heroicons:x-mark" class="w-5 h-5" />
@@ -31,25 +31,25 @@
                   v-model="searchQuery" 
                   type="text" 
                   class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:ring-1 focus:ring-amnimo-500 focus:border-amnimo-500 focus:bg-white transition-colors" 
-                  placeholder="Search..."
+                  :placeholder="$t('excelJsonViewer.search')"
                 />
               </div>
               
               <div class="inline-flex rounded-lg shadow-sm" role="group">
                 <button @click="activeFilter = 'all'" :class="[activeFilter === 'all' ? 'bg-slate-100 text-slate-800 border-slate-300 z-10' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50', 'relative px-4 py-2 text-sm font-medium border rounded-l-lg focus:outline-none transition-colors flex items-center gap-2']">
-                  All
+                  {{ $t('excelJsonViewer.all') }}
                   <span class="bg-slate-200 text-slate-700 py-0.5 px-2 rounded-full text-xs font-bold">{{ summary.total }}</span>
                 </button>
                 <button @click="activeFilter = 'passed'" :class="[activeFilter === 'passed' ? 'bg-emerald-50 text-emerald-800 border-emerald-300 z-10' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50', 'relative -ml-px px-4 py-2 text-sm font-medium border focus:outline-none transition-colors flex items-center gap-2']">
-                  <Icon name="heroicons:check" class="w-4 h-4 text-emerald-500" /> Passed
+                  <Icon name="heroicons:check" class="w-4 h-4 text-emerald-500" /> {{ $t('excelJsonViewer.passed') }}
                   <span class="bg-emerald-100 text-emerald-800 py-0.5 px-2 rounded-full text-xs font-bold">{{ summary.pass }}</span>
                 </button>
                 <button @click="activeFilter = 'failed'" :class="[activeFilter === 'failed' ? 'bg-rose-50 text-rose-800 border-rose-300 z-10' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50', 'relative -ml-px px-4 py-2 text-sm font-medium border focus:outline-none transition-colors flex items-center gap-2']">
-                  <Icon name="heroicons:x-mark" class="w-4 h-4 text-rose-500" /> Failed
+                  <Icon name="heroicons:x-mark" class="w-4 h-4 text-rose-500" /> {{ $t('excelJsonViewer.failed') }}
                   <span class="bg-rose-100 text-rose-800 py-0.5 px-2 rounded-full text-xs font-bold">{{ summary.fail }}</span>
                 </button>
                 <button @click="activeFilter = 'skipped'" :class="[activeFilter === 'skipped' ? 'bg-slate-100 text-slate-800 border-slate-300 z-10' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50', 'relative -ml-px px-4 py-2 text-sm font-medium border rounded-r-lg focus:outline-none transition-colors flex items-center gap-2']">
-                  <Icon name="heroicons:no-symbol" class="w-4 h-4 text-slate-500" /> Skipped
+                  <Icon name="heroicons:no-symbol" class="w-4 h-4 text-slate-500" /> {{ $t('excelJsonViewer.skipped') }}
                   <span class="bg-slate-200 text-slate-700 py-0.5 px-2 rounded-full text-xs font-bold">{{ summary.skip }}</span>
                 </button>
               </div>
@@ -61,7 +61,7 @@
                 @click="activeBoard = 'all'" 
                 :class="[activeBoard === 'all' ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50', 'px-4 py-1.5 text-sm font-bold border rounded-lg transition-all whitespace-nowrap']"
               >
-                All Boards
+                {{ $t('excelJsonViewer.allBoards') }}
               </button>
               <button 
                 v-for="board in uniqueBoards" 
@@ -75,7 +75,7 @@
           </div>
           <div v-if="isLoading" class="flex flex-col items-center justify-center h-64 text-amnimo-400 gap-4">
             <AppLoader size="sm" text="" />
-            <span class="font-bold text-slate-600">Loading data...</span>
+            <span class="font-bold text-slate-600">{{ $t('excelJsonViewer.loadingData') }}</span>
           </div>
           
           <div v-else-if="error" class="p-8 flex flex-col items-center justify-center h-64 text-rose-500 gap-4">
@@ -89,13 +89,13 @@
             <table class="min-w-full divide-y divide-slate-200">
               <thead class="bg-slate-100/80 sticky top-0 shadow-sm z-10 backdrop-blur-md">
                 <tr>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Test ID</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Page</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Result</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Model</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Firmware</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{{ $t('excelJsonViewer.testId') }}</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{{ $t('excelJsonViewer.category') }}</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{{ $t('excelJsonViewer.page') }}</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{{ $t('excelJsonViewer.result') }}</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{{ $t('excelJsonViewer.model') }}</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{{ $t('excelJsonViewer.date') }}</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{{ $t('excelJsonViewer.firmware') }}</th>
                 </tr>
               </thead>
               <TransitionGroup tag="tbody" name="list" class="bg-white divide-y divide-slate-100">
@@ -103,7 +103,7 @@
                   <td colspan="7" class="px-6 py-16 text-center text-sm font-medium text-slate-400 bg-slate-50/50">
                     <div class="flex flex-col items-center justify-center w-full">
                       <Icon name="heroicons:inbox" class="w-12 h-12 mb-3 opacity-30" />
-                      <span>No tests match your filter criteria.</span>
+                      <span>{{ $t('excelJsonViewer.noTestsMatch') }}</span>
                     </div>
                   </td>
                 </tr>
@@ -144,6 +144,9 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: boolean;
@@ -255,7 +258,7 @@ watch(() => props.modelValue, async (isOpen) => {
       flatTests.value = rows;
     } catch (e: any) {
       console.error('Failed to parse json', e);
-      error.value = 'Failed to load or parse JSON file: ' + e.message;
+      error.value = t('excelJsonViewer.errorFailedToLoad', { msg: e.message });
     } finally {
       isLoading.value = false;
     }

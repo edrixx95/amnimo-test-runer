@@ -29,13 +29,13 @@
           @click="close"
           class="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
         >
-          Later
+          {{ $t('updateNotifier.later') }}
         </button>
         <button 
           @click="installUpdate"
           class="px-4 py-2 text-sm font-bold text-white bg-amnimo-600 hover:bg-amnimo-700 rounded-lg transition-colors"
         >
-          Restart & Install
+          {{ $t('updateNotifier.restartAndInstall') }}
         </button>
       </div>
     </div>
@@ -44,6 +44,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const isVisible = ref(false);
 const status = ref<'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error' | ''>('');
@@ -53,24 +56,24 @@ const errorMessage = ref('');
 
 const title = computed(() => {
   switch (status.value) {
-    case 'checking': return 'Checking for updates...';
-    case 'available': return 'Update available!';
-    case 'downloading': return 'Downloading update...';
-    case 'downloaded': return 'Ready to install';
-    case 'not-available': return 'You are up to date';
-    case 'error': return 'Update failed';
-    default: return 'Update';
+    case 'checking': return t('updateNotifier.checkingForUpdates');
+    case 'available': return t('updateNotifier.updateAvailable');
+    case 'downloading': return t('updateNotifier.downloadingUpdate');
+    case 'downloaded': return t('updateNotifier.readyToInstall');
+    case 'not-available': return t('updateNotifier.upToDate');
+    case 'error': return t('updateNotifier.updateFailed');
+    default: return t('updateNotifier.update');
   }
 });
 
 const message = computed(() => {
   switch (status.value) {
-    case 'checking': return 'Please wait while we check for the latest version.';
-    case 'available': return `Version ${versionInfo.value} is available and will be downloaded in the background.`;
-    case 'downloading': return `${Math.round(progress.value)}% completed.`;
-    case 'downloaded': return `Version ${versionInfo.value} has been downloaded. Restart the application to apply the update.`;
-    case 'not-available': return 'You are running the latest version of Amnimo Test Runner.';
-    case 'error': return errorMessage.value || 'An error occurred while updating.';
+    case 'checking': return t('updateNotifier.msgChecking');
+    case 'available': return t('updateNotifier.msgAvailable', { version: versionInfo.value });
+    case 'downloading': return t('updateNotifier.msgDownloading', { progress: Math.round(progress.value) });
+    case 'downloaded': return t('updateNotifier.msgDownloaded', { version: versionInfo.value });
+    case 'not-available': return t('updateNotifier.msgNotAvailable');
+    case 'error': return errorMessage.value || t('updateNotifier.msgError');
     default: return '';
   }
 });

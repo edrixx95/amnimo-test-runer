@@ -4,6 +4,8 @@ import IconInternalStorage from "./icons/IconInternalStorage.vue";
 import IconUsb from "./icons/IconUsb.vue";
 import IconSdCard from "./icons/IconSdCard.vue";
 
+const { t } = useI18n();
+
 const props = defineProps<{
   modelValue: boolean;
   baseUrl: string;
@@ -29,23 +31,23 @@ const expectedDevices = computed<ExpectedDevice[]>(() => {
   const b = props.board.toUpperCase();
   if (['AG10', 'AG20'].includes(b)) {
     return [
-      { id: 'internal', name: 'Internal Storage', regex: /^sda$/, icon: IconInternalStorage },
-      { id: 'usb', name: 'USB Drive', regex: /^sdb$/, icon: IconUsb },
-      { id: 'sd', name: 'SD Card', regex: /^mmcblk1$/, icon: IconSdCard }
+      { id: 'internal', name: t('peripheralStorageCheck.internalStorage'), regex: /^sda$/, icon: IconInternalStorage },
+      { id: 'usb', name: t('peripheralStorageCheck.usbDrive'), regex: /^sdb$/, icon: IconUsb },
+      { id: 'sd', name: t('peripheralStorageCheck.sdCard'), regex: /^mmcblk1$/, icon: IconSdCard }
     ];
   } else if (['AX11', 'AX21'].includes(b)) {
     return [
-      { id: 'internal', name: 'Internal Storage', regex: /^nvme0p1$/, icon: IconInternalStorage },
-      { id: 'usb', name: 'USB Drive', regex: /^sda$/, icon: IconUsb },
-      { id: 'sd', name: 'SD Card', regex: /^mmcblk1$/, icon: IconSdCard }
+      { id: 'internal', name: t('peripheralStorageCheck.internalStorage'), regex: /^nvme0p1$/, icon: IconInternalStorage },
+      { id: 'usb', name: t('peripheralStorageCheck.usbDrive'), regex: /^sda$/, icon: IconUsb },
+      { id: 'sd', name: t('peripheralStorageCheck.sdCard'), regex: /^mmcblk1$/, icon: IconSdCard }
     ];
   } else if (['AX30'].includes(b)) {
     return [
-      { id: 'usb', name: 'USB Drive', regex: /^(sda|sdb)$/, icon: IconUsb }
+      { id: 'usb', name: t('peripheralStorageCheck.usbDrive'), regex: /^(sda|sdb)$/, icon: IconUsb }
     ];
   }
   return [
-    { id: 'usb', name: 'USB Drive', regex: /^sda$/, icon: IconUsb }
+    { id: 'usb', name: t('peripheralStorageCheck.usbDrive'), regex: /^sda$/, icon: IconUsb }
   ];
 });
 
@@ -134,7 +136,7 @@ onMounted(() => {
             class="font-bold text-lg transition-colors duration-300"
             :class="isFullyConnected ? 'text-emerald-800' : 'text-slate-900'"
           >
-            Storage Device
+            {{ $t('peripheralStorageCheck.title') }}
           </h4>
           <p
             class="text-sm font-medium transition-colors"
@@ -148,10 +150,10 @@ onMounted(() => {
           >
             {{
               isLoading
-                ? "Checking storage devices..."
+                ? $t('peripheralStorageCheck.checking')
                 : isFullyConnected
-                ? "All devices mounted"
-                : "Missing or invalid devices"
+                ? $t('peripheralStorageCheck.allMounted')
+                : $t('peripheralStorageCheck.missing')
             }}
           </p>
         </div>
@@ -163,7 +165,7 @@ onMounted(() => {
         @click="checkStorage"
         :disabled="isLoading"
         class="p-2 text-slate-400 hover:text-amnimo-600 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
-        title="Check Storage Status"
+        :title="$t('peripheralStorageCheck.checkStatus')"
       >
         <Icon
           name="heroicons:arrow-path"
@@ -205,7 +207,7 @@ onMounted(() => {
                   <span v-if="item.storage.device.size">{{ (item.storage.device.size / (1024 * 1024)).toFixed(1) }} GB</span>
                 </template>
                 <template v-else>
-                  <span>Not Found</span>
+                  <span>{{ $t('peripheralStorageCheck.notFound') }}</span>
                 </template>
               </div>
             </div>

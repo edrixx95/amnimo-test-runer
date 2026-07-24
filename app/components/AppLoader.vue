@@ -9,7 +9,7 @@
     
     <!-- Optional Label -->
     <span v-if="text" class="text-sm font-bold text-slate-500 tracking-wide">
-      {{ text }}
+      {{ text === 'Loading...' ? $t('appLoader.loading') : text }}
     </span>
   </div>
 </template>

@@ -14,7 +14,7 @@ export type SessionMetadata = {
   firmware?: string;
   target?: string;
   baseUrl?: string;
-  testType?: "release" | "system";
+  testType?: "release" | "system" | "playground";
   envContent?: string;
   status: SessionStatus;
   createdAt: string;

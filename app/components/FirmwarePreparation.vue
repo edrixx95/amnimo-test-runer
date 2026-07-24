@@ -11,14 +11,14 @@
           class="w-6 h-6"
           :class="allReady ? 'text-emerald-500' : 'text-amnimo-600'"
         />
-        <h4 class="font-bold text-lg">FWファイル準備</h4>
+        <h4 class="font-bold text-lg">{{ $t('firmwarePrep.title') }}</h4>
       </div>
       <div class="flex items-center gap-2">
         <span
           v-if="isCheckingStatus"
           class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium"
         >
-          <AppSpinner size="sm" /> Checking...
+          <AppSpinner size="sm" /> {{ $t('firmwarePrep.checking') }}
         </span>
         <span
           v-else-if="allReady"
@@ -26,7 +26,7 @@
         >
           <Icon name="heroicons:check-badge" class="w-5 h-5 text-emerald-600" />
           <span class="tracking-wide uppercase text-xs"
-            >All Setup Complete</span
+            >{{ $t('firmwarePrep.allSetupComplete') }}</span
           >
         </span>
       </div>
@@ -42,7 +42,7 @@
           class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2"
         >
           <Icon name="heroicons:folder-arrow-down" class="w-4 h-4" /> 1.
-          ローカル配置 (Local Upload Dir)
+          {{ $t('firmwarePrep.localUploadDir') }}
         </h5>
 
         <div class="grid gap-3">
@@ -77,7 +77,7 @@
               </div>
               <div class="min-w-0">
                 <div class="text-xs font-semibold text-slate-500 mb-0.5">
-                  {{ fw === prevFw ? "Previous Version" : "Test Version" }}
+                  {{ fw === prevFw ? $t('firmwarePrep.previousVersion') : $t('firmwarePrep.testVersion') }}
                 </div>
                 <div
                   class="text-sm font-bold text-slate-800 truncate"
@@ -92,7 +92,7 @@
               <template v-if="downloadProgress[fw] !== undefined">
                 <div class="w-32">
                   <div class="flex justify-between text-xs font-medium text-slate-500 mb-1">
-                    <span>Downloading...</span>
+                    <span>{{ $t('firmwarePrep.downloading') }}</span>
                     <span>{{ downloadProgress[fw] }}%</span>
                   </div>
                   <div class="w-full bg-slate-200 rounded-full h-2">
@@ -103,12 +103,12 @@
 
               <template v-else-if="uploading[fw] || isGettingFromServer[fw]">
                 <AppSpinner size="sm" />
-                <span class="text-sm text-slate-600 font-medium">{{ isGettingFromServer[fw] ? "Copying..." : "Uploading..." }}</span>
+                <span class="text-sm text-slate-600 font-medium">{{ isGettingFromServer[fw] ? $t('firmwarePrep.copying') : $t('firmwarePrep.uploading') }}</span>
               </template>
 
               <template v-else-if="filesStatus[fw]?.local">
                 <span class="inline-flex items-center gap-1 text-sm font-bold text-emerald-600">
-                  <Icon name="heroicons:check" class="w-4 h-4" /> Ready
+                  <Icon name="heroicons:check" class="w-4 h-4" /> {{ $t('firmwarePrep.ready') }}
                 </span>
               </template>
 
@@ -120,8 +120,7 @@
                   @click="copyFromServer(fw)"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amnimo-700 bg-amnimo-50 border border-amnimo-200 rounded-lg hover:bg-amnimo-100 transition-colors"
                 >
-                  <Icon name="heroicons:arrow-down-tray" class="w-4 h-4" /> Sync
-                  from Server
+                  <Icon name="heroicons:arrow-down-tray" class="w-4 h-4" /> {{ $t('firmwarePrep.syncFromServer') }}
                 </button>
               </template>
 
@@ -138,7 +137,7 @@
                   @click="fileInputs[fw]?.click()"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                 >
-                  <Icon name="heroicons:arrow-up-tray" class="w-4 h-4" /> Upload
+                  <Icon name="heroicons:arrow-up-tray" class="w-4 h-4" /> {{ $t('firmwarePrep.upload') }}
                 </button>
                 <button
                   type="button"
@@ -146,7 +145,7 @@
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amnimo-700 bg-amnimo-50 border border-amnimo-200 rounded-lg hover:bg-amnimo-100 transition-colors"
                 >
                   <Icon name="heroicons:cloud-arrow-down" class="w-4 h-4" />
-                  Download
+                  {{ $t('firmwarePrep.download') }}
                 </button>
               </template>
             </div>
@@ -162,12 +161,10 @@
         <h5
           class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2"
         >
-          <Icon name="heroicons:server" class="w-4 h-4" /> 2. サーバー配置
-          (Server Placement)
+          <Icon name="heroicons:server" class="w-4 h-4" /> 2. {{ $t('firmwarePrep.serverPlacement') }}
         </h5>
         <p class="text-xs text-slate-500">
-          Copy the prepared firmware files to your local HTTP/TFTP server
-          directory so the device can fetch them.
+          {{ $t('firmwarePrep.serverPlacementDesc') }}
         </p>
 
         <div class="flex gap-3">
@@ -183,7 +180,7 @@
             <input
               type="text"
               v-model="serverPath"
-              placeholder="e.g. C:\Users\Public\Downloads"
+              :placeholder="$t('firmwarePrep.serverPathPlaceholder')"
               class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-l-xl text-sm focus:ring-amnimo-500 focus:border-amnimo-500 z-0"
             />
             <button
@@ -197,7 +194,7 @@
                 name="heroicons:arrow-path"
                 class="w-5 h-5 animate-spin"
               />
-              <span v-else>Browse</span>
+              <span v-else>{{ $t('firmwarePrep.browse') }}</span>
             </button>
           </div>
 
@@ -215,11 +212,10 @@
             <AppSpinner v-if="isCopying" size="sm" />
             <template v-else-if="serverReady">
               <Icon name="heroicons:check" class="w-5 h-5" />
-              <p class="text-white">Ready</p>
+              <p class="text-white">{{ $t('firmwarePrep.ready') }}</p>
             </template>
             <template v-else>
-              <Icon name="heroicons:document-duplicate" class="w-5 h-5" /> Sync
-              from Local
+              <Icon name="heroicons:document-duplicate" class="w-5 h-5" /> {{ $t('firmwarePrep.syncFromLocal') }}
             </template>
           </button>
         </div>
@@ -249,6 +245,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { useToast } from '~/composables/useToast';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const { addToast } = useToast();
 
@@ -393,7 +392,7 @@ async function handleUpload(event: Event, filename: string) {
 
   const file = input.files[0];
   if (file.name !== filename) {
-    addToast({ title: 'Error', message: `Tên file không khớp! Yêu cầu tải lên file: ${filename}`, type: 'error' });
+    addToast({ title: t('firmwarePrep.errorTitle'), message: t('firmwarePrep.fileNameMismatch', { filename }), type: 'error' });
     return;
   }
 
@@ -411,7 +410,7 @@ async function handleUpload(event: Event, filename: string) {
     );
     await checkStatus();
   } catch (err: any) {
-    addToast({ title: 'Error', message: `Lỗi upload: ${err.message}`, type: 'error' });
+    addToast({ title: t('firmwarePrep.errorTitle'), message: t('firmwarePrep.uploadError', { msg: err.message }), type: 'error' });
   } finally {
     uploading.value[filename] = false;
     input.value = ""; // Reset
@@ -443,9 +442,9 @@ function startDownload(filename: string) {
     delete downloadProgress.value[filename];
     try {
       const data = JSON.parse(e.data);
-      addToast({ title: 'Error', message: `Lỗi tải xuống: ${data.message}`, type: 'error' });
+      addToast({ title: t('firmwarePrep.errorTitle'), message: t('firmwarePrep.downloadError', { msg: data.message }), type: 'error' });
     } catch {
-      addToast({ title: 'Error', message: `Lỗi kết nối tải xuống`, type: 'error' });
+      addToast({ title: t('firmwarePrep.errorTitle'), message: t('firmwarePrep.downloadConnectionError'), type: 'error' });
     }
   });
 }
@@ -470,7 +469,7 @@ async function copyToServer() {
     copyError.value =
       err.data?.statusMessage ||
       err.message ||
-      "Lỗi không xác định khi copy file.";
+      t('firmwarePrep.unknownCopyError');
   } finally {
     isCopying.value = false;
   }
@@ -496,7 +495,7 @@ async function copyFromServer(filename: string) {
     });
     await checkStatus();
   } catch (err: any) {
-    addToast({ title: 'Error', message: `Lỗi copy từ server: ${err.message}`, type: 'error' });
+    addToast({ title: t('firmwarePrep.errorTitle'), message: t('firmwarePrep.copyFromServerMsg', { msg: err.message }), type: 'error' });
   } finally {
     isGettingFromServer.value[filename] = false;
   }

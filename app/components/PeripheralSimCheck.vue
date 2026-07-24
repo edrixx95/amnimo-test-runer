@@ -35,7 +35,7 @@
             !modelValue && !errorMsg ? 'text-slate-900' : '',
           ]"
         >
-          SIM Check
+          {{ $t('peripheralSimCheck.title') }}
         </h4>
       </div>
       <span
@@ -43,14 +43,14 @@
         class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-sm font-bold shadow-sm shadow-emerald-200/50 scale-105 origin-right transition-transform"
       >
         <Icon name="heroicons:check-badge" class="w-5 h-5 text-emerald-600" />
-        <span class="tracking-wide uppercase text-xs">Plugged In</span>
+        <span class="tracking-wide uppercase text-xs">{{ $t('peripheralSimCheck.pluggedIn') }}</span>
       </span>
       <span
         v-else-if="!modelValue && errorMsg"
         class="inline-flex items-center gap-1.5 text-sm font-bold text-amber-700 bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-200 animate-fade-in shadow-sm shadow-amber-100/50"
       >
         <Icon name="heroicons:exclamation-triangle" class="w-5 h-5" />
-        Warning
+        {{ $t('peripheralSimCheck.warning') }}
       </span>
     </div>
 
@@ -63,8 +63,8 @@
       ]"
     >
       <div class="flex justify-between items-center">
-        <span class="text-slate-500 font-medium">Requirement</span>
-        <span class="font-bold text-slate-800">1x LTE SIM Card (Slot 0)</span>
+        <span class="text-slate-500 font-medium">{{ $t('peripheralSimCheck.requirement') }}</span>
+        <span class="font-bold text-slate-800">{{ $t('peripheralSimCheck.requirementDesc') }}</span>
       </div>
 
       <!-- Error & Login Box -->
@@ -90,7 +90,7 @@
               </div>
               <input
                 v-model="username"
-                placeholder="Username"
+                :placeholder="$t('peripheralSimCheck.username')"
                 class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-amnimo-500 focus:border-amnimo-500 bg-transparent"
                 @keyup.enter="checkSim"
               />
@@ -104,7 +104,7 @@
               <input
                 v-model="password"
                 type="password"
-                placeholder="Password"
+                :placeholder="$t('peripheralSimCheck.password')"
                 class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-amnimo-500 focus:border-amnimo-500 bg-transparent"
                 @keyup.enter="checkSim"
               />
@@ -114,7 +114,7 @@
               class="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-rose-700 transition-colors shrink-0 flex items-center gap-2"
             >
               <AppSpinner v-if="isChecking" size="sm" />
-              Login & Retry
+              {{ $t('peripheralSimCheck.loginRetry') }}
             </button>
           </div>
         </div>
@@ -135,22 +135,22 @@
               class="w-5 h-5 shrink-0"
             />
             <span class="text-xs font-medium"
-              >SIM is already in a connected state.</span
+              >{{ $t('peripheralSimCheck.simConnected') }}</span
             >
           </div>
 
           <div class="flex justify-between items-center">
-            <span class="text-slate-500 font-medium">Module Model</span>
+            <span class="text-slate-500 font-medium">{{ $t('peripheralSimCheck.moduleModel') }}</span>
             <span class="font-bold text-slate-800">{{ simInfo.model }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-slate-500 font-medium">Module IMEI</span>
+            <span class="text-slate-500 font-medium">{{ $t('peripheralSimCheck.moduleImei') }}</span>
             <span class="font-bold text-slate-800 font-mono">{{
               simInfo.imei
             }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-slate-500 font-medium">Firmware</span>
+            <span class="text-slate-500 font-medium">{{ $t('peripheralSimCheck.firmware') }}</span>
             <span
               class="font-medium text-slate-600 text-xs font-mono bg-white px-2 py-1 rounded border border-slate-200"
               >{{ simInfo.fw_version }}</span
@@ -161,8 +161,7 @@
               class="flex justify-between items-center pt-2 border-t border-slate-100"
             >
               <span class="text-slate-500 font-medium flex items-center gap-1.5"
-                ><Icon name="heroicons:credit-card" class="w-4 h-4" /> ICCID
-                (Slot 0)</span
+                ><Icon name="heroicons:credit-card" class="w-4 h-4" /> {{ $t('peripheralSimCheck.iccid') }}</span
               >
               <span class="font-bold text-slate-800 font-mono text-xs">{{
                 simInfo.sim_iccid
@@ -171,7 +170,7 @@
             <div class="flex justify-between items-center">
               <span class="text-slate-500 font-medium flex items-center gap-1.5"
                 ><Icon name="heroicons:finger-print" class="w-4 h-4" />
-                IMSI</span
+                {{ $t('peripheralSimCheck.imsi') }}</span
               >
               <span class="font-bold text-slate-800 font-mono text-xs">{{
                 simInfo.sim_imsi
@@ -191,7 +190,7 @@
       >
         <AppSpinner v-if="isChecking" size="md" />
         <Icon v-else name="heroicons:arrow-path" class="w-5 h-5" />
-        Check via API
+        {{ $t('peripheralSimCheck.checkApi') }}
       </button>
     </div>
   </div>
@@ -199,6 +198,8 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
+
+const { t } = useI18n();
 
 const props = defineProps<{ baseUrl: string; modelValue: boolean }>();
 const emit = defineEmits<{ (e: "update:modelValue", val: boolean): void }>();
@@ -231,8 +232,7 @@ watch(
 
 async function checkSim() {
   if (!props.baseUrl) {
-    errorMsg.value =
-      "Base URL is required to check SIM. Please set it in Step 1/2.";
+    errorMsg.value = t('peripheralSimCheck.errorNoUrl');
     return;
   }
 
@@ -254,7 +254,7 @@ async function checkSim() {
 
     const module = res?.content?.module?.[0];
     if (!module) {
-      throw new Error("Invalid API response format (missing module data)");
+      throw new Error(t('peripheralSimCheck.errorInvalidFormat'));
     }
 
     if (module.sim && module.sim.length > 0) {
@@ -271,23 +271,22 @@ async function checkSim() {
         emit("update:modelValue", true);
       } else {
         simInfo.value = module;
-        errorMsg.value =
-          "A SIM was detected, but it is NOT in Slot 0! Please move it to Slot 0.";
+        errorMsg.value = t('peripheralSimCheck.errorWrongSlot');
       }
     } else {
       // No SIM
       simInfo.value = module;
-      errorMsg.value = "No SIM card detected in the module!";
+      errorMsg.value = t('peripheralSimCheck.errorNoSim');
     }
   } catch (err: any) {
     if (err.data?.statusCode === 401) {
-      errorMsg.value = "Authentication required! Please provide credentials.";
+      errorMsg.value = t('peripheralSimCheck.errorAuth');
       needsLogin.value = true;
     } else {
       errorMsg.value =
         err.data?.statusMessage ||
         err.message ||
-        "Failed to connect to device API";
+        t('peripheralSimCheck.errorConnect');
     }
   } finally {
     isChecking.value = false;

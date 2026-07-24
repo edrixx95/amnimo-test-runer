@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { onClickOutside } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
   modelValue: string | number;
@@ -55,6 +56,8 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue']);
 
+const { t } = useI18n();
+
 const isOpen = ref(false);
 const dropdownRef = ref(null);
 
@@ -64,7 +67,7 @@ onClickOutside(dropdownRef, () => {
 
 const selectedLabel = computed(() => {
   const selected = props.options.find(opt => opt.value === props.modelValue);
-  return selected ? selected.label : (props.placeholder || 'Select...');
+  return selected ? selected.label : (props.placeholder || t('customSelect.select'));
 });
 
 const selectOption = (value: string | number) => {

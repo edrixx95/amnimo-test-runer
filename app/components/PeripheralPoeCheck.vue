@@ -27,7 +27,7 @@
             (!modelValue && !errorMsg) ? 'text-slate-900' : ''
           ]"
         >
-          PoE Camera
+          {{ $t('peripheralPoeCheck.title') }}
         </h4>
       </div>
       <span
@@ -35,14 +35,14 @@
         class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-sm font-bold shadow-sm shadow-emerald-200/50 scale-105 origin-right transition-transform"
       >
         <Icon name="heroicons:check-badge" class="w-5 h-5 text-emerald-600" />
-        <span class="tracking-wide uppercase text-xs">Connected</span>
+        <span class="tracking-wide uppercase text-xs">{{ $t('peripheralPoeCheck.connected') }}</span>
       </span>
       <span
         v-else-if="!modelValue && errorMsg"
         class="inline-flex items-center gap-1.5 text-sm font-bold text-amber-700 bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-200 animate-fade-in shadow-sm shadow-amber-100/50"
       >
         <Icon name="heroicons:exclamation-triangle" class="w-5 h-5" />
-        Warning
+        {{ $t('peripheralPoeCheck.warning') }}
       </span>
     </div>
 
@@ -55,8 +55,8 @@
       ]"
     >
       <div class="flex justify-between items-center">
-        <span class="text-slate-500 font-medium">Requirement</span>
-        <span class="font-bold text-slate-800">PoE Device on LAN 1</span>
+        <span class="text-slate-500 font-medium">{{ $t('peripheralPoeCheck.requirement') }}</span>
+        <span class="font-bold text-slate-800">{{ $t('peripheralPoeCheck.requirementDesc') }}</span>
       </div>
       
       <!-- Error & Login Box -->
@@ -72,17 +72,17 @@
                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                  <Icon name="heroicons:user" class="w-4 h-4 text-slate-400" />
                </div>
-               <input v-model="username" placeholder="Username" class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-amnimo-500 focus:border-amnimo-500 bg-transparent" @keyup.enter="checkPoe" />
+               <input v-model="username" :placeholder="$t('peripheralPoeCheck.username')" class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-amnimo-500 focus:border-amnimo-500 bg-transparent" @keyup.enter="checkPoe" />
              </div>
              <div class="relative flex-1">
                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                  <Icon name="heroicons:key" class="w-4 h-4 text-slate-400" />
                </div>
-               <input v-model="password" type="password" placeholder="Password" class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-amnimo-500 focus:border-amnimo-500 bg-transparent" @keyup.enter="checkPoe" />
+               <input v-model="password" type="password" :placeholder="$t('peripheralPoeCheck.password')" class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-amnimo-500 focus:border-amnimo-500 bg-transparent" @keyup.enter="checkPoe" />
              </div>
              <button @click="checkPoe" class="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-rose-700 transition-colors shrink-0 flex items-center gap-2">
                <AppSpinner v-if="isChecking" size="sm" />
-               Login & Retry
+               {{ $t('peripheralPoeCheck.loginRetry') }}
              </button>
           </div>
         </div>
@@ -92,28 +92,28 @@
       <Transition name="fade">
         <div v-if="poeInfo" class="mt-4 pt-4 border-t border-slate-200 space-y-3">
           <div class="flex justify-between items-center">
-            <span class="text-slate-500 font-medium">Interface</span>
+            <span class="text-slate-500 font-medium">{{ $t('peripheralPoeCheck.interface') }}</span>
             <span class="font-bold text-slate-800 uppercase tracking-wide">{{ poeInfo.name }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-slate-500 font-medium">State</span>
+            <span class="text-slate-500 font-medium">{{ $t('peripheralPoeCheck.state') }}</span>
             <span class="font-bold font-mono px-2 py-0.5 rounded text-xs" :class="poeInfo.state === 'connected' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-amber-100 text-amber-700 border border-amber-200'">{{ poeInfo.state }}</span>
           </div>
           <template v-if="poeInfo.state === 'connected' || poeInfo.voltage !== undefined">
             <div class="flex justify-between items-center pt-2 border-t border-slate-100">
-              <span class="text-slate-500 font-medium">Voltage</span>
+              <span class="text-slate-500 font-medium">{{ $t('peripheralPoeCheck.voltage') }}</span>
               <span class="font-bold text-slate-800 font-mono">{{ poeInfo.voltage?.toFixed(2) }} V</span>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-slate-500 font-medium">Current</span>
+              <span class="text-slate-500 font-medium">{{ $t('peripheralPoeCheck.current') }}</span>
               <span class="font-bold text-slate-800 font-mono">{{ poeInfo.current?.toFixed(2) }} mA</span>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-slate-500 font-medium">Power</span>
+              <span class="text-slate-500 font-medium">{{ $t('peripheralPoeCheck.power') }}</span>
               <span class="font-bold text-slate-800 font-mono">{{ poeInfo.watt?.toFixed(2) }} W</span>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-slate-500 font-medium">Class</span>
+              <span class="text-slate-500 font-medium">{{ $t('peripheralPoeCheck.class') }}</span>
               <span class="font-medium text-slate-600">{{ poeInfo.class }}</span>
             </div>
           </template>
@@ -130,7 +130,7 @@
       >
         <AppSpinner v-if="isChecking" size="md" />
         <Icon v-else name="heroicons:arrow-path" class="w-5 h-5" />
-        Check via API
+        {{ $t('peripheralPoeCheck.checkApi') }}
       </button>
     </div>
   </div>
@@ -138,6 +138,8 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
+
+const { t } = useI18n();
 
 const props = defineProps<{ baseUrl: string, modelValue: boolean }>();
 const emit = defineEmits<{ (e: 'update:modelValue', val: boolean): void }>();
@@ -166,7 +168,7 @@ watch(() => props.modelValue, (newVal) => {
 
 async function checkPoe() {
   if (!props.baseUrl) {
-    errorMsg.value = 'Base URL is required to check PoE. Please set it in Step 1/2.';
+    errorMsg.value = t('peripheralPoeCheck.errorNoUrl');
     return;
   }
 
@@ -188,7 +190,7 @@ async function checkPoe() {
 
     const poes = res?.content?.poes;
     if (!poes || !Array.isArray(poes)) {
-      throw new Error('Invalid API response format (missing poes data)');
+      throw new Error(t('peripheralPoeCheck.errorInvalidFormat'));
     }
 
     if (poes.length > 0) {
@@ -199,20 +201,20 @@ async function checkPoe() {
         if (lan1.state === 'connected') {
           emit('update:modelValue', true);
         } else {
-          errorMsg.value = `PoE interface lan1 is in '${lan1.state}' state (expected 'connected').`;
+          errorMsg.value = t('peripheralPoeCheck.errorState', { state: lan1.state });
         }
       } else {
-        errorMsg.value = 'PoE interface "lan1" not found on the device!';
+        errorMsg.value = t('peripheralPoeCheck.errorNotFound');
       }
     } else {
-      errorMsg.value = 'No PoE interfaces detected!';
+      errorMsg.value = t('peripheralPoeCheck.errorNoInterfaces');
     }
   } catch (err: any) {
     if (err.data?.statusCode === 401) {
-      errorMsg.value = 'Authentication required! Please provide credentials.';
+      errorMsg.value = t('peripheralPoeCheck.errorAuth');
       needsLogin.value = true;
     } else {
-      errorMsg.value = err.data?.statusMessage || err.message || 'Failed to connect to device API';
+      errorMsg.value = err.data?.statusMessage || err.message || t('peripheralPoeCheck.errorConnect');
     }
   } finally {
     isChecking.value = false;

@@ -3,7 +3,7 @@
     <header class="h-16 flex items-center px-8 border-b border-gray-100 bg-white shrink-0 shadow-sm z-10 relative">
       <h2 class="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
         <Icon name="heroicons:cog-6-tooth" class="w-6 h-6 text-slate-500" />
-        Settings
+        {{ $t('settings.title') }}
       </h2>
     </header>
 
@@ -115,8 +115,8 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div class="p-6 flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-bold text-slate-800">Data Management</h3>
-              <p class="text-sm text-slate-500 mt-1">Backup and restore your session data across devices.</p>
+              <h3 class="text-lg font-bold text-slate-800">{{ $t('settings.dataManagement') }}</h3>
+              <p class="text-sm text-slate-500 mt-1">{{ $t('settings.dataManagementDesc') }}</p>
             </div>
             <div class="flex items-center gap-3">
               <input 
@@ -133,7 +133,7 @@
               >
                 <Icon v-if="isImporting" name="heroicons:arrow-path" class="w-4 h-4 animate-spin" />
                 <Icon v-else name="heroicons:arrow-up-tray" class="w-4 h-4" />
-                Import Backup
+                {{ $t('settings.importBackup') }}
               </button>
               <a 
                 href="/api/backup/export" 
@@ -141,7 +141,7 @@
                 class="px-4 py-2 text-sm font-bold text-white bg-slate-800 rounded-xl hover:bg-slate-900 transition-colors shadow-sm inline-flex items-center gap-2 shrink-0"
               >
                 <Icon name="heroicons:arrow-down-tray" class="w-4 h-4" />
-                Export Backup
+                {{ $t('settings.exportBackup') }}
               </a>
             </div>
           </div>
@@ -161,8 +161,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import FolderPickerDialog from '~/components/FolderPickerDialog.vue';
-
 import { useToast } from '~/composables/useToast';
+const { t } = useI18n();
 
 const e2ePath = ref('');
 const isFolderPickerOpen = ref(false);
@@ -197,7 +197,7 @@ const handleImportBackup = async (event: Event) => {
       body: formData
     });
     
-    addToast({ title: 'Success', message: res.message, type: 'success' });
+    addToast({ title: t('settings.successTitle'), message: res.message, type: 'success' });
     // Clear input
     target.value = '';
     
@@ -207,7 +207,7 @@ const handleImportBackup = async (event: Event) => {
     }, 1500);
   } catch (e: any) {
     console.error('Import failed', e);
-    addToast({ title: 'Error', message: e.data?.statusMessage || e.message || 'Import failed', type: 'error' });
+    addToast({ title: t('settings.errorTitle'), message: e.data?.statusMessage || e.message || t('settings.importFailed'), type: 'error' });
   } finally {
     isImporting.value = false;
   }
@@ -231,29 +231,29 @@ onMounted(async () => {
       switch (info.status) {
         case 'checking':
           isCheckingUpdate.value = true;
-          updateStatusMessage.value = 'Checking for updates...';
+          updateStatusMessage.value = t('settings.checkingUpdates');
           break;
         case 'available':
           isCheckingUpdate.value = false;
-          updateStatusMessage.value = `Update to version ${info.version} is available. Downloading...`;
+          updateStatusMessage.value = t('settings.updateAvailable', { version: info.version });
           break;
         case 'not-available':
           isCheckingUpdate.value = false;
-          updateStatusMessage.value = 'You are already on the latest version.';
+          updateStatusMessage.value = t('settings.alreadyLatest');
           break;
         case 'downloading':
           updateProgress.value = info.percent;
-          updateStatusMessage.value = `Downloading update... ${Math.round(info.percent)}%`;
+          updateStatusMessage.value = t('settings.downloadingUpdate', { percent: Math.round(info.percent) });
           break;
         case 'downloaded':
           isCheckingUpdate.value = false;
           updateProgress.value = 100;
           isUpdateReady.value = true;
-          updateStatusMessage.value = `Version ${info.version} is ready to install!`;
+          updateStatusMessage.value = t('settings.updateReady', { version: info.version });
           break;
         case 'error':
           isCheckingUpdate.value = false;
-          updateStatusMessage.value = `Error: ${info.error}`;
+          updateStatusMessage.value = t('settings.updateError', { error: info.error });
           break;
       }
     });
@@ -263,12 +263,12 @@ onMounted(async () => {
 const checkForUpdates = () => {
   if ((window as any).electronAPI) {
     isCheckingUpdate.value = true;
-    updateStatusMessage.value = 'Checking for updates...';
+    updateStatusMessage.value = t('settings.checkingUpdates');
     updateProgress.value = 0;
     isUpdateReady.value = false;
     (window as any).electronAPI.checkForUpdates();
   } else {
-    updateStatusMessage.value = 'Update checking is only available in the desktop app.';
+    updateStatusMessage.value = t('settings.updateNotDesktop');
   }
 };
 
@@ -298,7 +298,7 @@ const validatePath = async () => {
     });
     validationResult.value = res as any;
   } catch (e: any) {
-    validationResult.value = { valid: false, message: e.message || 'Validation failed' };
+    validationResult.value = { valid: false, message: e.message || t('settings.validationFailed') };
   } finally {
     isValidating.value = false;
   }
@@ -313,14 +313,14 @@ const saveSettings = async () => {
       body: { e2ePath: e2ePath.value }
     });
     addToast({
-      title: 'Success',
-      message: 'Settings saved successfully!',
+      title: t('settings.successTitle'),
+      message: t('settings.settingsSaved'),
       type: 'success'
     });
   } catch (e: any) {
     addToast({
-      title: 'Error',
-      message: 'Failed to save settings: ' + (e.message || String(e)),
+      title: t('settings.errorTitle'),
+      message: t('settings.saveFailed') + ': ' + (e.message || String(e)),
       type: 'error'
     });
   } finally {

@@ -35,7 +35,7 @@
             !modelValue && pingStatus !== 'failed' && apiStatus !== 'failed' ? 'text-slate-900' : '',
           ]"
         >
-          DHCP Client (Partner GW) Check
+          {{ $t('peripheralDhcpCheck.title') }}
         </h4>
       </div>
       <span
@@ -43,14 +43,14 @@
         class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-sm font-bold shadow-sm shadow-emerald-200/50 scale-105 origin-right transition-transform"
       >
         <Icon name="heroicons:check-badge" class="w-5 h-5 text-emerald-600" />
-        <span class="tracking-wide uppercase text-xs">Ready</span>
+        <span class="tracking-wide uppercase text-xs">{{ $t('peripheralDhcpCheck.ready') }}</span>
       </span>
       <span
         v-else-if="!modelValue && (pingStatus === 'failed' || apiStatus === 'failed')"
         class="inline-flex items-center gap-1.5 text-sm font-bold text-amber-700 bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-200 animate-fade-in shadow-sm shadow-amber-100/50"
       >
         <Icon name="heroicons:exclamation-triangle" class="w-5 h-5" />
-        Warning
+        {{ $t('peripheralDhcpCheck.warning') }}
       </span>
     </div>
 
@@ -63,8 +63,8 @@
       ]"
     >
       <div class="flex justify-between items-center">
-        <span class="text-slate-500 font-medium">Requirement</span>
-        <span class="font-bold text-slate-800">Partner GW connected to HUB (IP: {{ dhcpClientIp || 'Not configured' }})</span>
+        <span class="text-slate-500 font-medium">{{ $t('peripheralDhcpCheck.requirement') }}</span>
+        <span class="font-bold text-slate-800">{{ $t('peripheralDhcpCheck.requirementDesc', { ip: dhcpClientIp || $t('peripheralDhcpCheck.notConfigured') }) }}</span>
       </div>
 
       <!-- Error & Progress Box -->
@@ -84,7 +84,7 @@
                 <Icon name="heroicons:x-mark" class="w-4 h-4" />
               </div>
               <span class="font-medium" :class="{'text-slate-500': pingStatus === 'running', 'text-emerald-700': pingStatus === 'success', 'text-amber-700': pingStatus === 'failed'}">
-                1. Ping Partner GW ({{ dhcpClientIp }})
+                {{ $t('peripheralDhcpCheck.step1', { ip: dhcpClientIp }) }}
               </span>
             </div>
           </div>
@@ -103,7 +103,7 @@
                   <Icon name="heroicons:x-mark" class="w-4 h-4" />
                 </div>
                 <span class="font-medium" :class="{'text-slate-500': apiStatus === 'running', 'text-emerald-700': apiStatus === 'success', 'text-amber-700': apiStatus === 'failed'}">
-                  2. Verify DHCP Configuration on br0 via API
+                  {{ $t('peripheralDhcpCheck.step2') }}
                 </span>
               </div>
             </div>
@@ -111,15 +111,15 @@
             <div v-if="configData" class="ml-9 mt-2 flex flex-col gap-1.5">
               <div class="text-sm text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/50 px-3 py-2 rounded-lg inline-flex items-center gap-2 border border-slate-200 dark:border-slate-700/50 w-fit">
                 <Icon name="heroicons:server" class="w-4 h-4 text-slate-400" />
-                <span class="font-medium text-slate-500">dhcp4:</span>
+                <span class="font-medium text-slate-500">{{ $t('peripheralDhcpCheck.dhcp4') }}</span>
                 <span class="font-bold" :class="configData.dhcp4?.enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'">
                   {{ configData.dhcp4?.enabled === true ? 'true' : 'false' }}
                 </span>
               </div>
               <details class="text-xs mt-1 group">
                 <summary class="cursor-pointer text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 underline underline-offset-2 transition-colors select-none">
-                  <span class="group-open:hidden">View full config details</span>
-                  <span class="hidden group-open:inline">Hide config details</span>
+                  <span class="group-open:hidden">{{ $t('peripheralDhcpCheck.viewFullConfig') }}</span>
+                  <span class="hidden group-open:inline">{{ $t('peripheralDhcpCheck.hideFullConfig') }}</span>
                 </summary>
                 <div class="mt-2 p-3 bg-slate-800 text-slate-100 rounded-lg overflow-x-auto font-mono text-xs shadow-inner">
                   <pre>{{ JSON.stringify(configData, null, 2) }}</pre>
@@ -144,7 +144,7 @@
         @click="skipCheck"
         class="text-sm font-medium text-slate-500 hover:text-slate-700 underline underline-offset-2 transition-colors"
       >
-        Skip (Force Check)
+        {{ $t('peripheralDhcpCheck.skip') }}
       </button>
 
       <button
@@ -155,7 +155,7 @@
       >
         <AppSpinner v-if="isRunning" size="sm" class="text-white" />
         <Icon v-else name="heroicons:play" class="w-4 h-4" />
-        {{ isRunning ? "Checking..." : (pingStatus === 'failed' || apiStatus === 'failed' ? "Retry Check" : "Run Check") }}
+        {{ isRunning ? $t('peripheralDhcpCheck.checking') : (pingStatus === 'failed' || apiStatus === 'failed' ? $t('peripheralDhcpCheck.retryCheck') : $t('peripheralDhcpCheck.runCheck')) }}
       </button>
     </div>
   </div>
@@ -163,6 +163,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   baseUrl: string;
@@ -185,7 +187,7 @@ const isRunning = computed(() => pingStatus.value === 'running' || apiStatus.val
 
 const runCheck = async () => {
   if (!props.dhcpClientIp) {
-    errorMsg.value = "DHCP_CLIENT_IP is not configured in Environment variables.";
+    errorMsg.value = t('peripheralDhcpCheck.errorNoIp');
     pingStatus.value = "failed";
     return;
   }
@@ -204,7 +206,7 @@ const runCheck = async () => {
 
     if (!pingRes.success) {
       pingStatus.value = "failed";
-      errorMsg.value = "Cannot ping Partner GW. Please ensure it is powered on, connected to the hub, and your PC has an IP in the same subnet.";
+      errorMsg.value = t('peripheralDhcpCheck.errorPing');
       return;
     }
     
@@ -231,16 +233,16 @@ const runCheck = async () => {
       emit("update:modelValue", true);
     } else {
       apiStatus.value = "failed";
-      errorMsg.value = apiRes.message || "Failed to verify DHCP configuration on the Partner GW.";
+      errorMsg.value = apiRes.message || t('peripheralDhcpCheck.errorVerify');
     }
 
   } catch (err: any) {
     if (pingStatus.value === "running") {
       pingStatus.value = "failed";
-      errorMsg.value = "Error during ping execution.";
+      errorMsg.value = t('peripheralDhcpCheck.errorPingExec');
     } else {
       apiStatus.value = "failed";
-      errorMsg.value = err.data?.statusMessage || err.message || "Unknown error occurred.";
+      errorMsg.value = err.data?.statusMessage || err.message || t('peripheralDhcpCheck.errorUnknown');
     }
   }
 };

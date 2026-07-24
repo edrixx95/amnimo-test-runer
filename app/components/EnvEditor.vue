@@ -12,7 +12,7 @@
         >
           <Icon name="heroicons:cpu-chip" class="w-5 h-5 text-indigo-500" />
         </div>
-        Device & Firmware Config
+        {{ $t("envEditor.deviceFirmwareConfig") }}
       </h4>
       <div class="space-y-5">
         <!-- Row 1: Readonly -->
@@ -62,11 +62,17 @@
                   @input="emitChange"
                   class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
                 />
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <div
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
+                >
                   <Icon
                     name="heroicons:chevron-up-down"
                     class="w-5 h-5 transition-colors duration-200"
-                    :class="focusedField === key ? 'text-amnimo-500' : 'text-slate-400'"
+                    :class="
+                      focusedField === key
+                        ? 'text-amnimo-500'
+                        : 'text-slate-400'
+                    "
                   />
                 </div>
               </div>
@@ -95,7 +101,7 @@
                           : 'text-slate-700 hover:bg-amnimo-50 hover:text-amnimo-600',
                       ]"
                     >
-                      {{ opt || '(Empty)' }}
+                      {{ opt || $t("envEditor.empty") }}
                     </li>
                   </ul>
                 </div>
@@ -203,7 +209,7 @@
         >
           <Icon name="heroicons:globe-alt" class="w-5 h-5 text-emerald-500" />
         </div>
-        Environment & Network Config
+        {{ $t("envEditor.environmentNetworkConfig") }}
       </h4>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div v-for="key in block2Keys" :key="key">
@@ -249,7 +255,7 @@
               @click="scanIIS(key)"
               :disabled="isScanningIIS"
               class="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
-              title="Scan IIS Sites"
+              :title="$t('envEditor.scanIisSites')"
             >
               <Icon
                 :name="
@@ -278,7 +284,7 @@
                     v-if="iisSites.length === 0"
                     class="px-4 py-3 text-sm text-slate-500 text-center"
                   >
-                    No active IIS sites found.
+                    {{ $t("envEditor.noActiveIisSites") }}
                   </li>
                   <li
                     v-for="site in iisSites"
@@ -292,7 +298,8 @@
                         >{{ site.name }}</span
                       >
                       <span class="block text-xs text-slate-500 mt-0.5"
-                        >Port: {{ site.port || "N/A" }}</span
+                        >{{ $t("envEditor.port") }}:
+                        {{ site.port || "N/A" }}</span
                       >
                     </div>
                     <span
@@ -326,7 +333,7 @@
         >
           <Icon name="heroicons:cog-8-tooth" class="w-5 h-5 text-amber-500" />
         </div>
-        System Constants
+        {{ $t("envEditor.systemConstants") }}
       </h4>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div v-for="key in block3Keys" :key="key" class="relative">
@@ -403,7 +410,7 @@
                       : 'text-slate-700 hover:bg-amnimo-50 hover:text-amnimo-600',
                   ]"
                 >
-                  {{ opt || '(Empty)' }}
+                  {{ opt || $t("envEditor.empty") }}
                 </li>
               </ul>
             </div>
@@ -417,6 +424,9 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, nextTick } from "vue";
 import { getFirmwarePrefix } from "~~/shared/constants";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: string;
@@ -462,7 +472,13 @@ const focusedField = ref<string | null>(null);
 // IIS Scanning State
 const isScanningIIS = ref(false);
 const iisSites = ref<
-  { name: string; state: string; port: number; url: string; physicalPath?: string }[]
+  {
+    name: string;
+    state: string;
+    port: number;
+    url: string;
+    physicalPath?: string;
+  }[]
 >([]);
 const showIISDropdown = ref(false);
 const iisTargetKey = ref<string | null>(null);
@@ -476,19 +492,25 @@ const scanIIS = async (key: string) => {
     showIISDropdown.value = true;
   } catch (error: any) {
     addToast({
-      title: 'Error',
-      message: error.data?.statusMessage || "Failed to scan IIS. Please ensure you are running the test runner as Administrator.",
-      type: 'error'
+      title: t("envEditor.error"),
+      message: error.data?.statusMessage || t("envEditor.failedToScanIis"),
+      type: "error",
     });
   } finally {
     isScanningIIS.value = false;
   }
 };
 
-const selectIISSite = (site: { port: number; url: string; physicalPath?: string }) => {
+const selectIISSite = (site: {
+  port: number;
+  url: string;
+  physicalPath?: string;
+}) => {
   if (site.physicalPath) {
     localStorage.setItem("amnimo_server_path", site.physicalPath);
-    window.dispatchEvent(new CustomEvent('serverPathUpdated', { detail: site.physicalPath }));
+    window.dispatchEvent(
+      new CustomEvent("serverPathUpdated", { detail: site.physicalPath }),
+    );
   }
 
   if (site.url) {
@@ -580,14 +602,26 @@ const getOptions = (key: string) => {
   if (key === "SERIES") {
     return ["G", "X", "R", "C"];
   }
-  
+
   if (key === "BOARD") {
     const series = parsedEnv.value["SERIES"];
     if (series === "G") return ["AG10", "AG20"];
     if (series === "X") return ["AX11", "AX12", "AX21", "AX30"];
     if (series === "R") return ["AR10", "AR20"];
     if (series === "C") return ["AC10", "AC15", "AC25"];
-    return ["AG10", "AG20", "AX11", "AX12", "AX21", "AX30", "AR10", "AR20", "AC10", "AC15", "AC25"];
+    return [
+      "AG10",
+      "AG20",
+      "AX11",
+      "AX12",
+      "AX21",
+      "AX30",
+      "AR10",
+      "AR20",
+      "AC10",
+      "AC15",
+      "AC25",
+    ];
   }
 
   if (key === "DEVICE_TYPE") {
@@ -722,8 +756,11 @@ onMounted(async () => {
     availablePorts.value = ports.map((p) => p.toString());
 
     // Auto-assign first available port if not present
-    if (!parsedEnv.value["CLI_SERVER_PORT"] && availablePorts.value.length > 0) {
-      parsedEnv.value["CLI_SERVER_PORT"] = availablePorts.value[0];
+    if (
+      !parsedEnv.value["CLI_SERVER_PORT"] &&
+      availablePorts.value.length > 0
+    ) {
+      parsedEnv.value["CLI_SERVER_PORT"] = availablePorts.value[0]!;
       emitChange();
     }
   } catch (err) {

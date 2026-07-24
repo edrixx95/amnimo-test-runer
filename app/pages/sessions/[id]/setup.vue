@@ -12,7 +12,7 @@
           <Icon name="heroicons:arrow-left" class="w-5 h-5" />
         </NuxtLink>
         <h2 class="text-lg font-bold text-slate-800 tracking-tight">
-          Setup:
+          {{ $t('setup.title') }}
           <span class="text-amnimo-600 font-semibold">{{
             session?.name || session?.id || "..."
           }}</span>
@@ -21,7 +21,7 @@
       <div class="flex items-center gap-2">
         <span
           class="text-xs font-semibold text-amnimo-600 bg-amnimo-50 px-3 py-1.5 rounded-full uppercase tracking-wider"
-          >Step {{ currentStep }} of {{ steps.length }}</span
+          >{{ $t('setup.stepProgress', { current: currentStep, total: steps.length }) }}</span
         >
       </div>
     </header>
@@ -99,7 +99,7 @@
       <!-- Main Content Area -->
       <main class="flex-1 relative flex flex-col overflow-hidden bg-white">
         <div v-if="isLoadingSession" class="flex justify-center p-20">
-          <AppLoader size="md" text="Loading Environment..." />
+          <AppLoader size="md" :text="$t('setup.loading')" />
         </div>
 
         <form
@@ -117,10 +117,10 @@
                     <h3
                       class="text-2xl font-bold text-slate-900 tracking-tight mb-2"
                     >
-                      Test Execution Type
+                      {{ $t('setup.step1Title') }}
                     </h3>
                     <p class="text-slate-500">
-                      Select the scope and type of tests to run.
+                      {{ $t('setup.step1Desc') }}
                     </p>
                   </div>
 
@@ -155,13 +155,12 @@
                       <h4
                         class="font-bold text-xl text-slate-900 mb-3 group-hover:text-amnimo-700 transition-colors"
                       >
-                        Release Test
+                        {{ $t('setup.releaseTest') }}
                       </h4>
                       <p
                         class="text-sm text-slate-500 leading-relaxed font-medium"
                       >
-                        Comprehensive suite for release qualification. Runs
-                        through the complete test order.
+                        {{ $t('setup.releaseTestDesc') }}
                       </p>
                     </div>
 
@@ -195,13 +194,12 @@
                       <h4
                         class="font-bold text-xl text-slate-900 mb-3 group-hover:text-amnimo-700 transition-colors"
                       >
-                        System Test
+                        {{ $t('setup.systemTest') }}
                       </h4>
                       <p
                         class="text-sm text-slate-500 leading-relaxed font-medium"
                       >
-                        Select specific features for testing. Ideal for focused
-                        validations.
+                        {{ $t('setup.systemTestDesc') }}
                       </p>
                     </div>
 
@@ -236,12 +234,12 @@
                       <h4
                         class="font-bold text-xl text-slate-900 mb-3 group-hover:text-amnimo-700 transition-colors"
                       >
-                        Playground
+                        {{ $t('setup.playground') }}
                       </h4>
                       <p
                         class="text-sm text-slate-500 leading-relaxed font-medium"
                       >
-                        Flexible environment for experimental testing. Skips environment checks.
+                        {{ $t('setup.playgroundDesc') }}
                       </p>
                     </div>
                   </div>
@@ -257,11 +255,10 @@
                     <h3
                       class="text-2xl font-bold text-slate-900 tracking-tight mb-2"
                     >
-                      Target Device
+                      {{ $t('setup.step2Title') }}
                     </h3>
                     <p class="text-slate-500">
-                      Select the device you want to test and its connection
-                      details.
+                      {{ $t('setup.step2Desc') }}
                     </p>
                   </div>
 
@@ -269,7 +266,7 @@
                   <div>
                     <label
                       class="block text-sm font-semibold text-slate-700 mb-3"
-                      >Device Series & Board</label
+                      >{{ $t('setup.deviceSeriesBoard') }}</label
                     >
                     <div class="space-y-8">
                       <div
@@ -377,7 +374,7 @@
                   <div>
                     <label
                       class="block text-sm font-semibold text-slate-700 mb-2"
-                      >Base URL</label
+                      >{{ $t('setup.baseUrl') }}</label
                     >
                     <input
                       v-model="formData.baseUrl"
@@ -400,11 +397,10 @@
                       <h3
                         class="text-2xl font-bold text-slate-900 tracking-tight mb-2"
                       >
-                        Environment Variables
+                        {{ $t('setup.step3Title') }}
                       </h3>
                       <p class="text-slate-500">
-                        Review and configure the .env file contents for this
-                        test run.
+                        {{ $t('setup.step3Desc') }}
                       </p>
                     </div>
                     <button
@@ -412,7 +408,7 @@
                       @click="resetEnv"
                       class="text-sm font-bold text-amnimo-600 bg-amnimo-50 hover:bg-amnimo-100 px-4 py-2 rounded-xl flex items-center gap-2 transition-colors"
                     >
-                      <Icon name="heroicons:arrow-path" class="w-4 h-4" /> Reset
+                      <Icon name="heroicons:arrow-path" class="w-4 h-4" /> {{ $t('setup.reset') }}
                     </button>
                   </div>
 
@@ -429,10 +425,10 @@
                     <h3
                       class="text-2xl font-bold text-slate-900 tracking-tight mb-2"
                     >
-                      Environment Check
+                      {{ $t('setup.step4Title') }}
                     </h3>
                     <p class="text-slate-500">
-                      Verify your local environment is ready for testing.
+                      {{ $t('setup.step4Desc') }}
                     </p>
                   </div>
 
@@ -471,7 +467,7 @@
                                   : 'text-amnimo-500'
                             "
                           />
-                          Connection Status
+                          {{ $t('setup.connectionStatus') }}
                         </h4>
                         <span
                           v-if="pingStatus === 'success'"
@@ -482,7 +478,7 @@
                             class="w-5 h-5 text-emerald-600"
                           />
                           <span class="tracking-wide uppercase text-xs"
-                            >Online</span
+                            >{{ $t('setup.online') }}</span
                           >
                         </span>
                         <span
@@ -493,7 +489,7 @@
                             name="heroicons:exclamation-triangle"
                             class="w-5 h-5"
                           />
-                          Offline
+                          {{ $t('setup.offline') }}
                         </span>
                       </div>
 
@@ -505,7 +501,7 @@
                         }"
                       >
                         <div class="flex justify-between items-center">
-                          <span class="text-slate-500 font-medium">Device</span>
+                          <span class="text-slate-500 font-medium">{{ $t('setup.device') }}</span>
                           <span class="font-bold text-slate-800"
                             >{{ formData.series }} / {{ formData.board }}
                             {{ formData.deviceType }}</span
@@ -513,7 +509,7 @@
                         </div>
                         <div class="flex justify-between items-center">
                           <span class="text-slate-500 font-medium"
-                            >Target URL</span
+                            >{{ $t('setup.targetUrl') }}</span
                           >
                           <div class="flex items-center gap-2">
                             <a
@@ -544,7 +540,7 @@
                             name="heroicons:signal"
                             class="w-5 h-5"
                           />
-                          Ping Device
+                          {{ $t('setup.pingDevice') }}
                         </button>
                       </div>
                     </div>
@@ -914,6 +910,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useToast } from '~/composables/useToast';
+const { t } = useI18n();
 import {
   BOARDS,
   DEVICE_TYPES,
@@ -937,16 +934,16 @@ const currentStep = ref(1);
 const steps = computed(() => {
   if (formData.value.testType === 'playground') {
     return [
-      { name: "Test Scope", description: "Select execution mode" },
-      { name: "Target Device", description: "Select model and address" },
-      { name: "Env Config", description: "Review .env variables" }
+      { name: t('setup.stepScope'), description: t('setup.stepScopeDescPg') },
+      { name: t('setup.stepTarget'), description: t('setup.stepTargetDesc') },
+      { name: t('setup.stepEnv'), description: t('setup.stepEnvDesc') }
     ];
   }
   return [
-    { name: "Test Scope", description: "Release or System test" },
-    { name: "Target Device", description: "Select model and address" },
-    { name: "Env Config", description: "Review .env variables" },
-    { name: "Environment Check", description: "Verify network and peripherals" },
+    { name: t('setup.stepScope'), description: t('setup.stepScopeDesc') },
+    { name: t('setup.stepTarget'), description: t('setup.stepTargetDesc') },
+    { name: t('setup.stepEnv'), description: t('setup.stepEnvDesc') },
+    { name: t('setup.stepCheck'), description: t('setup.stepCheckDesc') },
   ];
 });
 
@@ -1005,7 +1002,7 @@ onMounted(async () => {
     }
   } catch (err) {
     console.error("Failed to load session:", err);
-    addToast({ title: 'Error', message: "Session not found", type: 'error' });
+    addToast({ title: t('setup.errorTitle'), message: t('setup.sessionNotFound'), type: 'error' });
     router.push("/");
   } finally {
     isLoadingSession.value = false;

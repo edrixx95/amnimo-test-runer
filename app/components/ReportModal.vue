@@ -7,7 +7,7 @@
         <div class="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
           <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
             <Icon name="heroicons:document-chart-bar" class="w-6 h-6 text-amnimo-500" />
-            Test Reports
+            {{ $t('reportModal.testReports') }}
           </h3>
           <div class="flex items-center gap-3">
             <button @click="$emit('update:modelValue', false)" class="text-slate-400 hover:text-amnimo-600 bg-slate-50 hover:bg-amnimo-50 p-2 rounded-xl transition-colors">
@@ -18,16 +18,16 @@
         
         <div class="p-8 overflow-y-auto flex-1 bg-slate-50/50 min-h-[300px] custom-scrollbar">
           <div v-if="isLoading" class="flex flex-col items-center justify-center h-full text-amnimo-400 gap-4">
-            <AppLoader size="md" text="Loading report..." />
-            <span class="font-bold text-slate-600">Searching for reports...</span>
+            <AppLoader size="md" :text="$t('reportModal.loadingReport')" />
+            <span class="font-bold text-slate-600">{{ $t('reportModal.searchingForReports') }}</span>
           </div>
           
           <div v-else-if="reports.length === 0" class="flex flex-col items-center justify-center h-full text-slate-400 gap-4">
             <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100">
               <Icon name="heroicons:inbox" class="w-10 h-10 text-slate-300" />
             </div>
-            <p class="font-bold text-slate-800 text-lg">No reports found for this session yet.</p>
-            <p class="text-sm font-medium text-slate-500 text-center max-w-sm leading-relaxed">Reports are automatically generated in amnimo-e2e after tests finish.</p>
+            <p class="font-bold text-slate-800 text-lg">{{ $t('reportModal.noReportsFound') }}</p>
+            <p class="text-sm font-medium text-slate-500 text-center max-w-sm leading-relaxed">{{ $t('reportModal.reportsGeneratedAuto') }}</p>
           </div>
           
           <div v-else class="space-y-4">
@@ -47,11 +47,11 @@
                   <div v-if="report.totalCount !== undefined" class="flex gap-2">
                     <span v-if="report.failedCount && report.failedCount > 0" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
                       <Icon name="heroicons:x-circle" class="w-3.5 h-3.5" />
-                      {{ report.failedCount }} Failed
+                      {{ report.failedCount }} {{ $t('reportModal.failed') }}
                     </span>
                     <span v-else-if="report.totalCount > 0 && report.failedCount === 0" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
                       <Icon name="heroicons:check-circle" class="w-3.5 h-3.5" />
-                      All Passed ({{ report.totalCount }})
+                      {{ $t('reportModal.allPassed') }} ({{ report.totalCount }})
                     </span>
                   </div>
                 </div>
@@ -60,17 +60,17 @@
                 <button v-if="report.failedCount && report.failedCount > 0" @click="rerunFailedTests(report.name)" :disabled="isRerunning" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 hover:text-amber-800 transition-colors shadow-sm active:scale-95 disabled:opacity-50">
                   <Icon v-if="isRerunning" name="heroicons:arrow-path" class="w-5 h-5 animate-spin" />
                   <Icon v-else name="heroicons:arrow-path-rounded-square" class="w-5 h-5" />
-                  Rerun Failed
+                  {{ $t('reportModal.rerunFailed') }}
                 </button>
                 <button v-if="report.htmlReportUrl" @click="openHtmlViewer(report.htmlReportUrl)" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-800 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-amnimo-600 transition-colors shadow-sm active:scale-95">
                   <Icon name="heroicons:chart-bar-square" class="w-5 h-5" />
-                  HTML Report
+                  {{ $t('reportModal.htmlReport') }}
                 </button>
                 <button v-if="report.excelJsonUrl" @click="openJsonViewer(report.excelJsonUrl)" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-amnimo-600 border border-transparent rounded-xl hover:bg-amnimo-700 transition-colors shadow-sm hover:shadow-lg hover:shadow-amnimo-500/30 active:scale-95">
                   <Icon name="heroicons:table-cells" class="w-5 h-5" />
-                  View Data
+                  {{ $t('reportModal.viewData') }}
                 </button>
-                <button @click="reportToDelete = report" class="inline-flex items-center justify-center w-9 h-9 text-slate-400 bg-white border border-slate-200 rounded-xl hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm active:scale-95" title="Delete Report">
+                <button @click="reportToDelete = report" class="inline-flex items-center justify-center w-9 h-9 text-slate-400 bg-white border border-slate-200 rounded-xl hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm active:scale-95" :title="$t('reportModal.deleteReportTitle')">
                   <Icon name="heroicons:trash" class="w-4 h-4" />
                 </button>
               </div>
@@ -86,18 +86,18 @@
               <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-100">
                 <Icon name="heroicons:exclamation-triangle" class="w-8 h-8" />
               </div>
-              <h4 class="text-lg font-bold text-slate-900 mb-2">Delete Report?</h4>
+              <h4 class="text-lg font-bold text-slate-900 mb-2">{{ $t('reportModal.deleteReportConfirmTitle') }}</h4>
               <p class="text-sm text-slate-500 mb-6 leading-relaxed">
-                Are you sure you want to delete report <b class="text-slate-700">{{ reportToDelete.name }}</b>? This action cannot be undone.
+                {{ $t('reportModal.deleteReportConfirmText1') }} <b class="text-slate-700">{{ reportToDelete.name }}</b>{{ $t('reportModal.deleteReportConfirmText2') }}
               </p>
               <div class="flex gap-3 justify-center">
                 <button @click="reportToDelete = null" class="px-5 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors active:scale-95">
-                  Cancel
+                  {{ $t('reportModal.cancel') }}
                 </button>
                 <button @click="confirmDeleteReport" :disabled="isDeleting" class="inline-flex items-center justify-center gap-2 px-5 py-2 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors shadow-sm active:scale-95 disabled:opacity-50">
                   <Icon v-if="isDeleting" name="heroicons:arrow-path" class="w-4 h-4 animate-spin" />
                   <Icon v-else name="heroicons:trash" class="w-4 h-4" />
-                  Delete
+                  {{ $t('reportModal.delete') }}
                 </button>
               </div>
             </div>
@@ -114,8 +114,10 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useToast } from '~/composables/useToast';
 
+const { t } = useI18n();
 const { addToast } = useToast();
 import { useRouter } from 'vue-router';
 import ExcelJsonViewer from '~/components/ExcelJsonViewer.vue';
@@ -197,7 +199,7 @@ const rerunFailedTests = async (reportName: string) => {
     emit('update:modelValue', false);
     router.push(`/sessions/${props.sessionId}/runner`);
   } catch (e: any) {
-    addToast({ title: 'Error', message: "Failed to rerun tests: " + e.message, type: 'error' });
+    addToast({ title: t('reportModal.error'), message: t('reportModal.failedToRerun') + e.message, type: 'error' });
   } finally {
     isRerunning.value = false;
   }
@@ -217,7 +219,7 @@ const confirmDeleteReport = async () => {
     // Successfully deleted, refresh list
     await fetchReports();
   } catch (e: any) {
-    addToast({ title: 'Error', message: "Failed to delete report: " + (e.data?.statusMessage || e.message), type: 'error' });
+    addToast({ title: t('reportModal.error'), message: t('reportModal.failedToDelete') + (e.data?.statusMessage || e.message), type: 'error' });
   } finally {
     isDeleting.value = false;
     reportToDelete.value = null;

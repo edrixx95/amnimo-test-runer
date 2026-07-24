@@ -13,7 +13,7 @@
         </NuxtLink>
         <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
           <Icon name="heroicons:play-circle" class="w-6 h-6 text-amnimo-500" />
-          Test Runner:
+          {{ $t('runner.title') }}
           <span class="text-amnimo-600 font-semibold">{{
             session?.name || session?.id || "..."
           }}</span>
@@ -36,7 +36,7 @@
             class="w-4 h-4 animate-spin"
           />
           <Icon v-else name="heroicons:document-text" class="w-4 h-4" />
-          Report
+          {{ $t('runner.report') }}
         </button>
         <NuxtLink
           v-if="session?.testType !== 'playground'"
@@ -44,14 +44,14 @@
           class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-slate-800 bg-white hover:bg-slate-50 hover:text-amnimo-700 border border-slate-300 rounded-xl transition-all shadow-sm active:scale-95"
         >
           <Icon name="heroicons:shield-check" class="w-4 h-4" />
-          Verify Env
+          {{ $t('runner.verifyEnv') }}
         </NuxtLink>
         <button
           @click="showEnvModal = true"
           class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-slate-800 bg-white hover:bg-slate-50 hover:text-amnimo-700 border border-slate-300 rounded-xl transition-all shadow-sm active:scale-95"
         >
           <Icon name="heroicons:cog-8-tooth" class="w-4 h-4" />
-          Edit .env
+          {{ $t('runner.editEnv') }}
         </button>
         <button
           v-if="session?.status !== 'Closed'"
@@ -59,7 +59,7 @@
           class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-rose-700 bg-white hover:bg-rose-50 hover:text-rose-800 border border-rose-200 rounded-xl transition-all shadow-sm active:scale-95"
         >
           <Icon name="heroicons:lock-closed" class="w-4 h-4" />
-          Close Session
+          {{ $t('runner.closeSession') }}
         </button>
         <span
           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-sm"
@@ -79,7 +79,7 @@
               'bg-emerald-500': !isTesting && session?.status !== 'Closed',
             }"
           ></span>
-          {{ isTesting ? "Running" : session?.status || "Ready" }}
+          {{ isTesting ? $t('runner.statusRunning') : (session?.status ? $t('home.status.' + session.status.toLowerCase()) : $t('runner.statusReady')) }}
         </span>
       </div>
     </header>
@@ -94,12 +94,12 @@
             class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2"
           >
             <Icon name="heroicons:adjustments-horizontal" class="w-4 h-4" />
-            Configuration
+            {{ $t('runner.config') }}
           </h3>
 
           <div v-if="session?.testType === 'playground'" class="mb-5">
             <label class="block text-sm font-bold text-slate-800 mb-2">
-              Test Source
+              {{ $t('runner.testSource') }}
             </label>
             <div class="flex rounded-xl bg-slate-200/60 p-1">
               <button
@@ -111,7 +111,7 @@
                     : 'text-slate-600 hover:text-slate-800'
                 "
               >
-                Release
+                {{ $t('runner.release') }}
               </button>
               <button
                 @click="playgroundSource = 'system'"
@@ -122,7 +122,7 @@
                     : 'text-slate-600 hover:text-slate-800'
                 "
               >
-                System
+                {{ $t('runner.system') }}
               </button>
             </div>
           </div>
@@ -130,7 +130,7 @@
           <div class="space-y-5 flex-1 flex flex-col min-h-0">
             <div>
               <label class="block text-sm font-bold text-slate-800 mb-2"
-                >Execution Mode</label
+                >{{ $t('runner.execMode') }}</label
               >
               <div class="flex rounded-xl bg-slate-200/60 p-1">
                 <button
@@ -142,7 +142,7 @@
                       : 'text-slate-600 hover:text-slate-800'
                   "
                 >
-                  Manual
+                  {{ $t('runner.manual') }}
                 </button>
                 <button
                   @click="executionMode = 'order'"
@@ -153,7 +153,7 @@
                       : 'text-slate-600 hover:text-slate-800'
                   "
                 >
-                  Test Order
+                  {{ $t('runner.testOrder') }}
                 </button>
               </div>
             </div>
@@ -164,10 +164,10 @@
               class="flex flex-col min-h-0 flex-1 animate-fade-in"
             >
               <div class="flex items-center justify-between mb-2 shrink-0">
-                <label class="block text-sm font-bold text-slate-800">Available Tests</label>
+                <label class="block text-sm font-bold text-slate-800">{{ $t('runner.availableTests') }}</label>
                 <div class="flex bg-slate-200/60 p-0.5 rounded-lg">
-                  <button @click="testViewMode = 'tree'" class="px-2 py-1 rounded text-xs font-bold transition-colors" :class="testViewMode === 'tree' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'">Tree</button>
-                  <button @click="testViewMode = 'filter'" class="px-2 py-1 rounded text-xs font-bold transition-colors" :class="testViewMode === 'filter' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'">Filter</button>
+                  <button @click="testViewMode = 'tree'" class="px-2 py-1 rounded text-xs font-bold transition-colors" :class="testViewMode === 'tree' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'">{{ $t('runner.tree') }}</button>
+                  <button @click="testViewMode = 'filter'" class="px-2 py-1 rounded text-xs font-bold transition-colors" :class="testViewMode === 'filter' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'">{{ $t('runner.filter') }}</button>
                 </div>
               </div>
 
@@ -188,7 +188,7 @@
                   v-else
                   class="text-sm font-medium text-slate-500 italic p-4 text-center"
                 >
-                  No test files found for this mode.
+                  {{ $t('runner.noTestFiles') }}
                 </div>
               </div>
 
@@ -209,8 +209,8 @@
                 </div>
                 
                 <div class="overflow-y-auto flex-1 pr-2 bg-slate-50/50 rounded-xl border border-slate-200 p-2 custom-scrollbar">
-                  <div v-if="!filterPage" class="text-xs text-slate-400 text-center italic mt-4">Select a page to view tests</div>
-                  <div v-else-if="filterFiles.length === 0" class="text-xs text-slate-400 text-center italic mt-4">No tests found</div>
+                  <div v-if="!filterPage" class="text-xs text-slate-400 text-center italic mt-4">{{ $t('runner.selectPage') }}</div>
+                  <div v-else-if="filterFiles.length === 0" class="text-xs text-slate-400 text-center italic mt-4">{{ $t('runner.noTestsFound') }}</div>
                   <div v-else class="space-y-3">
                     <div v-for="file in filterFiles" :key="file.path">
                       <div class="flex items-center gap-2 mb-1 min-w-0" :class="{ 'opacity-50': selectedTests.includes(file.path!) }">
@@ -232,10 +232,10 @@
                       <div class="pl-6 space-y-1">
                         <div v-if="file.cases === undefined" class="flex items-center gap-2 text-xs text-slate-400 py-1">
                           <Icon name="heroicons:arrow-path" class="w-3.5 h-3.5 animate-spin" />
-                          Loading cases...
+                          {{ $t('runner.loadingCases') }}
                         </div>
                         <div v-else-if="file.cases.length === 0" class="flex items-center gap-2 text-xs text-slate-400 py-1">
-                          No cases found
+                          {{ $t('runner.noCasesFound') }}
                         </div>
                         <div v-else v-for="tc in file.cases" :key="tc" class="flex items-start gap-2 group min-w-0" :class="{ 'opacity-50': selectedTests.includes(file.path! + '::' + tc) || selectedTests.includes(file.path!) }">
                           <button
@@ -267,7 +267,7 @@
             >
               <label
                 class="block text-sm font-bold text-slate-800 mb-2 shrink-0"
-                >Test Orders (.json)</label
+                >{{ $t('runner.testOrders') }}</label
               >
               <div
                 class="space-y-2 overflow-y-auto flex-1 pr-2 custom-scrollbar"
@@ -301,14 +301,14 @@
                     }}</span>
                   </div>
                   <div class="text-xs font-semibold text-slate-500 mt-1.5 pl-8">
-                    {{ order.tests.length }} tests
+                    {{ order.tests.length }} {{ $t('runner.tests') }}
                   </div>
                 </div>
                 <div
                   v-if="testOrders.length === 0"
                   class="text-sm font-medium text-slate-500 italic p-4 text-center border border-dashed border-slate-300 rounded-xl"
                 >
-                  No order files found.
+                  {{ $t('runner.noOrderFiles') }}
                 </div>
               </div>
             </div>
@@ -350,12 +350,12 @@
             />
             {{
               session?.status === "Closed"
-                ? "Session Closed"
+                ? $t('runner.sessionClosed')
                 : isTesting
-                  ? "Stop Execution"
+                  ? $t('runner.stopExecution')
                   : isParsingTests
-                    ? "Parsing..."
-                    : "Start Tests"
+                    ? $t('runner.parsing')
+                    : $t('runner.startTests')
             }}
           </button>
           
@@ -370,7 +370,7 @@
             class="w-full mt-3 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-sm active:scale-95 bg-amber-100 text-amber-700 border border-amber-200 hover:bg-amber-200 hover:shadow-amber-500/20 hover:shadow-md disabled:opacity-50 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:shadow-none"
           >
             <Icon name="heroicons:arrow-path-rounded-square" class="w-5 h-5" />
-            Rerun Failed Tests
+            {{ $t('runner.rerunFailed') }}
           </button>
         </div>
       </aside>
@@ -391,13 +391,13 @@
                 name="heroicons:command-line"
                 class="w-4 h-4 text-amnimo-400"
               />
-              <span>Playwright Engine</span>
+              <span>{{ $t('runner.playwrightEngine') }}</span>
             </div>
             <div class="flex gap-4">
               <button @click="downloadLog('e2e')" class="text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                <Icon name="heroicons:arrow-down-tray" class="w-3 h-3" /> Save
+                <Icon name="heroicons:arrow-down-tray" class="w-3 h-3" /> {{ $t('runner.save') }}
               </button>
-              <button @click="clearE2ELogs" class="text-xs font-medium text-slate-400 hover:text-white transition-colors">Clear</button>
+              <button @click="clearE2ELogs" class="text-xs font-medium text-slate-400 hover:text-white transition-colors">{{ $t('runner.clear') }}</button>
             </div>
           </div>
           <div
@@ -413,7 +413,7 @@
               <span v-html="log.htmlText"></span>
             </div>
             <div v-if="e2eLogs.length === 0" class="text-slate-600 italic mt-2">
-              Ready to execute tests...
+              {{ $t('runner.readyToExec') }}
             </div>
           </div>
         </div>
@@ -429,13 +429,13 @@
               class="flex items-center gap-2 text-xs font-semibold text-slate-300 tracking-wide uppercase"
             >
               <Icon name="heroicons:server" class="w-4 h-4 text-emerald-400" />
-              <span>Backend Events</span>
+              <span>{{ $t('runner.backendEvents') }}</span>
             </div>
             <div class="flex gap-4">
               <button @click="downloadLog('backend')" class="text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                <Icon name="heroicons:arrow-down-tray" class="w-3 h-3" /> Save
+                <Icon name="heroicons:arrow-down-tray" class="w-3 h-3" /> {{ $t('runner.save') }}
               </button>
-              <button @click="clearBackendLogs" class="text-xs font-medium text-slate-400 hover:text-white transition-colors">Clear</button>
+              <button @click="clearBackendLogs" class="text-xs font-medium text-slate-400 hover:text-white transition-colors">{{ $t('runner.clear') }}</button>
             </div>
           </div>
           <div
@@ -454,7 +454,7 @@
               v-if="backendLogs.length === 0"
               class="text-slate-600 italic mt-2"
             >
-              Listening for backend events...
+              {{ $t('runner.listeningBackend') }}
             </div>
           </div>
         </div>
@@ -482,9 +482,9 @@
               class="w-10 h-10 animate-spin mb-4 text-amnimo-500"
             />
             <p class="text-sm font-bold text-slate-700">
-              Resolving Test Cases...
+              {{ $t('runner.resolvingTestCases') }}
             </p>
-            <p class="text-xs text-slate-400 mt-2">Fetching suite structures</p>
+            <p class="text-xs text-slate-400 mt-2">{{ $t('runner.fetchingSuites') }}</p>
           </div>
           <TestProgress 
             v-else 
@@ -520,7 +520,7 @@
                 name="heroicons:cog-8-tooth"
                 class="w-6 h-6 text-amnimo-500"
               />
-              Edit .env Configuration
+              {{ $t('runner.editEnvConfig') }}
             </h3>
             <button
               @click="showEnvModal = false"
@@ -541,7 +541,7 @@
               @click="showEnvModal = false"
               class="px-5 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm active:scale-95"
             >
-              Cancel
+              {{ $t('runner.cancel') }}
             </button>
             <button
               @click="saveEnv"
@@ -553,7 +553,7 @@
                 name="heroicons:arrow-path"
                 class="w-4 h-4 animate-spin"
               />
-              Save Changes
+              {{ $t('runner.saveChanges') }}
             </button>
           </div>
         </div>
@@ -583,6 +583,7 @@ import type { Session } from "~~/shared/types";
 import TestProgress from "~/components/TestProgress.vue";
 import ConfirmModal from "~/components/ConfirmModal.vue";
 import { useToast } from '~/composables/useToast';
+const { t } = useI18n();
 
 const { addToast } = useToast();
 
@@ -771,11 +772,11 @@ const executeTests = async () => {
   if (!session.value || isTesting.value) return;
 
   if (executionMode.value === "single" && selectedTests.value.length === 0) {
-    addToast({ title: 'Error', message: "Please select at least one test to run.", type: 'error' });
+    addToast({ title: t('runner.errorTitle'), message: t('runner.selectTestError'), type: 'error' });
     return;
   }
   if (executionMode.value === "order" && !selectedOrder.value) {
-    addToast({ title: 'Error', message: "Please select a test order.", type: 'error' });
+    addToast({ title: t('runner.errorTitle'), message: t('runner.selectOrderError'), type: 'error' });
     return;
   }
 

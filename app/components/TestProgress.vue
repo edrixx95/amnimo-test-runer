@@ -6,11 +6,11 @@
       <div class="flex justify-between items-center mb-3">
         <h3 class="font-bold text-slate-800 flex items-center gap-2">
           <Icon name="heroicons:queue-list" class="w-5 h-5 text-amnimo-500" />
-          Test Queue
+          {{ $t('testProgress.testQueue') }}
         </h3>
         <span
           class="text-xs font-bold text-slate-500 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-sm"
-          title="Completed Suites / Total Suites"
+          :title="$t('testProgress.completedSuites')"
         >
           {{ completedSpecs }} / {{ specs.length }}
         </span>
@@ -69,7 +69,7 @@
         >
           <Icon name="heroicons:inbox" class="w-8 h-8 opacity-50" />
         </div>
-        <p class="text-sm font-medium">Queue is empty</p>
+        <p class="text-sm font-medium">{{ $t('testProgress.queueIsEmpty') }}</p>
       </div>
 
       <div
@@ -115,14 +115,14 @@
               v-if="spec.innerTests.length > 0"
               class="text-xs font-medium text-slate-500 mt-0.5"
             >
-              {{ spec.innerTests.length }} tests
+              {{ spec.innerTests.length }} {{ $t('testProgress.tests') }}
             </p>
           </div>
           <div v-if="!isTesting" class="shrink-0 flex items-center">
             <button
               @click.stop="$emit('remove-file', spec.path)"
               class="w-6 h-6 flex items-center justify-center bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-lg transition-colors"
-              title="Remove File"
+              :title="$t('testProgress.removeFile')"
             >
               <Icon name="heroicons:minus" class="w-4 h-4" />
             </button>
@@ -186,7 +186,7 @@
                   v-if="!isTesting"
                   @click.stop="$emit('remove-case', spec.path, test.name)"
                   class="shrink-0 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded transition-colors"
-                  title="Remove Case"
+                  :title="$t('testProgress.removeCase')"
                 >
                   <Icon name="heroicons:minus" class="w-3.5 h-3.5" />
                 </button>

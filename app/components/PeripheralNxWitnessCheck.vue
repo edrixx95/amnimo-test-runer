@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
 
+const { t } = useI18n();
+
 const props = defineProps<{
   modelValue: boolean;
   baseUrl: string;
@@ -65,7 +67,7 @@ const startProcess = async () => {
           attempts++;
           lastError = err?.data?.statusMessage || err.message || "Unknown error";
           if (attempts >= 5) {
-            throw new Error(`Failed to initialize Nx Witness Media Server: ${lastError}`);
+            throw new Error(t('peripheralNxWitnessCheck.errorInit', { lastError }));
           }
         }
       }
@@ -78,7 +80,7 @@ const startProcess = async () => {
   } catch (err: any) {
     console.error("Nx Witness Setup Error:", err);
     status.value = 'error';
-    errorMessage.value = err?.data?.statusMessage || err.message || "Failed to configure Nx Witness on router";
+    errorMessage.value = err?.data?.statusMessage || err.message || t('peripheralNxWitnessCheck.errorConfig');
   }
 };
 
@@ -169,9 +171,9 @@ onMounted(() => {
             class="font-bold text-lg transition-colors duration-300 flex items-center gap-2"
             :class="status === 'connected' ? 'text-emerald-800' : 'text-slate-900'"
           >
-            Nx Witness
+            {{ $t('peripheralNxWitnessCheck.title') }}
             <a :href="nxLink" target="_blank" @click.stop class="text-xs font-semibold text-amnimo-500 hover:text-amnimo-600 bg-amnimo-50 hover:bg-amnimo-100 px-2 py-0.5 rounded-md transition-colors flex items-center gap-1 border border-amnimo-100">
-              Web Client <Icon name="heroicons:arrow-top-right-on-square" class="w-3 h-3" />
+              {{ $t('peripheralNxWitnessCheck.webClient') }} <Icon name="heroicons:arrow-top-right-on-square" class="w-3 h-3" />
             </a>
           </h4>
           <p
@@ -188,13 +190,13 @@ onMounted(() => {
           >
             {{
               status === 'idle'
-                ? 'Ready to setup'
+                ? $t('peripheralNxWitnessCheck.ready')
                 : status === 'configuring'
-                ? 'Configuring router...'
+                ? $t('peripheralNxWitnessCheck.configuring')
                 : status === 'waiting_client'
-                ? 'Waiting for Nx Client login...'
+                ? $t('peripheralNxWitnessCheck.waiting')
                 : status === 'connected'
-                ? 'Connected and verified'
+                ? $t('peripheralNxWitnessCheck.connected')
                 : errorMessage
             }}
           </p>
@@ -208,7 +210,7 @@ onMounted(() => {
         @click="startProcess"
         class="px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-bold shadow-sm transition-all active:scale-95"
       >
-        Setup
+        {{ $t('peripheralNxWitnessCheck.setup') }}
       </button>
       <div v-else-if="status === 'configuring' || status === 'waiting_client'" class="p-2 text-indigo-500">
         <Icon name="heroicons:arrow-path" class="w-5 h-5 animate-spin" />
@@ -233,10 +235,10 @@ onMounted(() => {
           </div>
           <div>
             <span class="block font-bold text-sm text-slate-700">
-              PC Client Connection
+              {{ $t('peripheralNxWitnessCheck.pcConnection') }}
             </span>
             <span class="block text-xs font-medium text-slate-500 mt-0.5">
-              {{ status === 'connected' ? 'Established via TCP:7001' : 'No connection found' }}
+              {{ status === 'connected' ? $t('peripheralNxWitnessCheck.established') : $t('peripheralNxWitnessCheck.noConnection') }}
             </span>
           </div>
         </div>

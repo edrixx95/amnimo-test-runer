@@ -23,7 +23,7 @@
             :disabled="isLoading"
             class="w-full sm:w-auto px-5 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50 active:scale-95 shadow-sm"
           >
-            {{ cancelText }}
+            {{ cancelText === 'Cancel' ? $t('common.cancel') : cancelText }}
           </button>
           <button
             type="button"
@@ -33,7 +33,7 @@
             :class="confirmBtnClass"
           >
             <AppSpinner v-if="isLoading" size="sm" />
-            {{ confirmText }}
+            {{ confirmText === 'Confirm' ? $t('common.confirm') : confirmText }}
           </button>
         </div>
       </div>

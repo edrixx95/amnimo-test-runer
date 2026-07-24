@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, globalShortcut } from "electron";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import http from "http";
@@ -109,6 +109,19 @@ function createWindow() {
       splashWindow.close();
     }
     mainWindow.show();
+  });
+
+  // Enable F5 and Ctrl+R for reloading
+  mainWindow.webContents.on("before-input-event", (event, input) => {
+    if (input.type === "keyDown") {
+      if (input.key === "F5" || (input.control && input.key.toLowerCase() === "r")) {
+        mainWindow.reload();
+        event.preventDefault();
+      } else if (input.key === "F12" || (input.control && input.shift && input.key.toLowerCase() === "i")) {
+        mainWindow.webContents.toggleDevTools();
+        event.preventDefault();
+      }
+    }
   });
 
   mainWindow.on("closed", () => {

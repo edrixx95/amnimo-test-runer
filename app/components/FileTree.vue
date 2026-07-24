@@ -71,10 +71,10 @@
         >
           <div v-if="node.cases === undefined" class="p-1.5 text-xs text-gray-500 flex items-center gap-2">
             <Icon name="heroicons:arrow-path" class="w-3.5 h-3.5 animate-spin" />
-            Loading cases...
+            {{ $t('fileTree.loadingCases') }}
           </div>
           <div v-else-if="node.cases.length === 0" class="p-1.5 text-xs text-gray-500">
-            No cases found
+            {{ $t('fileTree.noCasesFound') }}
           </div>
           <div v-else v-for="testCase in node.cases" :key="testCase">
             <div

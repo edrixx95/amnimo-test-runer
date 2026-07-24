@@ -33,8 +33,8 @@
               <div class="w-20 h-20 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Icon name="heroicons:server" class="w-10 h-10" />
               </div>
-              <h4 class="text-2xl font-bold text-slate-900 mb-2">Staging Server</h4>
-              <p class="text-slate-500 font-medium">Testing and pre-release firmwares</p>
+              <h4 class="text-2xl font-bold text-slate-900 mb-2">{{ $t('firmware.stagingServer') }}</h4>
+              <p class="text-slate-500 font-medium">{{ $t('firmware.stagingDesc') }}</p>
             </div>
             
             <div @click="selectSource('production')" class="group bg-white rounded-3xl p-8 border-2 border-transparent hover:border-emerald-400 hover:shadow-glass hover:-translate-y-1 transition-all duration-300 cursor-pointer text-center relative overflow-hidden">
@@ -42,8 +42,8 @@
               <div class="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Icon name="heroicons:check-badge" class="w-10 h-10" />
               </div>
-              <h4 class="text-2xl font-bold text-slate-900 mb-2">Production Server</h4>
-              <p class="text-slate-500 font-medium">Stable, officially released firmwares</p>
+              <h4 class="text-2xl font-bold text-slate-900 mb-2">{{ $t('firmware.productionServer') }}</h4>
+              <p class="text-slate-500 font-medium">{{ $t('firmware.productionDesc') }}</p>
             </div>
           </div>
         </div>
@@ -53,7 +53,7 @@
           <div class="mb-6 flex gap-4">
             <button @click="clearSource" class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-xl font-medium transition-colors shadow-sm">
               <Icon name="heroicons:arrow-left" class="w-5 h-5" />
-              Back
+              {{ $t('firmware.back') }}
             </button>
             
             <div class="flex-1 bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex gap-4">
@@ -61,7 +61,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <Icon name="heroicons:magnifying-glass" class="w-5 h-5" />
                 </div>
-                <input v-model="searchQuery" type="text" placeholder="Search filename..." class="block w-full pl-10 pr-3 py-2 border-none focus:ring-0 text-sm bg-transparent" />
+                <input v-model="searchQuery" type="text" :placeholder="$t('firmware.searchPlaceholder')" class="block w-full pl-10 pr-3 py-2 border-none focus:ring-0 text-sm bg-transparent" />
               </div>
               
               <div class="w-px bg-slate-200 my-1"></div>
@@ -71,7 +71,7 @@
                   <Icon name="heroicons:cpu-chip" class="w-4 h-4 text-slate-400" />
                 </div>
                 <button @click="isBoardDropdownOpen = !isBoardDropdownOpen" class="w-full py-2 pl-8 pr-3 text-left bg-transparent text-sm font-bold text-slate-700 outline-none flex items-center justify-between hover:bg-slate-50 rounded-lg transition-colors">
-                  <span class="truncate">{{ filterBoard === 'all' ? 'All Boards' : filterBoard }}</span>
+                  <span class="truncate">{{ filterBoard === 'all' ? $t('firmware.allBoards') : filterBoard }}</span>
                   <Icon name="heroicons:chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-300" :class="{'rotate-180': isBoardDropdownOpen}" />
                 </button>
                 
@@ -91,7 +91,7 @@
                     <div class="max-h-60 overflow-y-auto custom-scrollbar px-1">
                       <button @click="selectBoardFilter('all')" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors mb-1" :class="filterBoard === 'all' ? 'text-amnimo-700 bg-amnimo-50 font-bold' : 'text-slate-600 hover:bg-slate-50 font-medium hover:text-slate-900'">
                         <Icon name="heroicons:square-3-stack-3d" class="w-4 h-4" :class="filterBoard === 'all' ? 'text-amnimo-500' : 'text-slate-400'" />
-                        All Boards
+                        {{ $t('firmware.allBoards') }}
                       </button>
                       
                       <div class="h-px bg-slate-100 my-1 mx-2"></div>
@@ -108,7 +108,7 @@
           </div>
 
           <div v-if="isLoading && firmwares.length === 0" class="flex justify-center p-20">
-            <AppLoader size="md" text="Loading firmwares..." />
+            <AppLoader size="md" :text="$t('firmware.loading')" />
           </div>
           
           <div v-else-if="error" class="p-8 text-center text-red-600 bg-white rounded-2xl shadow-sm border border-red-100">
@@ -118,8 +118,8 @@
 
           <div v-else-if="filteredFirmwares.length === 0" class="p-16 text-center text-slate-500 bg-white rounded-2xl shadow-sm border border-slate-100">
             <Icon name="heroicons:document-magnifying-glass" class="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p class="text-lg font-bold text-slate-900 mb-1">No firmwares found</p>
-            <p>Try adjusting your search or filters.</p>
+            <p class="text-lg font-bold text-slate-900 mb-1">{{ $t('firmware.noFirmwares') }}</p>
+            <p>{{ $t('firmware.tryAdjusting') }}</p>
           </div>
           
           <div v-else class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
@@ -136,21 +136,21 @@
                     </th>
                     <th class="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors group" @click="sortBy('board')">
                       <div class="flex items-center gap-1.5">
-                        Board
+                        {{ $t('firmware.board') }}
                         <Icon v-if="sortKey === 'board'" :name="sortOrder === 'asc' ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="w-3.5 h-3.5 text-amnimo-600" />
                         <Icon v-else name="heroicons:chevron-up-down" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-50" />
                       </div>
                     </th>
                     <th class="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors group" @click="sortBy('isModem')">
                       <div class="flex items-center gap-1.5">
-                        Type
+                        {{ $t('firmware.type') }}
                         <Icon v-if="sortKey === 'isModem'" :name="sortOrder === 'asc' ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="w-3.5 h-3.5 text-amnimo-600" />
                         <Icon v-else name="heroicons:chevron-up-down" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-50" />
                       </div>
                     </th>
                     <th class="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors group" @click="sortBy('version')">
                       <div class="flex items-center gap-1.5">
-                        Version
+                        {{ $t('firmware.version') }}
                         <Icon v-if="sortKey === 'version'" :name="sortOrder === 'asc' ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="w-3.5 h-3.5 text-amnimo-600" />
                         <Icon v-else name="heroicons:chevron-up-down" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-50" />
                       </div>
@@ -195,17 +195,17 @@
                     </td>
                     <td class="px-6 py-4">
                       <span v-if="fw.isModem" class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-amnimo-100 text-amnimo-700 border border-amnimo-200 uppercase tracking-wider">
-                        Modem
+                        {{ $t('firmware.modem') }}
                       </span>
                       <span v-else class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider">
-                        Firmware
+                        {{ $t('firmware.firmwareLabel') }}
                       </span>
                     </td>
                     <td class="px-6 py-4">
                       <div class="flex flex-col">
                         <span class="font-mono text-sm text-slate-800 font-bold" v-if="fw.version && fw.version.toLowerCase() !== 'modem'">{{ fw.version }}</span>
                         <span class="font-mono text-sm text-slate-400 font-bold italic" v-else>N/A</span>
-                        <span class="text-xs text-slate-400 font-semibold tracking-wide">Build {{ fw.build }}</span>
+                        <span class="text-xs text-slate-400 font-semibold tracking-wide">{{ $t('firmware.build') }} {{ fw.build }}</span>
                       </div>
                     </td>
                     <td class="px-6 py-4 text-sm text-slate-600 font-semibold">
@@ -234,6 +234,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+const { t } = useI18n();
 
 interface Firmware {
   filename: string;
@@ -340,7 +341,7 @@ const fetchFirmwares = async () => {
     firmwares.value = await $fetch<Firmware[]>('/api/firmwares/external');
   } catch (err: any) {
     console.error('Failed to fetch firmwares', err);
-    error.value = 'Failed to load firmwares from external servers. Please try again later.';
+    error.value = t('firmware.fetchError');
   } finally {
     isLoading.value = false;
   }
