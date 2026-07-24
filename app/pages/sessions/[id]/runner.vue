@@ -715,8 +715,8 @@
 import { ref, computed, watch, onMounted, nextTick, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import type { Session } from "~~/shared/types";
-import TestProgress from "~/components/TestProgress.vue";
-import ConfirmModal from "~/components/ConfirmModal.vue";
+
+
 import { useToast } from "~/composables/useToast";
 const { t } = useI18n();
 
@@ -1402,10 +1402,10 @@ const toggleTest = async () => {
         method: "POST",
         body: { sessionId },
       });
-      addE2ELog("\n\x1b[33m⚠️ Sent kill signal to test process.\x1b[0m\n");
+      addE2ELog("\n\x1b[33m⚠�E�ESent kill signal to test process.\x1b[0m\n");
       if (session.value) session.value.status = "Failed";
     } catch (err) {
-      addE2ELog("\n\x1b[31m❌ Failed to stop test process.\x1b[0m\n");
+      addE2ELog("\n\x1b[31m❁EFailed to stop test process.\x1b[0m\n");
     }
   } else {
     // Start Execution
@@ -1414,7 +1414,7 @@ const toggleTest = async () => {
     backendLogs.value = [];
     if (session.value) session.value.status = "Running";
 
-    addE2ELog("\x1b[36mℹ️ Initializing Test Runner...\x1b[0m\n");
+    addE2ELog("\x1b[36mℹ�E�EInitializing Test Runner...\x1b[0m\n");
 
     const testList =
       executionMode.value === "order" && selectedOrder.value
@@ -1475,7 +1475,7 @@ const toggleTest = async () => {
       }
     } catch (err: any) {
       addE2ELog(
-        `\n\x1b[33m⚠️ Warning: Failed to parse test cases (${err.message}). Tests will appear as they run.\x1b[0m\n`,
+        `\n\x1b[33m⚠�E�EWarning: Failed to parse test cases (${err.message}). Tests will appear as they run.\x1b[0m\n`,
       );
     } finally {
       isParsingTests.value = false;
@@ -1496,7 +1496,7 @@ const toggleTest = async () => {
     } catch (err: any) {
       isTesting.value = false;
       addE2ELog(
-        `\n\x1b[31m❌ Failed to start test runner: ${err.message}\x1b[0m\n`,
+        `\n\x1b[31m❁EFailed to start test runner: ${err.message}\x1b[0m\n`,
       );
     }
   }

@@ -9,6 +9,12 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     '@nuxtjs/i18n'
   ],
+  components: [
+    {
+      path: '~/components',
+      pathPrefix: false,
+    }
+  ],
   i18n: {
     locales: ['en', 'ja'],
     defaultLocale: 'en',

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from "vue";
-import IconInternalStorage from "./icons/IconInternalStorage.vue";
-import IconUsb from "./icons/IconUsb.vue";
-import IconSdCard from "./icons/IconSdCard.vue";
+import IconInternalStorage from "../icons/IconInternalStorage.vue";
+import IconUsb from "../icons/IconUsb.vue";
+import IconSdCard from "../icons/IconSdCard.vue";
 
 const { t } = useI18n();
 

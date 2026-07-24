@@ -241,7 +241,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import FolderPickerDialog from "~/components/FolderPickerDialog.vue";
+
 import { useToast } from "~/composables/useToast";
 const { t } = useI18n();
 

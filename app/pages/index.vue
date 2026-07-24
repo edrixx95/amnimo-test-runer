@@ -263,7 +263,7 @@
               </div>
 
               <div
-                v-if="session.meta && session.status !== 'Closed'"
+                v-if="session.status === 'Running' && session.meta"
                 class="pt-3 mt-3 border-t border-gray-200/50 space-y-2"
               >
                 <div
@@ -282,12 +282,9 @@
                   <div
                     class="h-1.5 rounded-full transition-all duration-500"
                     :class="
-                      session.status === 'Failed' ||
                       session.meta.testCounts?.failed > 0
                         ? 'bg-red-500'
-                        : session.status === 'Completed' ||
-                            session.meta.specCounts?.completed ===
-                              session.meta.specCounts?.total
+                        : session.meta.specCounts?.completed === session.meta.specCounts?.total
                           ? 'bg-green-500'
                           : 'bg-blue-500'
                     "
@@ -475,10 +472,10 @@ import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "~/composables/useToast";
 const { t } = useI18n();
-import ReportModal from "~/components/ReportModal.vue";
-import ConfirmModal from "~/components/ConfirmModal.vue";
-import ExcelJsonViewer from "~/components/ExcelJsonViewer.vue";
-import HtmlReportViewer from "~/components/HtmlReportViewer.vue";
+
+
+
+
 
 const sessionStore = useSessionStore();
 const router = useRouter();
