@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 <script setup lang="ts">
 /* eslint-disable */
 import { ref, watch, computed } from "vue";

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, vue/attributes-order, vue/block-order */
 <script setup lang="ts">
 /* eslint-disable */
 import { ref, computed, onMounted } from "vue";

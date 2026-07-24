@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, vue/html-self-closing, vue/attributes-order, vue/block-order, @typescript-eslint/no-unused-vars, no-empty, @typescript-eslint/no-dynamic-delete */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 <script setup lang="ts">
 /* eslint-disable */
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";

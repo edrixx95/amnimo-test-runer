@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, _globalShortcut } from "electron";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import http from "http";
@@ -175,7 +175,7 @@ app.whenReady().then(async () => {
     });
 
     // Handle generic downloads
-    mainWindow._webContents.session.on('will-download', (event, item, _webContents) => {
+    mainWindow.webContents.session.on('will-download', (event, item, _webContents) => {
       item.on('updated', (event, state) => {
         if (state === 'progressing') {
           if (!item.isPaused() && mainWindow) {
