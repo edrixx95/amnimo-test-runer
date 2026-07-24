@@ -1,3 +1,32 @@
+<script setup lang="ts">
+import { onMounted } from "vue";
+import { useFirmwareManager } from "~/composables/firmware/useFirmwareManager";
+
+const {
+  firmwares,
+  isLoading,
+  error,
+  selectedSource,
+  searchQuery,
+  filterBoard,
+  sortKey,
+  sortOrder,
+  isBoardDropdownOpen,
+  BOARD_LIST,
+  sortBy,
+  selectBoardFilter,
+  filteredFirmwares,
+  selectSource,
+  clearSource,
+  fetchFirmwares,
+  formatBytes,
+} = useFirmwareManager();
+
+onMounted(() => {
+  fetchFirmwares();
+});
+</script>
+
 <template>
   <div class="flex-1 flex flex-col h-full overflow-hidden relative bg-slate-50">
     <header
@@ -19,7 +48,7 @@
     </header>
 
     <div class="flex-1 p-8 overflow-auto">
-      <div class="max-w-7xl mx-auto">
+      <div class="max-w-8xl mx-auto">
         <div class="mb-8 flex justify-between items-end">
           <div>
             <h3 class="text-2xl font-bold text-slate-900 tracking-tight">
@@ -494,147 +523,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-const { t } = useI18n();
-
-interface Firmware {
-  filename: string;
-  source: string;
-  board: string;
-  version: string;
-  build: string;
-  isModem: boolean;
-  date: string;
-  size: number;
-  url: string;
-}
-
-const firmwares = ref<Firmware[]>([]);
-const isLoading = ref(false);
-const error = ref("");
-
-const selectedSource = ref<string | null>(null);
-const searchQuery = ref("");
-const filterBoard = ref("all");
-const sortKey = ref<keyof Firmware>("date");
-const sortOrder = ref<"asc" | "desc">("desc");
-
-const sortBy = (key: keyof Firmware) => {
-  if (sortKey.value === key) {
-    sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
-  } else {
-    sortKey.value = key;
-    // Default descending for date, asc for others
-    sortOrder.value = key === "date" ? "desc" : "asc";
-  }
-};
-
-const isBoardDropdownOpen = ref(false);
-const BOARD_LIST = [
-  "AG10",
-  "AG20",
-  "AX11",
-  "AX12",
-  "AX21",
-  "AX30",
-  "AR10",
-  "AR20",
-  "AC10",
-  "AC15",
-  "AC25",
-];
-
-const selectBoardFilter = (board: string) => {
-  filterBoard.value = board;
-  isBoardDropdownOpen.value = false;
-};
-
-const filteredFirmwares = computed(() => {
-  if (!selectedSource.value) return [];
-
-  let result = firmwares.value.filter((fw) => {
-    // Exact Source match
-    if (fw.source !== selectedSource.value) return false;
-
-    // Search
-    if (searchQuery.value) {
-      const query = searchQuery.value.toLowerCase();
-      if (!fw.filename.toLowerCase().includes(query)) return false;
-    }
-
-    // Board
-    if (filterBoard.value !== "all") {
-      const boardParts = fw.board.split("_");
-      if (!boardParts.includes(filterBoard.value)) return false;
-    }
-
-    return true;
-  });
-
-  result.sort((a, b) => {
-    let valA: any = a[sortKey.value];
-    let valB: any = b[sortKey.value];
-
-    if (sortKey.value === "date") {
-      valA = new Date(a.date).getTime();
-      valB = new Date(b.date).getTime();
-    } else if (sortKey.value === "version") {
-      // Basic natural sort for versions (e.g. 1.2.10 > 1.2.9)
-      const collator = new Intl.Collator(undefined, {
-        numeric: true,
-        sensitivity: "base",
-      });
-      return sortOrder.value === "asc"
-        ? collator.compare(valA, valB)
-        : collator.compare(valB, valA);
-    } else if (typeof valA === "string") {
-      valA = valA.toLowerCase();
-      valB = (valB as string).toLowerCase();
-    }
-
-    if (valA < valB) return sortOrder.value === "asc" ? -1 : 1;
-    if (valA > valB) return sortOrder.value === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  return result;
-});
-
-const selectSource = (source: string) => {
-  selectedSource.value = source;
-  searchQuery.value = "";
-  filterBoard.value = "all";
-};
-
-const clearSource = () => {
-  selectedSource.value = null;
-};
-
-const fetchFirmwares = async () => {
-  isLoading.value = true;
-  error.value = "";
-  try {
-    firmwares.value = await $fetch<Firmware[]>("/api/firmwares/external");
-  } catch (err: any) {
-    console.error("Failed to fetch firmwares", err);
-    error.value = t("firmware.fetchError");
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const formatBytes = (bytes: number, decimals = 2) => {
-  if (!+bytes) return "0 Bytes";
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-};
-
-onMounted(() => {
-  fetchFirmwares();
-});
-</script>

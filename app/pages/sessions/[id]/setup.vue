@@ -1,3 +1,35 @@
+<script setup lang="ts">
+import { useSessionSetup } from "~/composables/sessions/useSessionSetup";
+import { BOARDS, DEVICE_TYPES } from "~~/shared/constants";
+
+const {
+  sessionId,
+  session,
+  isLoadingSession,
+  isSaving,
+  currentStep,
+  steps,
+  formData,
+  extractedPrevFw,
+  extractedTestFw,
+  extractedDhcpIp,
+  extractedUsername,
+  extractedPassword,
+  availableDeviceTypes,
+  selectBoard,
+  pingStatus,
+  isPinging,
+  pingDevice,
+  checklistState,
+  currentChecklist,
+  resetEnv,
+  isStepValid,
+  nextStep,
+  prevStep,
+  finishSetup,
+} = useSessionSetup();
+</script>
+
 <template>
   <div class="flex flex-col h-full bg-slate-50 text-slate-900">
     <!-- Header -->
@@ -661,7 +693,7 @@
                               ].includes(p.id),
                           )"
                           :key="item.id"
-                          class="rounded-2xl border-2 p-6 shadow-soft transition-all duration-300 flex flex-col group cursor-pointer break-inside-avoid mb-6 w-full inline-block"
+                          class="rounded-2xl border-2 p-6 shadow-soft transition-all duration-300 flex flex-col group cursor-pointer break-inside-avoid mb-6 w-full"
                           :class="
                             checklistState.peripherals[item.id]
                               ? 'border-emerald-300 bg-emerald-50/40'
@@ -729,7 +761,7 @@
                         <div
                           v-for="item in currentChecklist.partners"
                           :key="item.id"
-                          class="rounded-2xl border-2 p-6 shadow-soft transition-all duration-300 flex flex-col group cursor-pointer break-inside-avoid mb-6 w-full inline-block"
+                          class="rounded-2xl border-2 p-6 shadow-soft transition-all duration-300 flex flex-col group cursor-pointer break-inside-avoid mb-6 w-full"
                           :class="
                             checklistState.partners[item.id]
                               ? 'border-emerald-300 bg-emerald-50/40'
@@ -836,7 +868,7 @@
                     </template>
                     <div
                       v-else-if="currentChecklist && pingStatus === 'failed'"
-                      class="p-6 bg-red-50 border border-red-200 rounded-2xl flex flex-col items-center justify-center gap-3 text-red-700 min-h-[260px] shadow-sm text-center break-inside-avoid mb-6 w-full inline-block"
+                      class="p-6 bg-red-50 border border-red-200 rounded-2xl flex flex-col items-center justify-center gap-3 text-red-700 min-h-[260px] shadow-sm text-center break-inside-avoid mb-6 w-full"
                     >
                       <Icon
                         name="heroicons:exclamation-triangle"
@@ -852,7 +884,7 @@
                     </div>
                     <div
                       v-else-if="currentChecklist && pingStatus === 'idle'"
-                      class="p-6 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-3 text-slate-500 min-h-[260px] text-center break-inside-avoid mb-6 w-full inline-block"
+                      class="p-6 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-3 text-slate-500 min-h-[260px] text-center break-inside-avoid mb-6 w-full"
                     >
                       <Icon
                         name="heroicons:cursor-arrow-rays"
@@ -868,7 +900,7 @@
                     </div>
                     <div
                       v-else
-                      class="p-6 bg-blue-50/50 text-amnimo-800 rounded-2xl border border-amnimo-100 flex flex-col items-center justify-center font-medium min-h-[260px] text-center break-inside-avoid mb-6 w-full inline-block"
+                      class="p-6 bg-blue-50/50 text-amnimo-800 rounded-2xl border border-amnimo-100 flex flex-col items-center justify-center font-medium min-h-[260px] text-center break-inside-avoid mb-6 w-full"
                     >
                       No specific checklist defined for this device type. You
                       can proceed.
@@ -921,525 +953,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useToast } from "~/composables/useToast";
-const { t } = useI18n();
-import {
-  BOARDS,
-  DEVICE_TYPES,
-  CHECKLISTS,
-  DEFAULT_CHECKLIST,
-  getFirmwarePrefix,
-} from "~~/shared/constants";
-import type { Session } from "~~/shared/types";
-
-const route = useRoute();
-const router = useRouter();
-const sessionId = route.params.id as string;
-const session = ref<Session | null>(null);
-const isLoadingSession = ref(true);
-const isSaving = ref(false);
-
-const { addToast } = useToast();
-
-const currentStep = ref(1);
-
-const steps = computed(() => {
-  if (formData.value.testType === "playground") {
-    return [
-      { name: t("setup.stepScope"), description: t("setup.stepScopeDescPg") },
-      { name: t("setup.stepTarget"), description: t("setup.stepTargetDesc") },
-      { name: t("setup.stepEnv"), description: t("setup.stepEnvDesc") },
-    ];
-  }
-  return [
-    { name: t("setup.stepScope"), description: t("setup.stepScopeDesc") },
-    { name: t("setup.stepTarget"), description: t("setup.stepTargetDesc") },
-    { name: t("setup.stepEnv"), description: t("setup.stepEnvDesc") },
-    { name: t("setup.stepCheck"), description: t("setup.stepCheckDesc") },
-  ];
-});
-
-const formData = ref({
-  series: "",
-  board: "",
-  deviceType: "",
-  baseUrl: "https://192.168.0.254",
-  envContent: "",
-  testType: "release" as "release" | "system" | "playground",
-});
-
-// Extract firmwares for step 4 firmware preparation
-const extractedPrevFw = computed(() => {
-  const match = formData.value.envContent.match(/^PREV_FIRMWARE_NAME=(.*)$/m);
-  return match ? match[1]!.trim() : "";
-});
-
-const extractedTestFw = computed(() => {
-  const match = formData.value.envContent.match(/^TEST_FIRMWARE_NAME=(.*)$/m);
-  return match ? match[1]!.trim() : "";
-});
-
-const extractedDhcpIp = computed(() => {
-  const match = formData.value.envContent.match(/^DHCP_CLIENT_IP=(.*)$/m);
-  return match ? match[1]!.trim() : "";
-});
-
-const extractedUsername = computed(() => {
-  const match = formData.value.envContent.match(/^TEST_USERNAME=(.*)$/m);
-  return match ? match[1]!.trim() : "admin";
-});
-
-const extractedPassword = computed(() => {
-  const match = formData.value.envContent.match(/^TEST_PASSWORD=(.*)$/m);
-  return match ? match[1]!.trim() : "yoko1234";
-});
-
-// Load session data
-onMounted(async () => {
-  try {
-    const data = await $fetch<Session>(`/api/sessions/${sessionId}`);
-    session.value = data;
-    if (data.series) formData.value.series = data.series;
-    if (data.board) formData.value.board = data.board;
-    if (data.deviceType) formData.value.deviceType = data.deviceType;
-    if (data.baseUrl) formData.value.baseUrl = data.baseUrl;
-    if (data.envContent) formData.value.envContent = data.envContent;
-    if (data.testType) formData.value.testType = data.testType;
-
-    if (route.query.step) {
-      const s = parseInt(route.query.step as string);
-      if (!isNaN(s) && s >= 1 && s <= 4) {
-        currentStep.value = s;
-      }
-    }
-  } catch (err) {
-    console.error("Failed to load session:", err);
-    addToast({
-      title: t("setup.errorTitle"),
-      message: t("setup.sessionNotFound"),
-      type: "error",
-    });
-    router.push("/");
-  } finally {
-    isLoadingSession.value = false;
-  }
-});
-
-// Step 1 Logic
-const availableDeviceTypes = computed(() => {
-  if (!formData.value.board) return [];
-  return DEVICE_TYPES[formData.value.board] || [];
-});
-
-const selectBoard = (series: string, board: string) => {
-  formData.value.series = series;
-  formData.value.board = board;
-  formData.value.deviceType = ""; // Reset type
-};
-
-// Step 2 Logic
-const pingStatus = ref<"idle" | "pinging" | "success" | "failed">("idle");
-const isPinging = computed(() => pingStatus.value === "pinging");
-let pingInterval: any = null;
-
-const checklistState = ref({
-  peripherals: {} as Record<string, boolean>,
-  partners: {} as Record<string, boolean>,
-  manual: {} as Record<string, boolean>,
-});
-
-const currentChecklistKey = computed(() => {
-  let key = formData.value.board;
-  if (formData.value.deviceType) {
-    key += ` ${formData.value.deviceType}`;
-  }
-  return key;
-});
-
-const currentChecklist = computed(() => {
-  return (
-    (CHECKLISTS as any)[currentChecklistKey.value] ||
-    (CHECKLISTS as any)[formData.value.board] ||
-    DEFAULT_CHECKLIST
-  );
-});
-
-// Reset checklist state when device changes
-watch(currentChecklistKey, () => {
-  pingStatus.value = "idle";
-  checklistState.value = { peripherals: {}, partners: {}, manual: {} };
-});
-
-const pingDevice = async (silent = false) => {
-  if (!silent) pingStatus.value = "pinging";
-  try {
-    const ipMatch = formData.value.baseUrl.match(/https?:\/\/([^:]+)/);
-    const ip = ipMatch ? ipMatch[1] : formData.value.baseUrl;
-
-    const res = await $fetch<{ success: boolean }>("/api/network/ping", {
-      method: "POST",
-      body: { ip },
-    });
-
-    if (res.success) {
-      // If we just transitioned to success, check if device needs initial setup
-      if (pingStatus.value !== "success") {
-        try {
-          await $fetch("/api/proxy/device/startup-check", {
-            method: "POST",
-            body: {
-              targetUrl: formData.value.baseUrl,
-              defaultPassword: "yoko1234",
-            },
-          });
-        } catch (startupErr) {
-          console.warn("Startup check failed or not applicable:", startupErr);
-        }
-      }
-      pingStatus.value = "success";
-    } else {
-      pingStatus.value = "failed";
-    }
-  } catch (err) {
-    pingStatus.value = "failed";
-  }
-};
-
-const startPingPolling = () => {
-  stopPingPolling();
-  pingDevice(pingStatus.value !== "idle"); // If idle, show loading, otherwise silent
-  pingInterval = setInterval(() => {
-    pingDevice(true);
-  }, 3000);
-};
-
-const stopPingPolling = () => {
-  if (pingInterval) {
-    clearInterval(pingInterval);
-    pingInterval = null;
-  }
-};
-
-watch(currentStep, (newStep) => {
-  if (newStep === 4) {
-    startPingPolling();
-  } else {
-    stopPingPolling();
-  }
-});
-
-import { onUnmounted } from "vue";
-onUnmounted(() => {
-  stopPingPolling();
-});
-
-watch(currentStep, (newStep) => {
-  if (newStep === 3) {
-    pingDevice();
-  }
-});
-
-// Step 3 Logic
-const DEFAULT_ENV_TEMPLATE = `# ====================================================
-# [ブロック1] 機種・テストごとの変更項目
-# ====================================================
-
-# テスト対象のボード名とシリーズ名
-BOARD=
-SERIES=
-
-# 読み込む設定ファイルを切り替えるため、対象機種に応じて以下を指定してください（不要な場合は空欄）
-# - AC15/AC25 : V2A または V3A
-# - ARシリーズ: WoM または 空欄
-# - AX30      : A または B
-DEVICE_TYPE=
-
-# リリースFWの｢1つ前｣のバージョンのFWファイル名
-PREV_FIRMWARE_NAME=
-
-# 今回テストするリリースFWのファイル名
-TEST_FIRMWARE_NAME=
-
-# ====================================================
-# [ブロック2] テスト環境（担当者）ごとの設定項目
-# ※初回セットアップ時にご自身の環境に合わせて設定し、以降は使い回します。
-# ====================================================
-
-# ファイルサーバーのアクセスURLとポート（ポート指定がない場合は空欄）
-# ※URLには必要に応じてパス（/firmwareなど）まで含めて設定してください
-PC_SERVER_URL=http://192.168.0.6
-PC_SERVER_PORT=10068
-
-# テストに使用するインターネット回線設定
-# ※注意：GUIアクセス用ネットワーク(192.168.0.x)とアドレス帯が重複しないよう設定してください。
-INTERNET_ADDRESS=192.168.1.90/24
-INTERNET_GATEWAY_ADDRESS=192.168.1.10
-
-# テストに使用するSIM情報
-SIM_APN=soracom.io
-SIM_USERNAME=sora
-SIM_PASSWORD=sora
-
-# ====================================================
-# [ブロック3] システム固定値（変更禁止）
-# ====================================================
-
-# デバイス接続情報（デフォルト設定）
-BASE_URL=https://192.168.0.254
-HOST=192.168.0.254
-
-# 認証情報
-TEST_USERNAME=admin
-TEST_PASSWORD=yoko1234
-
-# CLIバックエンド接続情報
-CLI_SERVER_URL=http://localhost
-CLI_SERVER_PORT=8080`;
-
-const updateEnvVariables = () => {
-  let env = formData.value.envContent || DEFAULT_ENV_TEMPLATE;
-
-  // If the env doesn't contain the standard comments block, it was probably saved in an older format.
-  // We will re-apply the template to restore comments but keep the current values.
-  if (!env.includes("# [ブロック1]")) {
-    const oldValues: Record<string, string> = {};
-    env.split("\n").forEach((line) => {
-      const idx = line.indexOf("=");
-      if (idx > -1 && !line.trim().startsWith("#")) {
-        const k = line.substring(0, idx).trim();
-        const v = line.substring(idx + 1).trim();
-        oldValues[k] = v;
-      }
-    });
-
-    env = DEFAULT_ENV_TEMPLATE;
-
-    const mergeUpsert = (key: string, value: string) => {
-      if (!value) return;
-      const regex = new RegExp(`^${key}=.*$`, "m");
-      if (env.match(regex)) {
-        env = env.replace(regex, `${key}=${value}`);
-      } else {
-        env += (env && !env.endsWith("\n") ? "\n" : "") + `${key}=${value}`;
-      }
-    };
-
-    Object.entries(oldValues).forEach(([k, v]) => mergeUpsert(k, v));
-  }
-
-  const upsert = (key: string, value: string) => {
-    if (value === undefined || value === null) return;
-    const regex = new RegExp(`^${key}=.*$`, "m");
-    if (env.match(regex)) {
-      env = env.replace(regex, `${key}=${value}`);
-    } else {
-      env += (env && !env.endsWith("\n") ? "\n" : "") + `${key}=${value}`;
-    }
-  };
-
-  upsert("BOARD", formData.value.board);
-  upsert("SERIES", formData.value.series);
-
-  let deviceTypeValue = formData.value.deviceType || "";
-  upsert("DEVICE_TYPE", deviceTypeValue);
-
-  upsert("BASE_URL", formData.value.baseUrl);
-
-  try {
-    const host = new URL(formData.value.baseUrl).hostname;
-    upsert("HOST", host || formData.value.baseUrl.replace(/^https?:\/\//, ""));
-  } catch (e) {
-    upsert("HOST", formData.value.baseUrl.replace(/^https?:\/\//, ""));
-  }
-
-  // Set defaults if not exist
-  if (!env.includes("TEST_USERNAME=")) upsert("TEST_USERNAME", "admin");
-  if (!env.includes("TEST_PASSWORD=")) upsert("TEST_PASSWORD", "yoko1234");
-  if (!env.includes("CLI_SERVER_URL="))
-    upsert("CLI_SERVER_URL", "http://localhost");
-
-  formData.value.envContent = env;
-};
-
-const resetEnv = () => {
-  formData.value.envContent = DEFAULT_ENV_TEMPLATE;
-  updateEnvVariables();
-};
-
-// Auto update env when device settings change
-watch(
-  [
-    () => formData.value.board,
-    () => formData.value.series,
-    () => formData.value.deviceType,
-    () => formData.value.baseUrl,
-  ],
-  () => {
-    if (formData.value.board) {
-      updateEnvVariables();
-    }
-  },
-);
-
-// Navigation Logic
-const isStepValid = computed(() => {
-  if (currentStep.value === 1) {
-    // Test Scope
-    return !!formData.value.testType;
-  }
-  if (currentStep.value === 2) {
-    // Target Device
-    if (!formData.value.board || !formData.value.baseUrl) return false;
-    if (
-      availableDeviceTypes.value.length > 0 &&
-      formData.value.board !== "AR10" &&
-      !formData.value.deviceType
-    )
-      return false;
-    return true;
-  }
-  if (currentStep.value === 3) {
-    // Env Config
-    return formData.value.envContent.length > 0;
-  }
-  if (currentStep.value === 4) {
-    // Environment Check
-    if (pingStatus.value !== "success") return false;
-
-    const cl = currentChecklist.value;
-    if (cl) {
-      // Check all peripherals checked
-      for (const p of cl.peripherals || []) {
-        if (!checklistState.value.peripherals[p.id]) return false;
-      }
-      for (const p of cl.partners || []) {
-        if (!checklistState.value.partners[p.id]) return false;
-      }
-      for (const p of cl.manual || []) {
-        if (!checklistState.value.manual[p.id]) return false;
-      }
-    }
-    return true;
-  }
-  return true;
-});
-
-const saveProgress = async () => {
-  isSaving.value = true;
-  try {
-    await $fetch(`/api/sessions/${sessionId}`, {
-      method: "PUT",
-      body: formData.value,
-    });
-  } catch (err) {
-    console.error("Failed to save progress", err);
-  } finally {
-    isSaving.value = false;
-  }
-};
-
-const lastAutoFilledBoard = ref<string>("");
-
-const nextStep = async () => {
-  if (!isStepValid.value) return;
-
-  if (
-    currentStep.value === 2 &&
-    lastAutoFilledBoard.value !== formData.value.board
-  ) {
-    try {
-      const allFirmwares = await $fetch<string[]>("/api/firmwares");
-      if (allFirmwares && allFirmwares.length > 0) {
-        const boardName = formData.value.board.toLowerCase();
-        const requiredPrefix = getFirmwarePrefix(boardName);
-
-        const boardFws = allFirmwares.filter((fw) => {
-          const isBootloader = fw.toLowerCase().includes("bootloader");
-          // Allow any string between version and build (e.g. -release-)
-          const isValid = /^.*-v?\d+\.\d+\.\d+.*-b\d+.*\.amf$/i.test(fw);
-          if (isBootloader || !isValid) return false;
-
-          const prefix = fw.split("-")[0]?.toLowerCase() || "";
-          return prefix === requiredPrefix;
-        });
-
-        if (boardFws.length > 0) {
-          const testFw = boardFws[0]; // Already sorted numerically descending by API
-
-          // Helper to extract base version (e.g., "3.8.0" from "ax30-3.8.0-release-b123.amf")
-          const getBaseVersion = (fw: string) => {
-            const match = fw.match(/-(v?\d+\.\d+\.\d+)/);
-            return match ? match[1] : fw;
-          };
-
-          const testBaseVer = getBaseVersion(testFw!);
-          let prevFw = "";
-
-          // Find the first firmware that belongs to an older version
-          for (let i = 1; i < boardFws.length; i++) {
-            if (getBaseVersion(boardFws[i]!) !== testBaseVer) {
-              prevFw = boardFws[i]!;
-              break;
-            }
-          }
-
-          let env = formData.value.envContent;
-          const upsert = (key: string, value: string) => {
-            if (!value) return;
-            const regex = new RegExp(`^${key}=.*$`, "m");
-            if (env.match(regex)) {
-              env = env.replace(regex, `${key}=${value}`);
-            } else {
-              env +=
-                (env && !env.endsWith("\n") ? "\n" : "") + `${key}=${value}`;
-            }
-          };
-
-          upsert("TEST_FIRMWARE_NAME", testFw!);
-          if (prevFw) {
-            upsert("PREV_FIRMWARE_NAME", prevFw);
-          }
-
-          formData.value.envContent = env;
-        }
-      }
-      lastAutoFilledBoard.value = formData.value.board;
-    } catch (err) {
-      console.error("Failed to auto-select firmware:", err);
-    }
-  }
-
-  await saveProgress();
-  if (currentStep.value < steps.value.length) {
-    currentStep.value++;
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-};
-
-const prevStep = () => {
-  if (currentStep.value > 1) {
-    currentStep.value--;
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-};
-
-const finishSetup = async () => {
-  if (!isStepValid.value) return;
-  await saveProgress();
-  // Status is now preparing or ready
-  const nextStatus =
-    formData.value.testType === "playground" ? "Ready" : "Preparing";
-  await $fetch(`/api/sessions/${sessionId}`, {
-    method: "PUT",
-    body: { status: nextStatus },
-  });
-  router.push(`/sessions/${sessionId}/runner`);
-};
-</script>
 
 <style scoped>
 .step-enter-active,

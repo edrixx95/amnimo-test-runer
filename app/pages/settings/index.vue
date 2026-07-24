@@ -1,3 +1,196 @@
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+
+import { useToast } from "~/composables/useToast";
+const { t } = useI18n();
+
+const e2ePath = ref("");
+const isFolderPickerOpen = ref(false);
+const isSaving = ref(false);
+const isValidating = ref(false);
+const { addToast } = useToast();
+
+const validationResult = ref<{ valid: boolean; message: string } | null>(null);
+
+const isDesktopApp = ref(false);
+const appVersion = ref("1.0.0");
+const isCheckingUpdate = ref(false);
+const updateStatusMessage = ref("");
+const updateProgress = ref(0);
+const isUpdateReady = ref(false);
+
+const fileInput = ref<HTMLInputElement | null>(null);
+const isImporting = ref(false);
+
+const handleImportBackup = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (!target.files || target.files.length === 0) return;
+
+  const file = target.files[0]!;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  isImporting.value = true;
+  try {
+    const res = await $fetch<{ success: boolean; message: string }>(
+      "/api/backup/import",
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+
+    addToast({
+      title: t("settings.successTitle"),
+      message: res.message,
+      type: "success",
+    });
+    // Clear input
+    target.value = "";
+
+    // Optionally trigger a reload to fetch new sessions
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  } catch (e: any) {
+    console.error("Import failed", e);
+    addToast({
+      title: t("settings.errorTitle"),
+      message: e.data?.statusMessage || e.message || t("settings.importFailed"),
+      type: "error",
+    });
+  } finally {
+    isImporting.value = false;
+  }
+};
+
+onMounted(async () => {
+  try {
+    const res = await $fetch<{ e2ePath: string }>("/api/settings");
+    if (res && res.e2ePath) {
+      e2ePath.value = res.e2ePath;
+    }
+  } catch (e) {
+    console.error("Failed to load settings", e);
+  }
+
+  if ((window as any).electronAPI) {
+    isDesktopApp.value = true;
+    appVersion.value = await (window as any).electronAPI.getAppVersion();
+
+    (window as any).electronAPI.onUpdateStatus((info: any) => {
+      switch (info.status) {
+        case "checking":
+          isCheckingUpdate.value = true;
+          updateStatusMessage.value = t("settings.checkingUpdates");
+          break;
+        case "available":
+          isCheckingUpdate.value = false;
+          updateStatusMessage.value = t("settings.updateAvailable", {
+            version: info.version,
+          });
+          break;
+        case "not-available":
+          isCheckingUpdate.value = false;
+          updateStatusMessage.value = t("settings.alreadyLatest");
+          break;
+        case "downloading":
+          updateProgress.value = info.percent;
+          updateStatusMessage.value = t("settings.downloadingUpdate", {
+            percent: Math.round(info.percent),
+          });
+          break;
+        case "downloaded":
+          isCheckingUpdate.value = false;
+          updateProgress.value = 100;
+          isUpdateReady.value = true;
+          updateStatusMessage.value = t("settings.updateReady", {
+            version: info.version,
+          });
+          break;
+        case "error":
+          isCheckingUpdate.value = false;
+          updateStatusMessage.value = t("settings.updateError", {
+            error: info.error,
+          });
+          break;
+      }
+    });
+  }
+});
+
+const checkForUpdates = () => {
+  if ((window as any).electronAPI) {
+    isCheckingUpdate.value = true;
+    updateStatusMessage.value = t("settings.checkingUpdates");
+    updateProgress.value = 0;
+    isUpdateReady.value = false;
+    (window as any).electronAPI.checkForUpdates();
+  } else {
+    updateStatusMessage.value = t("settings.updateNotDesktop");
+  }
+};
+
+const installUpdate = () => {
+  if ((window as any).electronAPI) {
+    (window as any).electronAPI.installUpdate();
+  }
+};
+
+const handleFolderSelected = (path: string) => {
+  e2ePath.value = path;
+  resetValidation();
+  validatePath();
+};
+
+const resetValidation = () => {
+  validationResult.value = null;
+};
+
+const validatePath = async () => {
+  if (!e2ePath.value) return;
+  isValidating.value = true;
+  try {
+    const res = await $fetch("/api/settings/validate", {
+      method: "POST",
+      body: { e2ePath: e2ePath.value },
+    });
+    validationResult.value = res as any;
+  } catch (e: any) {
+    validationResult.value = {
+      valid: false,
+      message: e.message || t("settings.validationFailed"),
+    };
+  } finally {
+    isValidating.value = false;
+  }
+};
+
+const saveSettings = async () => {
+  if (!e2ePath.value) return;
+  isSaving.value = true;
+  try {
+    await $fetch("/api/settings", {
+      method: "PUT",
+      body: { e2ePath: e2ePath.value },
+    });
+    addToast({
+      title: t("settings.successTitle"),
+      message: t("settings.settingsSaved"),
+      type: "success",
+    });
+  } catch (e: any) {
+    addToast({
+      title: t("settings.errorTitle"),
+      message: t("settings.saveFailed") + ": " + (e.message || String(e)),
+      type: "error",
+    });
+  } finally {
+    isSaving.value = false;
+  }
+};
+</script>
+
 <template>
   <div class="flex-1 flex flex-col h-full bg-slate-50 relative overflow-hidden">
     <header
@@ -238,196 +431,3 @@
     />
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted } from "vue";
-
-import { useToast } from "~/composables/useToast";
-const { t } = useI18n();
-
-const e2ePath = ref("");
-const isFolderPickerOpen = ref(false);
-const isSaving = ref(false);
-const isValidating = ref(false);
-const { addToast } = useToast();
-
-const validationResult = ref<{ valid: boolean; message: string } | null>(null);
-
-const isDesktopApp = ref(false);
-const appVersion = ref("1.0.0");
-const isCheckingUpdate = ref(false);
-const updateStatusMessage = ref("");
-const updateProgress = ref(0);
-const isUpdateReady = ref(false);
-
-const fileInput = ref<HTMLInputElement | null>(null);
-const isImporting = ref(false);
-
-const handleImportBackup = async (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (!target.files || target.files.length === 0) return;
-
-  const file = target.files[0]!;
-  const formData = new FormData();
-  formData.append("file", file);
-
-  isImporting.value = true;
-  try {
-    const res = await $fetch<{ success: boolean; message: string }>(
-      "/api/backup/import",
-      {
-        method: "POST",
-        body: formData,
-      },
-    );
-
-    addToast({
-      title: t("settings.successTitle"),
-      message: res.message,
-      type: "success",
-    });
-    // Clear input
-    target.value = "";
-
-    // Optionally trigger a reload to fetch new sessions
-    setTimeout(() => {
-      window.location.reload();
-    }, 1500);
-  } catch (e: any) {
-    console.error("Import failed", e);
-    addToast({
-      title: t("settings.errorTitle"),
-      message: e.data?.statusMessage || e.message || t("settings.importFailed"),
-      type: "error",
-    });
-  } finally {
-    isImporting.value = false;
-  }
-};
-
-onMounted(async () => {
-  try {
-    const res = await $fetch<{ e2ePath: string }>("/api/settings");
-    if (res && res.e2ePath) {
-      e2ePath.value = res.e2ePath;
-    }
-  } catch (e) {
-    console.error("Failed to load settings", e);
-  }
-
-  if ((window as any).electronAPI) {
-    isDesktopApp.value = true;
-    appVersion.value = await (window as any).electronAPI.getAppVersion();
-
-    (window as any).electronAPI.onUpdateStatus((info: any) => {
-      switch (info.status) {
-        case "checking":
-          isCheckingUpdate.value = true;
-          updateStatusMessage.value = t("settings.checkingUpdates");
-          break;
-        case "available":
-          isCheckingUpdate.value = false;
-          updateStatusMessage.value = t("settings.updateAvailable", {
-            version: info.version,
-          });
-          break;
-        case "not-available":
-          isCheckingUpdate.value = false;
-          updateStatusMessage.value = t("settings.alreadyLatest");
-          break;
-        case "downloading":
-          updateProgress.value = info.percent;
-          updateStatusMessage.value = t("settings.downloadingUpdate", {
-            percent: Math.round(info.percent),
-          });
-          break;
-        case "downloaded":
-          isCheckingUpdate.value = false;
-          updateProgress.value = 100;
-          isUpdateReady.value = true;
-          updateStatusMessage.value = t("settings.updateReady", {
-            version: info.version,
-          });
-          break;
-        case "error":
-          isCheckingUpdate.value = false;
-          updateStatusMessage.value = t("settings.updateError", {
-            error: info.error,
-          });
-          break;
-      }
-    });
-  }
-});
-
-const checkForUpdates = () => {
-  if ((window as any).electronAPI) {
-    isCheckingUpdate.value = true;
-    updateStatusMessage.value = t("settings.checkingUpdates");
-    updateProgress.value = 0;
-    isUpdateReady.value = false;
-    (window as any).electronAPI.checkForUpdates();
-  } else {
-    updateStatusMessage.value = t("settings.updateNotDesktop");
-  }
-};
-
-const installUpdate = () => {
-  if ((window as any).electronAPI) {
-    (window as any).electronAPI.installUpdate();
-  }
-};
-
-const handleFolderSelected = (path: string) => {
-  e2ePath.value = path;
-  resetValidation();
-  validatePath();
-};
-
-const resetValidation = () => {
-  validationResult.value = null;
-};
-
-const validatePath = async () => {
-  if (!e2ePath.value) return;
-  isValidating.value = true;
-  try {
-    const res = await $fetch("/api/settings/validate", {
-      method: "POST",
-      body: { e2ePath: e2ePath.value },
-    });
-    validationResult.value = res as any;
-  } catch (e: any) {
-    validationResult.value = {
-      valid: false,
-      message: e.message || t("settings.validationFailed"),
-    };
-  } finally {
-    isValidating.value = false;
-  }
-};
-
-const saveSettings = async () => {
-  if (!e2ePath.value) return;
-  isSaving.value = true;
-  try {
-    await $fetch("/api/settings", {
-      method: "PUT",
-      body: { e2ePath: e2ePath.value },
-    });
-    addToast({
-      title: t("settings.successTitle"),
-      message: t("settings.settingsSaved"),
-      type: "success",
-    });
-  } catch (e: any) {
-    addToast({
-      title: t("settings.errorTitle"),
-      message: t("settings.saveFailed") + ": " + (e.message || String(e)),
-      type: "error",
-    });
-  } finally {
-    isSaving.value = false;
-  }
-};
-</script>
