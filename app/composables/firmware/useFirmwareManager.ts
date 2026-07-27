@@ -1,7 +1,18 @@
- 
 /* eslint-disable @typescript-eslint/no-explicit-any, prefer-const */
-import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+export interface Firmware {
+  filename: string;
+  source: string;
+  board: string;
+  version: string;
+  build: string;
+  isModem: boolean;
+  date: string;
+  size: number;
+  url: string;
+}
 
 export interface Firmware {
   filename: string;
@@ -28,9 +39,22 @@ export function useFirmwareManager() {
   const sortKey = ref<keyof Firmware>("date");
   const sortOrder = ref<"asc" | "desc">("desc");
 
+  const currentPage = ref(1);
+  const itemsPerPage = ref(15);
+
   const isBoardDropdownOpen = ref(false);
   const BOARD_LIST = [
-    "AG10", "AG20", "AX11", "AX12", "AX21", "AX30", "AR10", "AR20", "AC10", "AC15", "AC25",
+    "AG10",
+    "AG20",
+    "AX11",
+    "AX12",
+    "AX21",
+    "AX30",
+    "AR10",
+    "AR20",
+    "AC10",
+    "AC15",
+    "AC25",
   ];
 
   const sortBy = (key: keyof Firmware) => {
@@ -40,11 +64,13 @@ export function useFirmwareManager() {
       sortKey.value = key;
       sortOrder.value = key === "date" ? "desc" : "asc";
     }
+    currentPage.value = 1;
   };
 
   const selectBoardFilter = (board: string) => {
     filterBoard.value = board;
     isBoardDropdownOpen.value = false;
+    currentPage.value = 1;
   };
 
   const filteredFirmwares = computed(() => {
@@ -71,29 +97,60 @@ export function useFirmwareManager() {
         (valA as any) = new Date(a.date).getTime();
         (valB as any) = new Date(b.date).getTime();
       } else if (sortKey.value === "version") {
-        const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
-        return sortOrder.value === "asc" ? collator.compare((valA as any), (valB as any)) : collator.compare((valB as any), (valA as any));
+        const collator = new Intl.Collator(undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+        return sortOrder.value === "asc"
+          ? collator.compare(valA as any, valB as any)
+          : collator.compare(valB as any, valA as any);
       } else if (typeof (valA as any) === "string") {
         (valA as any) = (valA as any).toLowerCase();
-        (valB as any) = ((valB as any) as string).toLowerCase();
+        (valB as any) = (valB as any as string).toLowerCase();
       }
 
-      if ((valA as any) < (valB as any)) return sortOrder.value === "asc" ? -1 : 1;
-      if ((valA as any) > (valB as any)) return sortOrder.value === "asc" ? 1 : -1;
+      if ((valA as any) < (valB as any))
+        return sortOrder.value === "asc" ? -1 : 1;
+      if ((valA as any) > (valB as any))
+        return sortOrder.value === "asc" ? 1 : -1;
       return 0;
     });
 
     return result;
   });
 
+  const totalPages = computed(() =>
+    Math.ceil(filteredFirmwares.value.length / itemsPerPage.value),
+  );
+
+  const paginatedFirmwares = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value;
+    const end = start + itemsPerPage.value;
+    return filteredFirmwares.value.slice(start, end);
+  });
+
+  const nextPage = () => {
+    if (currentPage.value < totalPages.value) currentPage.value++;
+  };
+
+  const prevPage = () => {
+    if (currentPage.value > 1) currentPage.value--;
+  };
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages.value) currentPage.value = page;
+  };
+
   const selectSource = (source: string) => {
     selectedSource.value = source;
     searchQuery.value = "";
     filterBoard.value = "all";
+    currentPage.value = 1;
   };
 
   const clearSource = () => {
     selectedSource.value = null;
+    currentPage.value = 1;
   };
 
   const fetchFirmwares = async () => {
@@ -101,6 +158,7 @@ export function useFirmwareManager() {
     error.value = "";
     try {
       firmwares.value = await $fetch<Firmware[]>("/api/firmwares/external");
+      currentPage.value = 1;
     } catch (err: any) {
       console.error("Failed to fetch firmwares", err);
       error.value = t("firmware.fetchError");
@@ -129,12 +187,19 @@ export function useFirmwareManager() {
     sortOrder,
     isBoardDropdownOpen,
     BOARD_LIST,
+    currentPage,
+    itemsPerPage,
+    totalPages,
+    paginatedFirmwares,
+    nextPage,
+    prevPage,
+    goToPage,
     sortBy,
     selectBoardFilter,
     filteredFirmwares,
     selectSource,
     clearSource,
     fetchFirmwares,
-    formatBytes
+    formatBytes,
   };
 }

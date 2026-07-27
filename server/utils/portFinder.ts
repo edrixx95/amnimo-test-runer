@@ -1,9 +1,9 @@
 import net from "node:net";
 
 /**
- * Tìm một cổng mạng đang rảnh (chưa có ứng dụng nào dùng) trên máy tính.
- * @param startingAt Cổng bắt đầu quét (mặc định 8080)
- * @returns Promise trả về số cổng trống
+ * コンピュータ上で利用可能な（他のアプリケーションで使用されていない）ネットワークポートを検索します。
+ * @param startingAt スキャンを開始するポート番号 (デフォルトは 8080)
+ * @returns 空いているポート番号を返す Promise
  */
 export function getAvailablePort(startingAt: number = 8080): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -11,7 +11,7 @@ export function getAvailablePort(startingAt: number = 8080): Promise<number> {
     server.unref();
 
     server.on("error", (e: unknown) => {
-      // Nếu cổng đã bị chiếm (EADDRINUSE), thử tiếp với cổng tiếp theo
+      // ポートが既に使用されている場合 (EADDRINUSE)、次のポートを試す
       if ((e as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).code === "EADDRINUSE") {
         getAvailablePort(startingAt + 1)
           .then(resolve)
@@ -21,7 +21,7 @@ export function getAvailablePort(startingAt: number = 8080): Promise<number> {
       }
     });
 
-    // Thử lắng nghe trên cổng hiện tại
+    // 現在のポートでリッスンを試みる
     server.listen(startingAt, "127.0.0.1", () => {
       const port = (server.address() as net.AddressInfo).port;
       server.close(() => {

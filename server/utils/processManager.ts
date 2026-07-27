@@ -4,6 +4,7 @@ import EventEmitter from "node:events";
 import fs from "node:fs";
 import path from "node:path";
 import fsPromises from "node:fs/promises";
+import { lockManager } from "./lockManager";
 
 
 type TestSessionProcesses = {
@@ -109,6 +110,7 @@ export const clearSessionProcesses = (sessionId: string) => {
     session.backendProcess = undefined;
     session.e2eLogStream = undefined;
     session.backendLogStream = undefined;
+    lockManager.releaseAllForSession(sessionId);
   }
 };
 
@@ -161,6 +163,7 @@ export const killProcessesByFile = async (sessionId: string) => {
       }
 
       await fsPromises.rm(pidPath, { force: true });
+      lockManager.releaseAllForSession(sessionId);
     }
   } catch (err) {
     console.error("Failed to kill processes by file", err);

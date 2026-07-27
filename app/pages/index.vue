@@ -3,6 +3,9 @@ import { useSessionList } from "~/composables/sessions/useSessionList";
 import { useSessionActions } from "~/composables/sessions/useSessionActions";
 import { useReportViewers } from "~/composables/sessions/useReportViewers";
 import { useConfirmModal } from "~/composables/ui/useConfirmModal";
+import { useLocks } from "~/composables/useLocks";
+
+const { activeLocks } = useLocks();
 
 const {
   sessionStore,
@@ -217,13 +220,15 @@ const { confirmModal, executeConfirm } = useConfirmModal();
             :class="[
               session.status === 'Closed'
                 ? 'border-slate-300 bg-slate-200/80 opacity-80 grayscale'
-                : 'bg-white shadow-soft hover:shadow-glass hover:border-amnimo-200 border-gray-100 hover:-translate-y-1 cursor-pointer',
-              'group flex flex-col rounded-2xl border overflow-hidden transition-all duration-300',
+                : activeLocks.some(l => l.sessionId === session.id)
+                ? 'bg-amber-50/30 shadow-glass border-amber-400 border-[3px] hover:-translate-y-1 cursor-pointer ring-4 ring-amber-400/20'
+                : 'bg-white shadow-soft hover:shadow-glass hover:border-amnimo-200 border-gray-100 border hover:-translate-y-1 cursor-pointer',
+              'group flex flex-col rounded-2xl overflow-hidden transition-all duration-300',
             ]"
             @click="session.status !== 'Closed' && navigateToSession(session)"
           >
             <div
-              class="px-5 py-4 border-b border-gray-50/80"
+              class="px-5 py-4 border-b border-gray-50/80 relative"
               :class="
                 session.status === 'Closed' ? 'bg-transparent' : 'bg-white'
               "
@@ -255,6 +260,14 @@ const { confirmModal, executeConfirm } = useConfirmModal();
                       />
                       {{ session.testType || "release" }}
                     </span>
+                    <!-- Lock Icon -->
+                    <div 
+                      v-if="activeLocks.some(l => l.sessionId === session.id)"
+                      class="flex items-center justify-center w-6 h-6 bg-amber-100 text-amber-600 rounded-full shadow-sm cursor-help animate-pulse"
+                      :title="$t('home.lockedDueTo', { resource: activeLocks.find(l => l.sessionId === session.id)?.resource.toLowerCase() })"
+                    >
+                      <Icon name="heroicons:lock-closed" class="w-3.5 h-3.5" />
+                    </div>
                   </div>
                 </div>
                 <span

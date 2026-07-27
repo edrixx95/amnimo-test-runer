@@ -3,6 +3,8 @@
 import { ref, onMounted, onUnmounted } from "vue";
 
 const { locale, setLocale } = useI18n();
+import { useLocks } from "~/composables/useLocks";
+const { connect, eventLogs, activeLocks, showEventLog } = useLocks();
 
 const toggleLocale = () => {
   setLocale(locale.value === "en" ? "ja" : "en");
@@ -28,6 +30,8 @@ onMounted(async () => {
   if (saved) {
     isCollapsed.value = saved === "true";
   }
+
+  connect();
 
   if ((window as any).electronAPI) {
     try {
@@ -156,6 +160,32 @@ const toggleSidebar = () => {
 
       <!-- Bottom Settings Link (Fixed above footer) -->
       <div class="p-3 border-t border-gray-100 bg-white">
+        <!-- New Notifications Link -->
+        <button
+          class="w-full group flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 text-gray-500 hover:bg-slate-50 hover:text-gray-900 overflow-hidden relative mb-2"
+          :title="isCollapsed ? $t('nav.notifications') : ''"
+          @click="showEventLog = true"
+        >
+          <div class="relative shrink-0">
+            <Icon
+              name="heroicons:bell"
+              class="w-6 h-6 transition-transform duration-300 group-hover:scale-110"
+            />
+            <span
+              v-if="eventLogs.length > 0"
+              class="absolute -top-1 -right-1 flex items-center justify-center min-w-[14px] h-[14px] px-1 bg-red-500 text-white text-[9px] font-bold rounded-full shadow-sm animate-pulse border border-white"
+            >
+              {{ eventLogs.length > 99 ? '99+' : eventLogs.length }}
+            </span>
+          </div>
+          <span
+            class="ml-3 whitespace-nowrap transition-opacity duration-300"
+            :class="isCollapsed ? 'opacity-0' : 'opacity-100'"
+          >
+            {{ $t("nav.notifications") }}
+          </span>
+        </button>
+
         <NuxtLink
           to="/settings"
           class="group flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 text-gray-500 hover:bg-slate-50 hover:text-gray-900 overflow-hidden"
@@ -286,6 +316,69 @@ const toggleSidebar = () => {
               width: `${(activeDownload.received / activeDownload.total) * 100}%`,
             }"
           />
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Notifications Modal -->
+    <Transition name="modal">
+      <div v-if="showEventLog" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0">
+        <div class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm transform-gpu will-change-opacity" @click="showEventLog = false" />
+        
+        <div class="modal-content relative bg-white rounded-2xl shadow-glass w-full max-w-lg overflow-hidden border border-slate-200 max-h-[80vh] flex flex-col">
+          <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-slate-50 shrink-0">
+            <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <Icon name="heroicons:bell" class="w-6 h-6 text-amnimo-600" />
+              {{ $t("notifications.title") }}
+            </h3>
+            <div class="flex items-center gap-3">
+              <button
+                v-if="eventLogs.length > 0"
+                @click="eventLogs = []"
+                class="text-sm font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                {{ $t("notifications.clearAll") }}
+              </button>
+              <button class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors" @click="showEventLog = false">
+                <Icon name="heroicons:x-mark" class="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/50">
+            <div v-if="eventLogs.length === 0" class="text-center text-slate-500 py-12 bg-white rounded-xl border border-slate-200 shadow-sm">
+              <Icon name="heroicons:inbox" class="w-12 h-12 mx-auto mb-2 opacity-30 text-slate-400" />
+              <p class="font-medium text-slate-600">{{ $t("notifications.empty") }}</p>
+            </div>
+
+            <div
+              v-for="log in eventLogs"
+              :key="log.id"
+              class="p-4 rounded-xl border bg-white shadow-sm flex gap-3 transition-colors duration-300"
+              :class="log.type === 'acquired' ? 'border-amber-200 hover:border-amber-300' : 'border-emerald-200 hover:border-emerald-300'"
+            >
+              <div class="shrink-0 mt-0.5">
+                <Icon 
+                  :name="log.type === 'acquired' ? 'heroicons:lock-closed' : 'heroicons:lock-open'" 
+                  class="w-5 h-5"
+                  :class="log.type === 'acquired' ? 'text-amber-500' : 'text-emerald-500'"
+                />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="font-bold text-sm text-slate-800">
+                  {{ log.type === 'acquired' ? $t("notifications.deviceLocked") : $t("notifications.deviceUnlocked") }}
+                </p>
+                <p class="text-sm text-slate-600 mt-1 break-words leading-relaxed">
+                  <span class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 border border-slate-200">{{ log.lock.resource }}</span> 
+                  <span class="mx-1">{{ $t("notifications.bySession") }}</span>
+                  <span class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 border border-slate-200">{{ log.lock.sessionName || log.lock.sessionId }}</span>
+                </p>
+                <p class="text-xs text-slate-400 mt-2 font-medium">
+                  {{ new Date(log.timestamp).toLocaleString() }}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </Transition>

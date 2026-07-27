@@ -12,6 +12,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const success = lockManager.release(resource, sessionId, force === true);
+  if (success) {
+    console.log(`[LockManager] Released lock on resource '${resource}' for session '${sessionId}'`);
+  }
 
   if (!success) {
     throw createError({

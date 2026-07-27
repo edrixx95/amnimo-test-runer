@@ -5,7 +5,7 @@ import { SESSION_STATUS } from "../../shared/constants";
 import { randomUUID } from "node:crypto";
 import { getSettings } from "./settingsManager";
 
-// Đảm bảo đường dẫn tuyệt đối cho an toàn, sử dụng APP_DATA_PATH nếu có để bảo lưu dữ liệu
+// セキュリティのために絶対パスを確保し、データ保持のために可能であれば APP_DATA_PATH を使用します
 const SESSIONS_DIR = process.env.APP_DATA_PATH
   ? path.join(process.env.APP_DATA_PATH, "sessions")
   : path.resolve(process.cwd(), "sessions");
@@ -28,13 +28,13 @@ export const sessionManager = {
     const sessionDir = path.join(SESSIONS_DIR, id);
     await fs.mkdir(sessionDir, { recursive: true });
 
-    // Tạo cấu trúc folder như spec
+    // 仕様に従ってフォルダ構造を作成します
     await fs.mkdir(path.join(sessionDir, "report"), { recursive: true });
     await fs.mkdir(path.join(sessionDir, "screenshots"), { recursive: true });
     await fs.mkdir(path.join(sessionDir, "traces"), { recursive: true });
     await fs.mkdir(path.join(sessionDir, "videos"), { recursive: true });
 
-    // Đọc .env từ amnimo-e2e nếu có
+    // 存在する場合、amnimo-e2e から .env を読み込みます
     let initialEnv = "";
     try {
       const e2eEnvPath = path.join(getSettings().e2ePath, ".env");
@@ -77,7 +77,7 @@ export const sessionManager = {
           const data = await fs.readFile(sessionPath, "utf-8");
           sessions.push(JSON.parse(data));
         } catch (e) {
-          // Bỏ qua nếu không parse được
+          // パースできない場合はスキップします
           console.error(`Error reading session ${entry.name}`, e);
         }
       }

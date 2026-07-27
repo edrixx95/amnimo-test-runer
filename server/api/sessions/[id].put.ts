@@ -36,6 +36,9 @@ export default defineEventHandler(async (event) => {
 
       const matchDeviceType = body.envContent.match(/^DEVICE_TYPE=(.*)$/m);
       if (matchDeviceType) body.deviceType = matchDeviceType[1].trim();
+
+      const matchBaseUrl = body.envContent.match(/^BASE_URL=(.*)$/m);
+      if (matchBaseUrl) body.baseUrl = matchBaseUrl[1].trim();
     }
 
     const updatedSession: Session = {

@@ -16,6 +16,12 @@ const {
   sortBy,
   selectBoardFilter,
   filteredFirmwares,
+  paginatedFirmwares,
+  currentPage,
+  totalPages,
+  nextPage,
+  prevPage,
+  goToPage,
   selectSource,
   clearSource,
   fetchFirmwares,
@@ -145,7 +151,7 @@ onMounted(() => {
                 >
               </div>
 
-              <div class="w-px bg-slate-200 my-1"/>
+              <div class="w-px bg-slate-200 my-1" />
 
               <div class="relative w-48 shrink-0 flex items-center">
                 <div
@@ -214,7 +220,7 @@ onMounted(() => {
                         {{ $t("firmware.allBoards") }}
                       </button>
 
-                      <div class="h-px bg-slate-100 my-1 mx-2"/>
+                      <div class="h-px bg-slate-100 my-1 mx-2" />
 
                       <button
                         v-for="board in BOARD_LIST"
@@ -279,9 +285,9 @@ onMounted(() => {
 
           <div
             v-else
-            class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
+            class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col"
           >
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto min-w-full block">
               <table class="w-full text-left border-collapse">
                 <thead>
                   <tr
@@ -426,7 +432,7 @@ onMounted(() => {
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                   <tr
-                    v-for="fw in filteredFirmwares"
+                    v-for="fw in paginatedFirmwares"
                     :key="fw.url"
                     class="hover:bg-slate-50/50 transition-colors group"
                   >
@@ -516,6 +522,84 @@ onMounted(() => {
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div
+              class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-white"
+            >
+              <div class="flex flex-1 justify-between sm:hidden">
+                <button
+                  :disabled="currentPage === 1"
+                  class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  @click="prevPage"
+                  >
+                  {{ $t("firmware.prev") }}
+                </button>
+                <button
+                  :disabled="currentPage === totalPages"
+                  class="relative ml-3 inline-flex items-center px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  @click="nextPage">
+                  {{ $t("firmware.next") }}
+                </button>
+              </div>
+              <div
+                class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between"
+              >
+                <div>
+                  <p class="text-sm text-slate-700">
+                    {{ $t("firmware.page") }}
+                    <span class="font-medium">{{ currentPage }}</span>
+                    {{ $t("firmware.of") }}
+                    <span class="font-medium">{{ totalPages }}</span>
+                  </p>
+                </div>
+                <div>
+                  <nav
+                    class="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                    aria-label="Pagination"
+                  >
+                    <button
+                      :disabled="currentPage === 1"
+                      class="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      @click="prevPage"
+                    >
+                      <span class="sr-only">{{ $t("firmware.prev") }}</span>
+                      <Icon
+                        name="heroicons:chevron-left"
+                        class="h-5 w-5"
+                        aria-hidden="true"
+                      />
+                    </button>
+                    <!-- Current: "z-10 bg-amnimo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amnimo-600", Default: "text-slate-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0" -->
+                    <button
+                      v-for="page in totalPages"
+                      :key="page"
+                      :class="[
+                        page === currentPage
+                          ? 'z-10 bg-amnimo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amnimo-600'
+                          : 'text-slate-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0',
+                        'relative inline-flex items-center px-4 py-2 text-sm font-semibold',
+                      ]"
+                      @click="goToPage(page)"
+                    >
+                      {{ page }}
+                    </button>
+                    <button
+                      :disabled="currentPage === totalPages"
+                      class="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      @click="nextPage"
+                    >
+                      <span class="sr-only">{{ $t("firmware.next") }}</span>
+                      <Icon
+                        name="heroicons:chevron-right"
+                        class="h-5 w-5"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </nav>
+                </div>
+              </div>
             </div>
           </div>
         </div>

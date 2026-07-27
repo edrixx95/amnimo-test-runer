@@ -52,6 +52,10 @@ async function updateSessionStatus(sessionId: string, status: SessionStatus) {
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const { sessionId, testType, mode, tests, sessionName } = body;
+  
+  const host = getRequestHost(event);
+  const protocol = getRequestProtocol(event);
+  const testRunnerUrl = `${protocol}://${host}`;
 
   if (!sessionId) {
     throw createError({ statusCode: 400, statusMessage: "Missing sessionId" });
@@ -165,7 +169,13 @@ export default defineEventHandler(async (event) => {
   const e2eProc = spawn(npmCmd, e2eArgs, {
     cwd,
     shell: isWindows,
-    env: { ...process.env, ...parsedEnv, FORCE_COLOR: "1" },
+    env: { 
+      ...process.env, 
+      ...parsedEnv, 
+      FORCE_COLOR: "1", 
+      TEST_RUNNER_URL: testRunnerUrl,
+      SESSION_ID: sessionId 
+    },
   });
   sessionProcs.e2eProcess = e2eProc;
 

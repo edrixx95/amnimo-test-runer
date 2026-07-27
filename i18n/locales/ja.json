@@ -3,7 +3,8 @@
     "sessions": "セッション",
     "firmware": "ファームウェア",
     "settings": "設定",
-    "version": "バージョン"
+    "version": "バージョン",
+    "notifications": "通知"
   },
   "download": {
     "complete": "ダウンロード完了",
@@ -54,7 +55,8 @@
     "closeSessionTitle": "セッションを終了",
     "closeSessionDesc": "このセッションを終了してもよろしいですか？終了すると、このセッションで新しいテストを実行できなくなります。",
     "closeSessionConfirm": "セッションを終了",
-    "operationFailed": "操作に失敗しました"
+    "operationFailed": "操作に失敗しました",
+    "lockedDueTo": "ステップ {resource} を含むテストケースの実行によりロックされています"
   },
   "firmware": {
     "title": "ファームウェア",
@@ -82,7 +84,11 @@
     "firmwareLabel": "ファームウェア",
     "build": "ビルド",
     "download": "ダウンロード",
-    "fetchError": "外部サーバーからのファームウェアの読み込みに失敗しました。後でもう一度お試しください。"
+    "fetchError": "外部サーバーからのファームウェアの読み込みに失敗しました。後でもう一度お試しください。",
+    "page": "ページ",
+    "of": "/",
+    "prev": "前へ",
+    "next": "次へ"
   },
   "settings": {
     "title": "設定",
@@ -402,7 +408,9 @@
     "saveChanges": "変更を保存",
     "errorTitle": "エラー",
     "selectTestError": "実行するテストを少なくとも1つ選択してください。",
-    "selectOrderError": "テスト順序を選択してください。"
+    "selectOrderError": "テスト順序を選択してください。",
+    "lockedResource": "ロック中: {resource}",
+    "locked": "ロック中"
   },
   "setup": {
     "title": "セットアップ:",
@@ -442,5 +450,14 @@
     "stepCheckDesc": "ネットワークと周辺機器を検証",
     "errorTitle": "エラー",
     "sessionNotFound": "セッションが見つかりません"
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "通知はありません",
+    "clearAll": "すべて消去",
+    "deviceLocked": "デバイスがロックされました",
+    "deviceUnlocked": "デバイスのロックが解除されました",
+    "bySession": "セッション:",
+    "resource": "リソース"
   }
 }

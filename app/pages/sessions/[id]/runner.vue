@@ -7,6 +7,7 @@ import { useToast } from "~/composables/useToast";
 const { t } = useI18n();
 
 const { addToast } = useToast();
+const { activeLocks, eventLogs, showEventLog } = useLocks();
 
 const route = useRoute();
 const sessionId = route.params.id as string;
@@ -688,7 +689,7 @@ const toggleTest = async () => {
         method: "POST",
         body: { sessionId },
       });
-      addE2ELog("\n\x1b[33m⚠�E�ESent kill signal to test process.\x1b[0m\n");
+      addE2ELog("\n\x1b[33m⚠EESent kill signal to test process.\x1b[0m\n");
       if (session.value) session.value.status = "Failed";
     } catch (err) {
       addE2ELog("\n\x1b[31m❁EFailed to stop test process.\x1b[0m\n");
@@ -700,7 +701,7 @@ const toggleTest = async () => {
     backendLogs.value = [];
     if (session.value) session.value.status = "Running";
 
-    addE2ELog("\x1b[36mℹ�E�EInitializing Test Runner...\x1b[0m\n");
+    addE2ELog("\x1b[36mℹEEInitializing Test Runner...\x1b[0m\n");
 
     const testList =
       executionMode.value === "order" && selectedOrder.value
@@ -761,7 +762,7 @@ const toggleTest = async () => {
       }
     } catch (err: any) {
       addE2ELog(
-        `\n\x1b[33m⚠�E�EWarning: Failed to parse test cases (${err.message}). Tests will appear as they run.\x1b[0m\n`,
+        `\n\x1b[33m⚠EEWarning: Failed to parse test cases (${err.message}). Tests will appear as they run.\x1b[0m\n`,
       );
     } finally {
       isParsingTests.value = false;
@@ -813,6 +814,14 @@ const toggleTest = async () => {
             class="ml-3 text-xs bg-amnimo-50 text-amnimo-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider border border-amnimo-100"
             >{{ session.testType }}</span
           >
+          <div 
+            v-if="activeLocks.some(l => l.sessionId === session?.id)"
+            class="flex items-center gap-1.5 px-3 py-1 bg-amber-500 text-white rounded-lg shadow-sm z-10 cursor-help animate-pulse"
+            :title="$t('runner.lockedResource', { resource: activeLocks.find(l => l.sessionId === session?.id)?.resource })"
+          >
+            <Icon name="heroicons:lock-closed" class="w-4 h-4" />
+            <span class="tracking-wide font-bold">{{ $t('runner.locked') }}</span>
+          </div>
         </h2>
       </div>
       <div class="flex items-center gap-3">
@@ -849,7 +858,7 @@ const toggleTest = async () => {
           @click="confirmCloseSession"
           class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-rose-700 bg-white hover:bg-rose-50 hover:text-rose-800 border border-rose-200 rounded-xl transition-all shadow-sm active:scale-95"
         >
-          <Icon name="heroicons:lock-closed" class="w-4 h-4" />
+          <Icon name="heroicons:x-mark" class="w-4 h-4" />
           {{ $t("runner.closeSession") }}
         </button>
         <span

@@ -3,7 +3,8 @@
     "sessions": "Sessions",
     "firmware": "Firmware",
     "settings": "Settings",
-    "version": "Version"
+    "version": "Version",
+    "notifications": "Notifications"
   },
   "download": {
     "complete": "Download complete",
@@ -54,7 +55,8 @@
     "closeSessionTitle": "Close Session",
     "closeSessionDesc": "Are you sure you want to close this session? Once closed, you will not be able to run new tests in this session.",
     "closeSessionConfirm": "Close Session",
-    "operationFailed": "Operation failed"
+    "operationFailed": "Operation failed",
+    "lockedDueTo": "Locked due to executing a test case containing step {resource}"
   },
   "firmware": {
     "title": "Firmware",
@@ -82,7 +84,11 @@
     "firmwareLabel": "Firmware",
     "build": "Build",
     "download": "Download",
-    "fetchError": "Failed to load firmwares from external servers. Please try again later."
+    "fetchError": "Failed to load firmwares from external servers. Please try again later.",
+    "page": "Page",
+    "of": "of",
+    "prev": "Previous",
+    "next": "Next"
   },
   "settings": {
     "title": "Settings",
@@ -402,7 +408,9 @@
     "saveChanges": "Save Changes",
     "errorTitle": "Error",
     "selectTestError": "Please select at least one test to run.",
-    "selectOrderError": "Please select a test order."
+    "selectOrderError": "Please select a test order.",
+    "lockedResource": "Locked: {resource}",
+    "locked": "LOCKED"
   },
   "setup": {
     "title": "Setup:",
@@ -442,5 +450,14 @@
     "stepCheckDesc": "Verify network and peripherals",
     "errorTitle": "Error",
     "sessionNotFound": "Session not found"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "clearAll": "Clear all",
+    "deviceLocked": "Device locked",
+    "deviceUnlocked": "Device unlocked",
+    "bySession": "by session",
+    "resource": "Resource"
   }
 }

@@ -1,10 +1,14 @@
+import { EventEmitter } from "node:events";
+
 export interface LockInfo {
   resource: string;
   sessionId: string;
+  sessionName?: string;
   acquiredAt: number;
 }
 
 const locks = new Map<string, LockInfo>();
+const lockEvents = new EventEmitter();
 
 export const lockManager = {
   /**
@@ -12,22 +16,29 @@ export const lockManager = {
    * If the lock is already held by another session, returns false.
    * If the lock is held by the SAME session, returns true (re-entrant).
    */
-  acquire(resource: string, sessionId: string): boolean {
+  acquire(resource: string, sessionId: string, sessionName?: string): boolean {
     const existingLock = locks.get(resource);
 
     if (existingLock) {
       if (existingLock.sessionId === sessionId) {
-        // Re-entrant, already holds the lock
+        // Re-entrant, already holds the lock. Update sessionName if provided.
+        if (sessionName) {
+          existingLock.sessionName = sessionName;
+        }
         return true;
       }
       return false; // Held by someone else
     }
 
-    locks.set(resource, {
+    const lockInfo: LockInfo = {
       resource,
       sessionId,
+      sessionName,
       acquiredAt: Date.now(),
-    });
+    };
+
+    locks.set(resource, lockInfo);
+    lockEvents.emit("lock_acquired", lockInfo);
 
     return true;
   },
@@ -49,6 +60,7 @@ export const lockManager = {
 
     if (existingLock.sessionId === sessionId || force) {
       locks.delete(resource);
+      lockEvents.emit("lock_released", existingLock);
       return true;
     }
 
@@ -63,10 +75,34 @@ export const lockManager = {
   },
 
   /**
+   * Release all locks held by a specific session (useful for cleanup).
+   */
+  releaseAllForSession(sessionId: string): void {
+    const locksToRelease = [];
+    for (const [resource, lockInfo] of locks.entries()) {
+      if (lockInfo.sessionId === sessionId) {
+        locksToRelease.push(lockInfo);
+      }
+    }
+    for (const lockInfo of locksToRelease) {
+      locks.delete(lockInfo.resource);
+      lockEvents.emit("lock_released", lockInfo);
+      console.log(`[LockManager] Auto-released lock on resource '${lockInfo.resource}' for session '${sessionId}'`);
+    }
+  },
+
+  /**
    * Get lock info for a resource.
    */
   getLock(resource: string): LockInfo | undefined {
     return locks.get(resource);
+  },
+
+  /**
+   * Get all active locks.
+   */
+  getAllLocks(): LockInfo[] {
+    return Array.from(locks.values());
   },
 
   /**
@@ -75,4 +111,9 @@ export const lockManager = {
   clearAll() {
     locks.clear();
   },
+
+  /**
+   * Expose the event emitter for streaming endpoints
+   */
+  events: lockEvents,
 };
