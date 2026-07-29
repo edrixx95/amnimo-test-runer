@@ -329,9 +329,9 @@ const { confirmModal, executeConfirm } = useConfirmModal();
                 >
                   <span class="text-slate-500">{{ $t("home.progress") }}</span>
                   <span class="text-slate-700"
-                    >{{ session.meta.specCounts?.completed || 0 }} /
-                    {{ session.meta.specCounts?.total || 0 }}
-                    {{ $t("home.specs") }}</span
+                    >{{ session.meta.testCounts?.completed || 0 }} /
+                    {{ session.meta.testCounts?.total || session.meta.specCounts?.total || 0 }}
+                    {{ $t("home.tests") || "tests" }}</span
                   >
                 </div>
                 <div
@@ -340,17 +340,19 @@ const { confirmModal, executeConfirm } = useConfirmModal();
                   <div
                     class="h-1.5 rounded-full transition-all duration-500"
                     :class="
-                      session.meta.testCounts?.failed > 0
+                      session.meta.testCounts?.failed! > 0
                         ? 'bg-red-500'
-                        : session.meta.specCounts?.completed ===
-                            session.meta.specCounts?.total
+                        : (session.meta.testCounts?.total && session.meta.testCounts?.completed === session.meta.testCounts?.total) ||
+                          (!session.meta.testCounts?.total && session.meta.specCounts?.completed === session.meta.specCounts?.total)
                           ? 'bg-green-500'
-                          : 'bg-blue-500'
+                          : 'bg-amnimo-600'
                     "
                     :style="{
-                      width: session.meta.specCounts?.total
-                        ? `${(session.meta.specCounts.completed / session.meta.specCounts.total) * 100}%`
-                        : '0%',
+                      width: session.meta.testCounts?.total
+                        ? `${(session.meta.testCounts.completed / session.meta.testCounts.total) * 100}%`
+                        : session.meta.specCounts?.total 
+                          ? `${(session.meta.specCounts.completed / session.meta.specCounts.total) * 100}%`
+                          : '0%',
                     }"
                   />
                 </div>

@@ -34,9 +34,11 @@ const reports = ref<ReportData[]>([]);
 
 const isJsonViewerOpen = ref(false);
 const activeJsonUrl = ref("");
+const activeHtmlUrlForJson = ref("");
 
-const openJsonViewer = (url: string) => {
+const openJsonViewer = (url: string, htmlUrl?: string) => {
   activeJsonUrl.value = url;
+  activeHtmlUrlForJson.value = htmlUrl || "";
   isJsonViewerOpen.value = true;
 };
 
@@ -276,7 +278,7 @@ const confirmDeleteReport = async () => {
                 <button
                   v-if="report.excelJsonUrl"
                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-amnimo-600 border border-transparent rounded-xl hover:bg-amnimo-700 transition-colors shadow-sm hover:shadow-lg hover:shadow-amnimo-500/30 active:scale-95"
-                  @click="openJsonViewer(report.excelJsonUrl)"
+                  @click="openJsonViewer(report.excelJsonUrl, report.htmlReportUrl)"
                 >
                   <Icon name="heroicons:table-cells" class="w-5 h-5" />
                   {{ $t("reportModal.viewData") }}
@@ -345,7 +347,12 @@ const confirmDeleteReport = async () => {
         </Transition>
       </div>
 
-      <ExcelJsonViewer v-model="isJsonViewerOpen" :json-url="activeJsonUrl" />
+      <ExcelJsonViewer 
+        v-model="isJsonViewerOpen" 
+        :json-url="activeJsonUrl" 
+        :html-report-url="activeHtmlUrlForJson"
+        @open-html-report="openHtmlViewer"
+      />
       <HtmlReportViewer v-model="isHtmlViewerOpen" :url="activeHtmlUrl" />
     </div>
   </Transition>

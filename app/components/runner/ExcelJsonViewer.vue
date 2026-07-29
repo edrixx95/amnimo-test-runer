@@ -8,6 +8,7 @@ const { t } = useI18n();
 const props = defineProps<{
   modelValue: boolean;
   jsonUrl: string;
+  htmlReportUrl?: string;
 }>();
 
 const emit = defineEmits(["update:modelValue", "openHtmlReport"]);
@@ -29,6 +30,7 @@ type FlatTestRow = {
   date: string;
   fw: string;
   history?: HistoryEntry[];
+  playwrightTestId?: string;
 };
 
 const isLoading = ref(false);
@@ -122,6 +124,7 @@ watch(
                       date: test["test-date"] || "-",
                       fw: test["test-fw"] || "-",
                       history: test["history"],
+                      playwrightTestId: test["playwright-test-id"] || "",
                     });
                   }
                 }
@@ -469,6 +472,15 @@ const getResultClass = (res: string) => {
                         }}{{ hist.result }}
                       </button>
                     </div>
+                    <button
+                      v-else-if="htmlReportUrl"
+                      :class="getResultClass(row.result)"
+                      class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold border transition-all duration-300 cursor-pointer hover:shadow-sm hover:ring-2 hover:ring-opacity-50 active:scale-95"
+                      :title="$t('reportModal.htmlReport')"
+                      @click="$emit('openHtmlReport', htmlReportUrl + (row.playwrightTestId ? '#?testId=' + row.playwrightTestId : ''))"
+                    >
+                      {{ row.result }}
+                    </button>
                     <span
                       v-else
                       :class="getResultClass(row.result)"

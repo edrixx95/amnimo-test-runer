@@ -42,46 +42,6 @@ watch(filterCategory, () => {
   filterPage.value = "";
 });
 
-const loadCasesForPath = async (targetPath: string) => {
-  if (isParsingTests.value) return;
-  isParsingTests.value = true;
-  try {
-    const type =
-      session.value?.testType === "playground"
-        ? playgroundSource.value
-        : session.value?.testType || "release";
-    const res = await $fetch<Record<string, string[]>>("/api/tests/cases", {
-      params: {
-        type: type,
-        targetPath: targetPath,
-      },
-    });
-
-    const updateNode = (nodes: FileNode[]) => {
-      for (const node of nodes) {
-        if (node.type === "file" && node.path && res[node.path]) {
-          node.cases = res[node.path];
-        } else if (node.type === "folder" && node.children) {
-          updateNode(node.children);
-        }
-      }
-    };
-
-    updateNode(availableTests.value);
-  } catch (error) {
-    console.error("Failed to load test cases:", error);
-  } finally {
-    isParsingTests.value = false;
-  }
-};
-
-watch(filterPage, (newVal) => {
-  if (newVal) {
-    const targetPath = `${filterCategory.value}/${newVal}`;
-    loadCasesForPath(targetPath);
-  }
-});
-
 type FileNode = {
   name: string;
   type: "file" | "folder";
@@ -116,26 +76,61 @@ const filterFiles = computed(() => {
   if (!cat || !cat.children) return [];
   const page = cat.children.find((n) => n.name === filterPage.value);
   if (!page || !page.children) return [];
-  return page.children.filter((n) => n.type === "file");
+
+  const getFiles = (nodes: FileNode[]): FileNode[] => {
+    let files: FileNode[] = [];
+    for (const node of nodes) {
+      if (node.type === "file") files.push(node);
+      else if (node.type === "folder" && node.children) {
+        files = files.concat(getFiles(node.children));
+      }
+    }
+    return files;
+  };
+
+  return getFiles(page.children);
 });
 
-const toggleFilterFile = (path: string) => {
-  const index = selectedTests.value.indexOf(path);
-  if (index > -1) {
-    selectedTests.value.splice(index, 1);
+const isAllCasesSelected = (node: FileNode) => {
+  if (!node.cases || node.cases.length === 0) return false;
+  return node.cases.every(c => selectedTests.value.includes(`${node.path}::${c}`));
+};
+
+const isFileSelected = (node: FileNode) => {
+  if (!node.path) return false;
+  return selectedTests.value.includes(node.path) || isAllCasesSelected(node);
+};
+
+const toggleFilterFile = (node: FileNode) => {
+  if (!node.path) return;
+  if (isFileSelected(node)) {
+    const toRemove = new Set([node.path, ...(node.cases || []).map(c => `${node.path}::${c}`)]);
+    selectedTests.value = selectedTests.value.filter(t => !toRemove.has(t));
   } else {
-    selectedTests.value.push(path);
+    const toRemove = new Set((node.cases || []).map(c => `${node.path}::${c}`));
+    selectedTests.value = selectedTests.value.filter(t => !toRemove.has(t));
+    selectedTests.value.push(node.path);
   }
 };
 
-const toggleFilterTestCase = (path: string, tc: string) => {
-  if (selectedTests.value.includes(path)) return;
-  const caseId = `${path}::${tc}`;
-  const index = selectedTests.value.indexOf(caseId);
-  if (index > -1) {
-    selectedTests.value.splice(index, 1);
+const toggleFilterTestCase = (node: FileNode, tc: string) => {
+  if (!node.path) return;
+  const caseId = `${node.path}::${tc}`;
+  
+  const pathIndex = selectedTests.value.indexOf(node.path);
+  if (pathIndex > -1) {
+    selectedTests.value.splice(pathIndex, 1);
+    const otherCases = (node.cases || []).filter(c => c !== tc);
+    for (const c of otherCases) {
+      selectedTests.value.push(`${node.path}::${c}`);
+    }
   } else {
-    selectedTests.value.push(caseId);
+    const index = selectedTests.value.indexOf(caseId);
+    if (index > -1) {
+      selectedTests.value.splice(index, 1);
+    } else {
+      selectedTests.value.push(caseId);
+    }
   }
 };
 
@@ -145,9 +140,32 @@ const removeFileFromQueue = (path: string) => {
   );
 };
 
+const findCasesByPath = (nodes: FileNode[], targetPath: string): string[] => {
+  for (const node of nodes) {
+    if (node.type === "file" && node.path === targetPath) {
+      return node.cases || [];
+    }
+    if (node.type === "folder" && node.children) {
+      const found = findCasesByPath(node.children, targetPath);
+      if (found.length > 0) return found;
+    }
+  }
+  return [];
+};
+
 const removeCaseFromQueue = (path: string, tc: string) => {
   const caseId = `${path}::${tc}`;
-  selectedTests.value = selectedTests.value.filter((t) => t !== caseId);
+  const pathIndex = selectedTests.value.indexOf(path);
+  if (pathIndex > -1) {
+    selectedTests.value.splice(pathIndex, 1);
+    const allCases = findCasesByPath(availableTests.value, path);
+    const otherCases = allCases.filter(c => c !== tc);
+    for (const c of otherCases) {
+      selectedTests.value.push(`${path}::${c}`);
+    }
+  } else {
+    selectedTests.value = selectedTests.value.filter((t) => t !== caseId);
+  }
 };
 
 const computedQueuedSpecs = computed(() => {
@@ -162,6 +180,8 @@ const computedQueuedSpecs = computed(() => {
       innerTests: [],
     }));
   }
+
+
 
   const map: Record<string, any> = {};
   for (const item of selectedTests.value) {
@@ -180,14 +200,30 @@ const computedQueuedSpecs = computed(() => {
         status: "waiting",
         innerTests: [],
       };
+
+      // If the whole file was selected (no tc specified initially), populate with all cases
+      if (!tc && !item.includes("::")) {
+        const allCases = findCasesByPath(availableTests.value, path);
+        for (const caseName of allCases) {
+          map[path].innerTests.push({
+            id: "",
+            name: caseName,
+            status: "waiting",
+          });
+        }
+      }
     }
 
     if (tc) {
-      map[path].innerTests.push({
-        id: "",
-        name: tc,
-        status: "waiting",
-      });
+      // Check if it's already added by the whole file selection
+      const exists = map[path].innerTests.find((t: any) => t.name === tc);
+      if (!exists) {
+        map[path].innerTests.push({
+          id: "",
+          name: tc,
+          status: "waiting",
+        });
+      }
     }
   }
   return Object.values(map);
@@ -322,7 +358,7 @@ const parseLogLine = (line: string) => {
     cleanLine.startsWith("Failed tests to rerun:")
   ) {
     parsingHeader = true;
-    queuedSpecs.value = [];
+    // DO NOT clear queuedSpecs here, as we already captured the perfect UI state before starting
     return;
   }
   if (
@@ -334,30 +370,10 @@ const parseLogLine = (line: string) => {
   }
 
   if (parsingHeader) {
-    const match = cleanLine.match(/^(\d+)\.\s+(.*\.spec\.ts)$/);
-    if (match) {
-      queuedSpecs.value.push({
-        id: parseInt(match[1]!),
-        path: match[2]!,
-        status: "waiting",
-        innerTests: [],
-      });
-      return;
-    }
-
-    const matchRerun = cleanLine.match(/-\s+\w+:\s+.*\((.*\.spec\.ts):\d+\)/);
-    if (matchRerun) {
-      const specPath = matchRerun[1]!;
-      if (!queuedSpecs.value.find((s) => s.path === specPath)) {
-        queuedSpecs.value.push({
-          id: queuedSpecs.value.length + 1,
-          path: specPath,
-          status: "waiting",
-          innerTests: [],
-        });
-      }
-      return;
-    }
+    // We already built the perfect queue from the UI before execution,
+    // so we don't need to push specs again from the log header.
+    // Just ignore header lines.
+    return;
   }
 
   const execMatch = cleanLine.match(
@@ -383,12 +399,17 @@ const parseLogLine = (line: string) => {
     const activeSpec = queuedSpecs.value.find((s) => s.status === "running");
     if (activeSpec) {
       const testName = testStartMatch[2]!.trim();
-      const existing = activeSpec.innerTests.find((t) => t.name === testName);
+      const testId = testStartMatch[1]!.trim();
+      // Match by includes because the UI might have 'SYSTEM-RELEASE-8: アカウント...'
+      // while the log just outputs 'アカウント...'
+      const existing = activeSpec.innerTests.find(
+        (t) => t.name.includes(testName) || testName.includes(t.name) || (t.name.includes(testId) && testId !== "")
+      );
       if (existing) {
         existing.status = "running";
       } else {
         activeSpec.innerTests.push({
-          id: testStartMatch[1]!.trim(),
+          id: testId,
           name: testName,
           status: "running",
         });
@@ -435,7 +456,11 @@ const connectStream = () => {
   eventSource.addEventListener("message", (e) => {
     const data = JSON.parse(e.data);
     if (data.source === "system") {
-      if (session.value) session.value.status = data.status;
+      if (data.event === "tests-updated") {
+        fetchTests(true);
+        return;
+      }
+      if (session.value && data.status) session.value.status = data.status;
       if (data.status === "Completed" || data.status === "Failed") {
         isTesting.value = false;
 
@@ -461,9 +486,10 @@ const connectStream = () => {
   });
 };
 
-const fetchTests = async () => {
+const fetchTests = async (preserveState = false) => {
   if (!session.value) return;
-  isLoading.value = true;
+  // Only show full page loader if not preserving state
+  if (!preserveState) isLoading.value = true;
   try {
     const type =
       session.value.testType === "playground"
@@ -475,8 +501,10 @@ const fetchTests = async () => {
     const tests = await $fetch<FileNode[]>(`/api/tests/files?type=${type}`);
     availableTests.value = tests;
 
-    selectedTests.value = [];
-    selectedOrder.value = null;
+    if (!preserveState) {
+      selectedTests.value = [];
+      selectedOrder.value = null;
+    }
   } catch (err) {
     console.error(err);
   } finally {
@@ -490,8 +518,13 @@ onMounted(async () => {
     session.value = data;
     tempEnvContent.value = data.envContent || "";
 
-    if (data.status === "Running") {
-      isTesting.value = true;
+    if (data.status === "Running" || data.status === "Completed" || data.status === "Failed") {
+      if (data.meta?.queuedSpecs) {
+        queuedSpecs.value = JSON.parse(JSON.stringify(data.meta.queuedSpecs));
+      }
+      if (data.status === "Running") {
+        isTesting.value = true;
+      }
     }
 
     await fetchTests();
@@ -696,6 +729,29 @@ const toggleTest = async () => {
     }
   } else {
     // Start Execution
+    
+    // Parsing Phase: Capture the queue BEFORE setting isTesting to true
+    // Use the already perfectly computed queue from the UI instead of asking Playwright to parse it again
+    isParsingTests.value = true;
+    try {
+      const queueCopy = JSON.parse(JSON.stringify(computedQueuedSpecs.value));
+      
+      // Update paths to just filenames, since Playwright stdout logs only show filenames
+      for (const spec of queueCopy) {
+        if (spec.path && spec.path.includes("/")) {
+          const parts = spec.path.split("/");
+          spec.path = parts[parts.length - 1];
+        }
+      }
+      queuedSpecs.value = queueCopy;
+    } catch (err: any) {
+      addE2ELog(
+        `\n\x1b[33m⚠EEWarning: Failed to parse test cases (${err.message}). Tests will appear as they run.\x1b[0m\n`,
+      );
+    } finally {
+      isParsingTests.value = false;
+    }
+
     isTesting.value = true;
     e2eLogs.value = [];
     backendLogs.value = [];
@@ -708,66 +764,6 @@ const toggleTest = async () => {
         ? selectedOrder.value.name
         : selectedTests.value;
 
-    // Parsing Phase
-    isParsingTests.value = true;
-    try {
-      const parseData = await $fetch<any>("/api/tests/parse", {
-        method: "POST",
-        body: {
-          testType: session.value?.testType || "release",
-          mode: executionMode.value,
-          tests: testList,
-        },
-      });
-
-      queuedSpecs.value = [];
-      let specIdCounter = 1;
-
-      if (parseData?.suites) {
-        for (const suite of parseData.suites) {
-          const innerTests: any[] = [];
-
-          const extractSpecs = (s: any) => {
-            if (s.specs) {
-              for (const spec of s.specs) {
-                innerTests.push({
-                  id: spec.id || spec.title,
-                  name: spec.title,
-                  status: "waiting",
-                });
-              }
-            }
-            if (s.suites) {
-              for (const childSuite of s.suites) {
-                extractSpecs(childSuite);
-              }
-            }
-          };
-          extractSpecs(suite);
-
-          // Try to extract filename from path or title
-          let fileName = suite.file || suite.title;
-          if (fileName && fileName.includes("/")) {
-            const parts = fileName.split("/");
-            fileName = parts[parts.length - 1];
-          }
-
-          queuedSpecs.value.push({
-            id: specIdCounter++,
-            path: fileName,
-            status: "waiting",
-            innerTests,
-          });
-        }
-      }
-    } catch (err: any) {
-      addE2ELog(
-        `\n\x1b[33m⚠EEWarning: Failed to parse test cases (${err.message}). Tests will appear as they run.\x1b[0m\n`,
-      );
-    } finally {
-      isParsingTests.value = false;
-    }
-
     try {
       await $fetch("/api/tests/run", {
         method: "POST",
@@ -776,6 +772,7 @@ const toggleTest = async () => {
           testType: session.value?.testType || "release",
           mode: executionMode.value,
           tests: testList,
+          queuedSpecs: queuedSpecs.value,
         },
       });
       // Ensure stream is connected
@@ -814,13 +811,20 @@ const toggleTest = async () => {
             class="ml-3 text-xs bg-amnimo-50 text-amnimo-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider border border-amnimo-100"
             >{{ session.testType }}</span
           >
-          <div 
-            v-if="activeLocks.some(l => l.sessionId === session?.id)"
+          <div
+            v-if="activeLocks.some((l) => l.sessionId === session?.id)"
             class="flex items-center gap-1.5 px-3 py-1 bg-amber-500 text-white rounded-lg shadow-sm z-10 cursor-help animate-pulse"
-            :title="$t('runner.lockedResource', { resource: activeLocks.find(l => l.sessionId === session?.id)?.resource })"
+            :title="
+              $t('runner.lockedResource', {
+                resource: activeLocks.find((l) => l.sessionId === session?.id)
+                  ?.resource,
+              })
+            "
           >
             <Icon name="heroicons:lock-closed" class="w-4 h-4" />
-            <span class="tracking-wide font-bold">{{ $t('runner.locked') }}</span>
+            <span class="tracking-wide font-bold">{{
+              $t("runner.locked")
+            }}</span>
           </div>
         </h2>
       </div>
@@ -893,7 +897,7 @@ const toggleTest = async () => {
     <div class="flex-1 flex overflow-hidden">
       <!-- Left Sidebar: Test Suites & Orders -->
       <aside
-        class="w-80 border-r border-slate-200 bg-white flex-shrink-0 flex flex-col z-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]"
+        class="w-[22rem] border-r border-slate-200 bg-white flex-shrink-0 flex flex-col z-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]"
       >
         <div class="p-5 flex-1 overflow-y-auto flex flex-col">
           <h3
@@ -1009,7 +1013,6 @@ const toggleTest = async () => {
                   :nodes="availableTests"
                   :selected="selectedTests"
                   @update:selected="selectedTests = $event"
-                  @load-cases="loadCasesForPath"
                   :disabled="isTesting || isParsingTests"
                 />
                 <div
@@ -1072,12 +1075,12 @@ const toggleTest = async () => {
                       <div
                         class="flex items-center gap-2 mb-1 min-w-0"
                         :class="{
-                          'opacity-50': selectedTests.includes(file.path!),
+                          'opacity-50': isFileSelected(file),
                         }"
                       >
                         <button
-                          v-if="!selectedTests.includes(file.path!)"
-                          @click="toggleFilterFile(file.path!)"
+                          v-if="!isFileSelected(file)"
+                          @click="toggleFilterFile(file)"
                           class="shrink-0 w-4 h-4 flex items-center justify-center bg-white border border-slate-300 hover:bg-amnimo-600 hover:text-white hover:border-amnimo-600 rounded text-slate-400 transition-colors"
                           :disabled="isTesting || isParsingTests"
                         >
@@ -1102,17 +1105,7 @@ const toggleTest = async () => {
                       </div>
                       <div class="pl-6 space-y-1">
                         <div
-                          v-if="file.cases === undefined"
-                          class="flex items-center gap-2 text-xs text-slate-400 py-1"
-                        >
-                          <Icon
-                            name="heroicons:arrow-path"
-                            class="w-3.5 h-3.5 animate-spin"
-                          />
-                          {{ $t("runner.loadingCases") }}
-                        </div>
-                        <div
-                          v-else-if="file.cases.length === 0"
+                          v-if="file.cases!.length === 0"
                           class="flex items-center gap-2 text-xs text-slate-400 py-1"
                         >
                           {{ $t("runner.noCasesFound") }}
@@ -1125,18 +1118,18 @@ const toggleTest = async () => {
                           :class="{
                             'opacity-50':
                               selectedTests.includes(file.path! + '::' + tc) ||
-                              selectedTests.includes(file.path!),
+                              isFileSelected(file),
                           }"
                         >
                           <button
                             v-if="
                               !selectedTests.includes(file.path! + '::' + tc) &&
-                              !selectedTests.includes(file.path!)
+                              !isFileSelected(file)
                             "
                             @click="
                               !isTesting &&
                               !isParsingTests &&
-                              toggleFilterTestCase(file.path!, tc)
+                              toggleFilterTestCase(file, tc)
                             "
                             class="shrink-0 w-4 h-4 mt-0.5 flex items-center justify-center bg-white border border-slate-300 hover:bg-purple-500 hover:text-white hover:border-purple-500 rounded text-slate-400 transition-colors"
                             :disabled="
@@ -1164,7 +1157,7 @@ const toggleTest = async () => {
                               !isTesting &&
                               !isParsingTests &&
                               !selectedTests.includes(file.path!) &&
-                              toggleFilterTestCase(file.path!, tc)
+                              toggleFilterTestCase(file, tc)
                             "
                             >{{ tc }}</span
                           >

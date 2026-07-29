@@ -51,7 +51,7 @@ async function updateSessionStatus(sessionId: string, status: SessionStatus) {
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { sessionId, testType, mode, tests, sessionName } = body;
+  const { sessionId, testType, mode, tests, sessionName, queuedSpecs } = body;
   
   const host = getRequestHost(event);
   const protocol = getRequestProtocol(event);
@@ -96,6 +96,12 @@ export default defineEventHandler(async (event) => {
       if (parsedEnv["CLI_SERVER_PORT"]) {
         cliPort = parsedEnv["CLI_SERVER_PORT"];
       }
+    }
+
+    if (queuedSpecs) {
+      if (!session.meta) session.meta = {};
+      session.meta.queuedSpecs = queuedSpecs;
+      await fs.writeFile(sessionPath, JSON.stringify(session, null, 2), "utf-8");
     }
   } catch (_e) {
     // ignored
@@ -147,8 +153,9 @@ export default defineEventHandler(async (event) => {
     }
 
     e2eArgs = ["test", "--", ...Array.from(files)];
+    // We pass grep cases via env var to avoid cmd.exe quoting bugs
     if (grepCases.length > 0) {
-      e2eArgs.push("-g", grepCases.join("|"));
+      parsedEnv["PLAYWRIGHT_GREP"] = grepCases.join("|");
     }
   } else if (mode === "order") {
     if (testType === "release") {
@@ -166,16 +173,18 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  const spawnEnv: Record<string, string> = { 
+    ...process.env, 
+    ...parsedEnv, 
+    FORCE_COLOR: "1", 
+    TEST_RUNNER_URL: testRunnerUrl,
+    SESSION_ID: sessionId 
+  } as Record<string, string>;
+
   const e2eProc = spawn(npmCmd, e2eArgs, {
     cwd,
     shell: isWindows,
-    env: { 
-      ...process.env, 
-      ...parsedEnv, 
-      FORCE_COLOR: "1", 
-      TEST_RUNNER_URL: testRunnerUrl,
-      SESSION_ID: sessionId 
-    },
+    env: spawnEnv,
   });
   sessionProcs.e2eProcess = e2eProc;
 

@@ -16,6 +16,7 @@
     "description": "Manage and track your E2E test sessions",
     "newSession": "New Session",
     "searchPlaceholder": "Search sessions by name or ID...",
+    "tests": "tests",
     "allDevices": "All Devices",
     "to": "to",
     "loading": "Loading Sessions...",

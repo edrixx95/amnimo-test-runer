@@ -44,7 +44,11 @@ export const getLiveProgress = async (
       innerTests: InnerTest[];
     };
 
-    const queuedSpecs: Spec[] = [];
+    const sessionPath = path.join(SESSIONS_DIR, sessionId, "session.json");
+    const sessionData = await fs.readFile(sessionPath, "utf-8");
+    const session = JSON.parse(sessionData);
+
+    const queuedSpecs: Spec[] = session.meta?.queuedSpecs ? JSON.parse(JSON.stringify(session.meta.queuedSpecs)) : [];
     let parsingHeader = false;
 
     for (const line of lines) {
@@ -57,7 +61,6 @@ export const getLiveProgress = async (
         cleanLine.startsWith("Failed tests to rerun:")
       ) {
         parsingHeader = true;
-        queuedSpecs.length = 0; // Clear array
         continue;
       }
 
@@ -70,30 +73,9 @@ export const getLiveProgress = async (
       }
 
       if (parsingHeader) {
-        const match = cleanLine.match(/^(\d+)\.\s+(.*\.spec\.ts)$/);
-        if (match) {
-          queuedSpecs.push({
-            path: match[2]!,
-            status: "waiting",
-            innerTests: [],
-          });
-          continue;
-        }
-
-        const matchRerun = cleanLine.match(
-          /-\s+\w+:\s+.*\((.*\.spec\.ts):\d+\)/,
-        );
-        if (matchRerun) {
-          const specPath = matchRerun[1]!;
-          if (!queuedSpecs.find((s) => s.path === specPath)) {
-            queuedSpecs.push({
-              path: specPath,
-              status: "waiting",
-              innerTests: [],
-            });
-          }
-          continue;
-        }
+        // We already have the perfect queue from session.meta.queuedSpecs
+        // so we just ignore the header section.
+        continue;
       }
 
       const execMatch = cleanLine.match(
@@ -120,8 +102,11 @@ export const getLiveProgress = async (
         const activeSpec = queuedSpecs.find((s) => s.status === "running");
         if (activeSpec) {
           const testName = testStartMatch[2]!.trim();
+          const testId = testStartMatch[1]!.trim();
+          // Match by includes because the UI might have 'SYSTEM-RELEASE-8: アカウント...'
+          // while the log just outputs 'アカウント...'
           const existing = activeSpec.innerTests.find(
-            (t) => t.name === testName,
+            (t) => t.name.includes(testName) || testName.includes(t.name) || (t.name.includes(testId) && testId !== "")
           );
           if (existing) {
             existing.status = "running";
@@ -167,8 +152,14 @@ export const getLiveProgress = async (
     let passed = 0;
     let failed = 0;
     let skipped = 0;
+    let totalTests = 0;
 
     for (const spec of queuedSpecs) {
+      if (spec.innerTests.length > 0) {
+        totalTests += spec.innerTests.length;
+      } else {
+        totalTests += 1;
+      }
       for (const test of spec.innerTests) {
         if (test.status === "PASSED") passed++;
         else if (test.status === "FAILED") failed++;
@@ -180,8 +171,10 @@ export const getLiveProgress = async (
       (s) => s.status === "passed" || s.status === "failed",
     ).length;
 
+    const completedTests = passed + failed + skipped;
+
     return {
-      testCounts: { passed, failed, skipped },
+      testCounts: { passed, failed, skipped, total: totalTests, completed: completedTests },
       specCounts: { completed: completedSpecs, total: queuedSpecs.length },
     };
   } catch (_err) {

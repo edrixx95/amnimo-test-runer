@@ -17,7 +17,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:selected", values: string[]): void;
-  (e: "load-cases", path: string): void;
 }>();
 
 const openFolders = ref<Set<string>>(new Set());
@@ -33,32 +32,58 @@ const toggleFolder = (name: string) => {
 const toggleFolderAndLoadCases = (node: FileNode) => {
   const identifier = node.path || node.name;
   toggleFolder(identifier);
-  if (isOpen(identifier) && node.cases === undefined && node.path) {
-    emit("load-cases", node.path);
-  }
 };
 
 const isOpen = (name: string) => openFolders.value.has(name);
 
-const toggleFile = (path: string) => {
-  const newSelected = [...props.selected];
-  const index = newSelected.indexOf(path);
-  if (index > -1) {
-    newSelected.splice(index, 1);
-  } else {
-    newSelected.push(path);
-  }
-  emit("update:selected", newSelected);
+const isAllCasesSelected = (node: FileNode) => {
+  if (!node.cases || node.cases.length === 0) return false;
+  return node.cases.every(c => props.selected.includes(`${node.path}::${c}`));
 };
 
-const toggleCase = (path: string, testCase: string) => {
-  const caseId = `${path}::${testCase}`;
+const isFileSelected = (node: FileNode) => {
+  if (!node.path) return false;
+  return props.selected.includes(node.path) || isAllCasesSelected(node);
+};
+
+const toggleFile = (node: FileNode) => {
+  if (!node.path) return;
   const newSelected = [...props.selected];
-  const index = newSelected.indexOf(caseId);
-  if (index > -1) {
-    newSelected.splice(index, 1);
+  
+  if (isFileSelected(node)) {
+    // Unselect file and all its cases
+    const toRemove = new Set([node.path, ...(node.cases || []).map(c => `${node.path}::${c}`)]);
+    const filtered = newSelected.filter(t => !toRemove.has(t));
+    emit("update:selected", filtered);
   } else {
-    newSelected.push(caseId);
+    // Select the file by adding its path. Remove any individual case selections for this file to keep the array clean.
+    const toRemove = new Set((node.cases || []).map(c => `${node.path}::${c}`));
+    const filtered = newSelected.filter(t => !toRemove.has(t));
+    filtered.push(node.path);
+    emit("update:selected", filtered);
+  }
+};
+
+const toggleCase = (node: FileNode, testCase: string) => {
+  if (!node.path) return;
+  const newSelected = [...props.selected];
+  const caseId = `${node.path}::${testCase}`;
+  
+  const pathIndex = newSelected.indexOf(node.path);
+  if (pathIndex > -1) {
+    // File was selected as a whole. Remove the path, add back all cases except this one.
+    newSelected.splice(pathIndex, 1);
+    const otherCases = (node.cases || []).filter(c => c !== testCase);
+    for (const c of otherCases) {
+      newSelected.push(`${node.path}::${c}`);
+    }
+  } else {
+    const index = newSelected.indexOf(caseId);
+    if (index > -1) {
+      newSelected.splice(index, 1);
+    } else {
+      newSelected.push(caseId);
+    }
   }
   emit("update:selected", newSelected);
 };
@@ -95,7 +120,6 @@ const emitUpdate = (values: string[]) => {
             :selected="selected"
             :disabled="disabled"
             @update:selected="emitUpdate"
-            @load-cases="(p) => emit('load-cases', p)"
           />
         </div>
       </div>
@@ -123,13 +147,13 @@ const emitUpdate = (values: string[]) => {
 
           <div
             class="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
-            :class="{ 'opacity-50': selected.includes(node.path!) }"
+            :class="{ 'opacity-50': isFileSelected(node) }"
           >
             <button
-              v-if="!selected.includes(node.path!)"
+              v-if="!isFileSelected(node)"
               class="shrink-0 w-4 h-4 flex items-center justify-center bg-gray-700 hover:bg-amnimo-600 rounded text-gray-300 hover:text-white transition-colors"
               :disabled="disabled"
-              @click.stop="toggleFile(node.path!)"
+              @click.stop="toggleFile(node)"
             >
               <Icon name="heroicons:plus" class="w-3.5 h-3.5" />
             </button>
@@ -159,17 +183,7 @@ const emitUpdate = (values: string[]) => {
           class="pl-9 mt-0.5 space-y-0.5"
         >
           <div
-            v-if="node.cases === undefined"
-            class="p-1.5 text-xs text-gray-500 flex items-center gap-2"
-          >
-            <Icon
-              name="heroicons:arrow-path"
-              class="w-3.5 h-3.5 animate-spin"
-            />
-            {{ $t("fileTree.loadingCases") }}
-          </div>
-          <div
-            v-else-if="node.cases.length === 0"
+            v-if="node.cases!.length === 0"
             class="p-1.5 text-xs text-gray-500"
           >
             {{ $t("fileTree.noCasesFound") }}
@@ -190,7 +204,7 @@ const emitUpdate = (values: string[]) => {
                 "
                 class="shrink-0 w-4 h-4 flex items-center justify-center bg-gray-700 hover:bg-purple-600 rounded text-gray-300 hover:text-white transition-colors"
                 :disabled="disabled"
-                @click.stop="toggleCase(node.path!, testCase)"
+                @click.stop="toggleCase(node, testCase)"
               >
                 <Icon name="heroicons:plus" class="w-3.5 h-3.5" />
               </button>
@@ -210,7 +224,7 @@ const emitUpdate = (values: string[]) => {
                 :title="testCase"
                 @click="
                   !selected.includes(node.path!) &&
-                  toggleCase(node.path!, testCase)
+                  toggleCase(node, testCase)
                 "
                 >{{ testCase }}</span
               >

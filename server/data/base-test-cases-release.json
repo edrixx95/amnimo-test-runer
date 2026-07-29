@@ -1,0 +1,693 @@
+[
+  {
+    "name": "simple-settings",
+    "type": "folder",
+    "children": [
+      {
+        "name": "simple-settings.spec.ts",
+        "type": "file",
+        "path": "simple-settings/simple-settings.spec.ts",
+        "cases": [
+          "SIMPLE-RELEASE-1: 初回ログイン後、「簡易設定画面に遷移」ダイアログが表示されていることを確認する。",
+          "SIMPLE-RELEASE-2: モバイル通信の設定が可能なことを確認する",
+          "SIMPLE-RELEASE-3: モバイルインターフェースの設定が可能なことを確認する",
+          "SIMPLE-RELEASE-4: イーサネットインターフェースの設定が可能なことを確認する",
+          "SIMPLE-RELEASE-5: GUIアクセスインターフェースの設定が可能なことを確認する",
+          "SIMPLE-RELEASE-6: GUIアクセスインターフェースの設定が可能なことを確認する (AC10)",
+          "SIMPLE-RELEASE-7: GUIアクセスインターフェースの設定が可能なことを確認する (AR)",
+          "SIMPLE-RELEASE-8: DHCPサーバーの設定が可能なことを確認する",
+          "SIMPLE-RELEASE-9: パッケージリポジトリの設定が可能なことを確認する",
+          "SIMPLE-RELEASE-10: DMSの設定が可能なことを確認する",
+          "SIMPLE-RELEASE-11: Nx Witnessの設定が可能なことを確認する",
+          "SIMPLE-RELEASE-12: DNSとフィルターの設定が可能なことを確認する"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "side-menu",
+    "type": "folder",
+    "children": [
+      {
+        "name": "side-menu.spec.ts",
+        "type": "file",
+        "path": "side-menu/side-menu.spec.ts",
+        "cases": [
+          "SIDEMENU-RELEASE-1: サイドメニューの開閉が正常に行えることを確認",
+          "SIDEMENU-RELEASE-2: サイドメニューの表示が正しく、各画面へ正常に遷移できることを確認する。"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "dashboard",
+    "type": "folder",
+    "children": [
+      {
+        "name": "dashboard.spec.ts",
+        "type": "file",
+        "path": "dashboard/dashboard.spec.ts",
+        "cases": [
+          "DASHBOARD-RELEASE-1: 自動更新が可能なことを確認する。",
+          "DASHBOARD-RELEASE-2: モバイルモジュール情報の更新が可能なことを確認する(モバイル通信未接続)",
+          "DASHBOARD-RELEASE-3: モバイルモジュール情報の更新が可能なことを確認する(モバイル通信接続中)",
+          "DASHBOARD-RELEASE-4: SIM情報の更新が可能なことを確認する(モバイル通信未接続)",
+          "DASHBOARD-RELEASE-5: SIM情報の更新が可能なことを確認する(モバイル通信接続中)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "header",
+    "type": "folder",
+    "children": [
+      {
+        "name": "header.spec.ts",
+        "type": "file",
+        "path": "header/header.spec.ts",
+        "cases": [
+          "DASHBOARD-RELEASE-10: 言語の切り替えが可能なことを確認する",
+          "DASHBOARD-RELEASE-11: サインアウトが可能なことを確認する",
+          "DASHBOARD-RELEASE-12: パスワード変更が可能なことを確認する"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "network",
+    "type": "folder",
+    "children": [
+      {
+        "name": "interface",
+        "type": "folder",
+        "children": [
+          {
+            "name": "interface.spec.ts",
+            "type": "file",
+            "path": "network/interface/interface.spec.ts",
+            "cases": [
+              "NETWORK-RELEASE-1: 初期ステータスが正しく表示されていること。",
+              "NETWORK-RELEASE-2: 最新の情報に更新時、ステータスが正しく反映されることを確認する。",
+              "NETWORK-RELEASE-3: インターフェースを追加できることを確認する。 (eth0)",
+              "NETWORK-RELEASE-4: インターフェースを追加できることを確認する。 (ecm0)",
+              "NETWORK-RELEASE-5: インターフェースを編集できることを確認する。 (eth0)",
+              "NETWORK-RELEASE-6: インターフェースを編集できることを確認する。 (ecm0)",
+              "NETWORK-RELEASE-7: インターフェースを削除できることを確認する。 (eth0)",
+              "NETWORK-RELEASE-8: インターフェースを削除できることを確認する。 (ecm0)"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "mobile",
+        "type": "folder",
+        "children": [
+          {
+            "name": "mobile.spec.ts",
+            "type": "file",
+            "path": "network/mobile/mobile.spec.ts",
+            "cases": [
+              "NETWORK-RELEASE-9: 通信状況が正しく表示されていること。",
+              "NETWORK-RELEASE-87: モバイル通信の接続履歴が正しく取得・更新されていることの確認",
+              "NETWORK-RELEASE-10: モバイル通信を追加できることを確認する。",
+              "NETWORK-RELEASE-11: モバイル通信を編集できることを確認する。",
+              "NETWORK-RELEASE-12: モバイル通信を削除できることを確認する。",
+              "NETWORK-RELEASE-13: モバイル通信　セッションを追加できることを確認する。",
+              "NETWORK-RELEASE-14: モバイル通信　セッションを編集できることを確認する。",
+              "NETWORK-RELEASE-15: モバイル通信　セッションを削除できることを確認する。",
+              "NETWORK-RELEASE-16: AX12 モバイル通信を追加できることを確認する。",
+              "NETWORK-RELEASE-17: AX12 モバイル通信を編集できることを確認する。",
+              "NETWORK-RELEASE-18: AX12 モバイル通信を削除できることを確認する。",
+              "NETWORK-RELEASE-19: AX12 モバイル通信　セッションを追加できることを確認する。",
+              "NETWORK-RELEASE-20: AX12 モバイル通信　セッションを編集できることを確認する。",
+              "NETWORK-RELEASE-21: AX12 モバイル通信　セッションを削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "wifi",
+        "type": "folder",
+        "children": [
+          {
+            "name": "wifi.spec.ts",
+            "type": "file",
+            "path": "network/wifi/wifi.spec.ts",
+            "cases": [
+              "NETWORK-RELEASE-22: WPS実行が可能であることを確認する。",
+              "NETWORK-RELEASE-23: アクセスポイントPINコード生成が可能であることを確認する。",
+              "NETWORK-RELEASE-24: WPS設定の変更が可能であることを確認する。",
+              "NETWORK-RELEASE-25: アクセスポイント設定を追加できることを確認する。",
+              "NETWORK-RELEASE-26: アクセスポイント設定を編集できることを確認する。",
+              "NETWORK-RELEASE-27: アクセスポイント設定を削除できることを確認する。",
+              "NETWORK-RELEASE-28: ステーション設定を追加できることを確認する。",
+              "NETWORK-RELEASE-29: ステーション設定を編集できることを確認する。",
+              "NETWORK-RELEASE-30: ステーション設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "pppoe",
+        "type": "folder",
+        "children": [
+          {
+            "name": "pppoe.spec.ts",
+            "type": "file",
+            "path": "network/pppoe/pppoe.spec.ts",
+            "cases": [
+              "NETWORK-RELEASE-31: PPP(PPPoE)設定を追加できることを確認する。",
+              "NETWORK-RELEASE-32: PPP(PPPoE)設定を編集できることを確認する。",
+              "NETWORK-RELEASE-33: PPP(PPPoE)設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "routing",
+        "type": "folder",
+        "children": [
+          {
+            "name": "routing.spec.ts",
+            "type": "file",
+            "path": "network/routing/routing.spec.ts",
+            "cases": [
+              "NETWORK-RELEASE-34: 初期ステータスが正しく表示されていること。",
+              "NETWORK-RELEASE-35: 初期ステータスが正しく表示されていること。",
+              "NETWORK-RELEASE-36: 最新の情報に更新時、ステータスが正しく反映されることを確認する。",
+              "NETWORK-RELEASE-37: 最新の情報に更新時、ステータスが正しく反映されることを確認する。",
+              "NETWORK-RELEASE-38: スタティックルーティングを追加できることを確認する。",
+              "NETWORK-RELEASE-39: スタティックルーティングを編集できることを確認する。",
+              "NETWORK-RELEASE-40: スタティックルーティングを削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "filter",
+        "type": "folder",
+        "children": [
+          {
+            "name": "filter.spec.ts",
+            "type": "file",
+            "path": "network/filter/filter.spec.ts",
+            "cases": [
+              "NETWORK-RELEASE-41: フィルター入力設定を追加できることを確認する。",
+              "NETWORK-RELEASE-42: フィルター入力設定を編集できることを確認する。",
+              "NETWORK-RELEASE-43: フィルター入力設定を削除できることを確認する。",
+              "NETWORK-RELEASE-44: フィルター転送設定を追加できることを確認する。",
+              "NETWORK-RELEASE-45: フィルター転送設定を編集できることを確認する。",
+              "NETWORK-RELEASE-46: フィルター転送設定を削除できることを確認する。",
+              "NETWORK-RELEASE-47: フィルター出力設定を追加できることを確認する。",
+              "NETWORK-RELEASE-48: フィルター出力設定を編集できることを確認する。",
+              "NETWORK-RELEASE-49: フィルター出力設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "nat",
+        "type": "folder",
+        "children": [
+          {
+            "name": "nat.spec.ts",
+            "type": "file",
+            "path": "network/nat/nat.spec.ts",
+            "cases": [
+              "NETWORK-RELEASE-50: NAT設定動的SNATを追加できることを確認する。",
+              "NETWORK-RELEASE-51: NAT設定動的SNATを編集できることを確認する。",
+              "NETWORK-RELEASE-52: NAT設定動的SNATを削除できることを確認する。",
+              "NETWORK-RELEASE-53: NAT設定静的SNATを追加できることを確認する。",
+              "NETWORK-RELEASE-54: NAT設定静的SNATを編集できることを確認する。",
+              "NETWORK-RELEASE-55: NAT設定静的SNATを削除できることを確認する。",
+              "NETWORK-RELEASE-56: NAT設定DNATを追加できることを確認する。",
+              "NETWORK-RELEASE-57: NAT設定DNATを編集できることを確認する。",
+              "NETWORK-RELEASE-58: NAT設定DNATを削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ipsec",
+        "type": "folder",
+        "children": [
+          {
+            "name": "ipsec.spec.ts",
+            "type": "file",
+            "path": "network/ipsec/ipsec.spec.ts",
+            "cases": [
+              "NETWORK-RELEASE-59: Ipsec IKEを追加できることを確認する。",
+              "NETWORK-RELEASE-60: Ipsec IKEを編集できることを確認する。",
+              "NETWORK-RELEASE-61: Ipsec IKEを削除できることを確認する。",
+              "NETWORK-RELEASE-62: Ipsec SAを追加できることを確認する。",
+              "NETWORK-RELEASE-63: Ipsec SAを編集できることを確認する。",
+              "NETWORK-RELEASE-64: Ipsec SAを削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dns",
+        "type": "folder",
+        "children": [
+          {
+            "name": "dns.spec.ts",
+            "type": "file",
+            "path": "network/dns/dns.spec.ts",
+            "cases": [
+              "NETWORK-RELEASE-65: DNS設定 共通設定を変更できることを確認する。",
+              "NETWORK-RELEASE-66: DNS設定 問い合わせ先サーバーを追加できることを確認する。",
+              "NETWORK-RELEASE-67: DNS設定 問い合わせ先サーバーを編集できることを確認する。",
+              "NETWORK-RELEASE-68: DNS設定 問い合わせ先サーバーを削除できることを確認する。",
+              "NETWORK-RELEASE-69: DNS設定 ローカルアドレスを追加できることを確認する。",
+              "NETWORK-RELEASE-70: DNS設定 ローカルアドレスを編集できることを確認する。",
+              "NETWORK-RELEASE-71: DNS設定 ローカルアドレスを削除できることを確認する。",
+              "NETWORK-RELEASE-72: DNS設定 ローカルゾーンを追加できることを確認する。",
+              "NETWORK-RELEASE-73: DNS設定 ローカルゾーンを編集できることを確認する。",
+              "NETWORK-RELEASE-74: DNS設定 ローカルゾーンを削除できることを確認する。",
+              "NETWORK-RELEASE-75: DNS設定 別名定義を追加できることを確認する。",
+              "NETWORK-RELEASE-76: DNS設定 別名定義を編集できることを確認する。",
+              "NETWORK-RELEASE-77: DNS設定 別名定義を削除できることを確認する。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "system",
+    "type": "folder",
+    "children": [
+      {
+        "name": "hostname",
+        "type": "folder",
+        "children": [
+          {
+            "name": "hostname.spec.ts",
+            "type": "file",
+            "path": "system/hostname/hostname.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-1: ホスト名設定を変更できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "time",
+        "type": "folder",
+        "children": [
+          {
+            "name": "time.spec.ts",
+            "type": "file",
+            "path": "system/time/time.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-2: 最新の情報に更新時、デバイス時刻が正しく反映されることを確認する。",
+              "SYSTEM-RELEASE-3: タイムゾーン設定の変更が可能であることを確認する。",
+              "SYSTEM-RELEASE-4: 時刻の手動設定が可能であることを確認する。",
+              "SYSTEM-RELEASE-5: 時刻の時刻入力が可能であることを確認する。",
+              "SYSTEM-RELEASE-6: 時刻のNTP同期が可能であることを確認する。",
+              "SYSTEM-RELEASE-7: 時刻のNTP設定が可能であることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "account",
+        "type": "folder",
+        "children": [
+          {
+            "name": "account.spec.ts",
+            "type": "file",
+            "path": "system/account/account.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-8: アカウント設定を追加できることを確認する。",
+              "SYSTEM-RELEASE-9: アカウント設定を編集できることを確認する。",
+              "SYSTEM-RELEASE-10: アカウント設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "package-repository",
+        "type": "folder",
+        "children": [
+          {
+            "name": "package-repository.spec.ts",
+            "type": "file",
+            "path": "system/package-repository/package-repository.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-11: パッケージリポジトリ設定を追加できることを確認する。",
+              "SYSTEM-RELEASE-12: パッケージリポジトリ設定を編集できることを確認する。",
+              "SYSTEM-RELEASE-13: パッケージリポジトリ設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "storage",
+        "type": "folder",
+        "children": [
+          {
+            "name": "storage.spec.ts",
+            "type": "file",
+            "path": "system/storage/storage.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-14: 内部ストレージのパーティションを作成できることを確認する。",
+              "SYSTEM-RELEASE-15: 内部ストレージのパーティションをフォーマットできることを確認する。",
+              "SYSTEM-RELEASE-16: 内部ストレージのパーティションをマウントできることを確認する。",
+              "SYSTEM-RELEASE-17: 内部ストレージのパーティションをアンマウントできることを確認する。",
+              "SYSTEM-RELEASE-18: 内部ストレージのパーティションを削除できることを確認する。",
+              "SYSTEM-RELEASE-19: USBのパーティションを作成できることを確認する。",
+              "SYSTEM-RELEASE-20: USBのパーティションをフォーマットできることを確認する。",
+              "SYSTEM-RELEASE-21: USBのパーティションをマウントできることを確認する。",
+              "SYSTEM-RELEASE-22: USBのパーティションをアンマウントできることを確認する。",
+              "SYSTEM-RELEASE-23: USBのパーティションを削除できることを確認する。",
+              "SYSTEM-RELEASE-24: SDカードのパーティションを作成できることを確認する。",
+              "SYSTEM-RELEASE-25: SDカードのパーティションをフォーマットできることを確認する。",
+              "SYSTEM-RELEASE-26: SDカードのパーティションをマウントできることを確認する。",
+              "SYSTEM-RELEASE-27: SDカードのパーティションをアンマウントできることを確認する。",
+              "SYSTEM-RELEASE-28: SDカードのパーティションを削除できることを確認する。",
+              "SYSTEM-RELEASE-29: ストレージ設定を追加できることを確認する。",
+              "SYSTEM-RELEASE-30: ストレージ設定を編集できることを確認する。",
+              "SYSTEM-RELEASE-31: ストレージ設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "gui",
+        "type": "folder",
+        "children": [
+          {
+            "name": "gui.spec.ts",
+            "type": "file",
+            "path": "system/gui/gui.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-32: GUI設定を変更できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "poe",
+        "type": "folder",
+        "children": [
+          {
+            "name": "poe.spec.ts",
+            "type": "file",
+            "path": "system/poe/poe.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-33: 最新の情報に更新時、PoEのステータスが正しく反映されることを確認する。",
+              "SYSTEM-RELEASE-34: PoEポートリセットができることを確認する。",
+              "SYSTEM-RELEASE-35: PoE設定を編集できることを確認する。",
+              "SYSTEM-RELEASE-36: PoE設定を初期化できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ssh",
+        "type": "folder",
+        "children": [
+          {
+            "name": "ssh.spec.ts",
+            "type": "file",
+            "path": "system/ssh/ssh.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-37: SSH設定を変更できることを確認する。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "service",
+    "type": "folder",
+    "children": [
+      {
+        "name": "dhcp-server",
+        "type": "folder",
+        "children": [
+          {
+            "name": "dhcp-server.spec.ts",
+            "type": "file",
+            "path": "service/dhcp-server/dhcp-server.spec.ts",
+            "cases": [
+              "SERVICE-RELEASE-1: リース状況一覧の表示及び更新確認",
+              "SERVICE-RELEASE-2: DHCPサーバー設定を追加できることを確認する。",
+              "SERVICE-RELEASE-3: DHCPサーバー設定を編集できることを確認する。",
+              "SERVICE-RELEASE-4: DHCPサーバー設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dhcp-relay",
+        "type": "folder",
+        "children": [
+          {
+            "name": "dhcp-relay.spec.ts",
+            "type": "file",
+            "path": "service/dhcp-relay/dhcp-relay.spec.ts",
+            "cases": [
+              "SERVICE-RELEASE-5: DHCPリレー設定を追加できることを確認する。",
+              "SERVICE-RELEASE-6: DHCPリレー設定を編集できることを確認する。",
+              "SERVICE-RELEASE-7: DHCPリレー設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "proxy",
+        "type": "folder",
+        "children": [
+          {
+            "name": "proxy.spec.ts",
+            "type": "file",
+            "path": "service/proxy/proxy.spec.ts",
+            "cases": [
+              "SERVICE-RELEASE-8: プロキシサーバー設定を変更できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "schedule",
+        "type": "folder",
+        "children": [
+          {
+            "name": "schedule.spec.ts",
+            "type": "file",
+            "path": "service/schedule/schedule.spec.ts",
+            "cases": [
+              "SERVICE-RELEASE-9: スケジュール設定 一般を追加できることを確認する。",
+              "SERVICE-RELEASE-10: スケジュール設定 一般を編集できることを確認する。",
+              "SERVICE-RELEASE-11: スケジュール設定 一般を削除できることを確認する。",
+              "SERVICE-RELEASE-12: スケジュール設定 キープアライブを追加できることを確認する。",
+              "SERVICE-RELEASE-13: スケジュール設定 キープアライブを編集できることを確認する。",
+              "SERVICE-RELEASE-14: スケジュール設定 キープアライブを削除できることを確認する。",
+              "SERVICE-RELEASE-15: スケジュール設定 ユーザー定義を追加できることを確認する。",
+              "SERVICE-RELEASE-16: スケジュール設定 ユーザー定義を編集できることを確認する。",
+              "SERVICE-RELEASE-17: スケジュール設定 ユーザー定義を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dms",
+        "type": "folder",
+        "children": [
+          {
+            "name": "dms.spec.ts",
+            "type": "file",
+            "path": "service/dms/dms.spec.ts",
+            "cases": [
+              "SERVICE-RELEASE-19: DMS設定を変更できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "vms",
+        "type": "folder",
+        "children": [
+          {
+            "name": "vms.spec.ts",
+            "type": "file",
+            "path": "service/vms/vms.spec.ts",
+            "cases": [
+              "SERVICE-RELEASE-18: VMS設定を変更できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "cvr",
+        "type": "folder",
+        "children": [
+          {
+            "name": "cvr.spec.ts",
+            "type": "file",
+            "path": "service/cvr/cvr.spec.ts",
+            "cases": [
+              "SERVICE-RELEASE-20: カメラ設定のアップロードが可能であることを確認する。",
+              "SERVICE-RELEASE-21: カメラ設定の追加が可能であることを確認する。",
+              "SERVICE-RELEASE-22: カメラ設定の編集が可能であることを確認する。",
+              "SERVICE-RELEASE-23: カメラ設定の削除が可能であることを確認する。",
+              "SERVICE-RELEASE-24: CVR設定を変更できることを確認する｡"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "remoteit",
+        "type": "folder",
+        "children": [
+          {
+            "name": "remoteit.spec.ts",
+            "type": "file",
+            "path": "service/remoteit/remoteit.spec.ts",
+            "cases": [
+              "SERVICE-RELEASE-28: remote.it設定を変更できることを確認する。",
+              "SERVICE-RELEASE-29: remote.it設定を変更できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "di-history",
+        "type": "folder",
+        "children": [
+          {
+            "name": "di-history.spec.ts",
+            "type": "file",
+            "path": "service/di-history/di-history.spec.ts",
+            "cases": [
+              "SERVICE-RELEASE-30: 接点変化履歴のダウンロードが可能なことを確認",
+              "SERVICE-RELEASE-31: 接点変化履歴設定の変更が可能なことを確認"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "nxwitness",
+        "type": "folder",
+        "children": [
+          {
+            "name": "nxwitness.spec.ts",
+            "type": "file",
+            "path": "service/nxwitness/nxwitness.spec.ts",
+            "cases": [
+              "SERVICE-RELEASE-24: Nx Witness設定を変更できることを確認する。",
+              "SERVICE-RELEASE-25: Nx Witness設定を保存できることを確認する。",
+              "SERVICE-RELEASE-26: Nx Witness設定を復帰できることを確認する。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "management",
+    "type": "folder",
+    "children": [
+      {
+        "name": "syslog",
+        "type": "folder",
+        "children": [
+          {
+            "name": "syslog.spec.ts",
+            "type": "file",
+            "path": "management/syslog/syslog.spec.ts",
+            "cases": [
+              "MANAGEMENT-RELEASE-1: SYSLOG表示画面の設定ができることを確認",
+              "MANAGEMENT-RELEASE-2: SYSLOGのダウンロードが可能であることを確認",
+              "MANAGEMENT-RELEASE-3: AMLOG表示画面の設定ができることを確認",
+              "MANAGEMENT-RELEASE-4: AMLOGのダウンロードが可能であることを確認",
+              "MANAGEMENT-RELEASE-5: SYSLOGの設定が可能なことを確認"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "nwdiag",
+        "type": "folder",
+        "children": [
+          {
+            "name": "nwdiag.spec.ts",
+            "type": "file",
+            "path": "management/nwdiag/nwdiag.spec.ts",
+            "cases": [
+              "MANAGEMENT-RELEASE-6: ping実行が可能なことを確認"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "amdiag",
+        "type": "folder",
+        "children": [
+          {
+            "name": "amdiag.spec.ts",
+            "type": "file",
+            "path": "management/amdiag/amdiag.spec.ts",
+            "cases": [
+              "MANAGEMENT-RELEASE-7: アムニモ診断情報のダウンロードが可能なことを確認"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "reboot",
+        "type": "folder",
+        "children": [
+          {
+            "name": "reboot.spec.ts",
+            "type": "file",
+            "path": "management/reboot/reboot.spec.ts",
+            "cases": [
+              "MANAGEMENT-RELEASE-8: Gateway本体の再起動が行われることを確認する｡ (ソフトウェアリブート)",
+              "MANAGEMENT-RELEASE-9: Gateway本体の再起動が行われることを確認する｡ (ハードウェアリブート)",
+              "MANAGEMENT-RELEASE-10: Gateway本体が停止状態(電源断可能状態)に遷移することを確認する｡（シャットダウン）"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "firmware",
+        "type": "folder",
+        "children": [
+          {
+            "name": "firmware.spec.ts",
+            "type": "file",
+            "path": "management/firmware/firmware.spec.ts",
+            "cases": [
+              "MANAGEMENT-RELEASE-11: パッケージ更新が可能なことを確認",
+              "MANAGEMENT-RELEASE-12: ファイルアップロードによる、ファームウェアのエリア更新(全体更新)が行えることを確認する｡",
+              "MANAGEMENT-RELEASE-13: エリア同期による冗長領域のコピーが可能なことを確認する｡",
+              "MANAGEMENT-RELEASE-14: 工場初期化が可能なことを確認する｡"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "amnimo-cfg",
+        "type": "folder",
+        "children": [
+          {
+            "name": "amnimo-cfg.spec.ts",
+            "type": "file",
+            "path": "management/amnimo-cfg/amnimo-cfg.spec.ts",
+            "cases": [
+              "MANAGEMENT-RELEASE-15: 設定情報画面から設定情報の保存を行った場合に設定が永続化され、再起動後に保存を行った設定情報で起動が行われることを確認",
+              "MANAGEMENT-RELEASE-16: 設定情報のダウンロードが可能なことを確認。",
+              "MANAGEMENT-RELEASE-17: 設定初期化を行った場合に設定情報が初期化され、初期化後の設定で起動することを確認。",
+              "MANAGEMENT-RELEASE-18: 設定情報ファイルをアップロードができ、アップロードした設定情報で機器が起動することを確認。"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

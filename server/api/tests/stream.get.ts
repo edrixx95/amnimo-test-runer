@@ -1,4 +1,5 @@
 import { getSessionProcesses } from "../../utils/processManager";
+import { testScannerEvents } from "../../utils/testScanner";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -71,14 +72,22 @@ export default defineEventHandler(async (event) => {
     });
   };
 
+  const onTestListUpdated = () => {
+    eventStream.push({
+      data: JSON.stringify({ source: "system", event: "tests-updated" })
+    });
+  };
+
   sessionProcs.events.on("e2e-log", onE2eLog);
   sessionProcs.events.on("backend-log", onBackendLog);
   sessionProcs.events.on("status-update", onStatusUpdate);
+  testScannerEvents.on("tests-updated", onTestListUpdated);
 
   eventStream.onClosed(async () => {
     sessionProcs.events.off("e2e-log", onE2eLog);
     sessionProcs.events.off("backend-log", onBackendLog);
     sessionProcs.events.off("status-update", onStatusUpdate);
+    testScannerEvents.off("tests-updated", onTestListUpdated);
     await eventStream.close();
   });
 

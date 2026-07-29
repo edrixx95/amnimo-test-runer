@@ -16,6 +16,7 @@
     "description": "E2Eテストセッションの管理と追跡",
     "newSession": "新規セッション",
     "searchPlaceholder": "セッション名またはIDで検索...",
+    "tests": "テスト",
     "allDevices": "すべてのデバイス",
     "to": "～",
     "loading": "セッションを読み込み中...",

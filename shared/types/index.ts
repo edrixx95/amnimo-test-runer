@@ -32,8 +32,15 @@ export type SessionSummary = {
 };
 
 export type SessionMeta = {
-  testCounts: { passed: number; failed: number; skipped: number };
-  specCounts: { completed: number; total: number };
+  testCounts?: {
+    passed: number;
+    failed: number;
+    skipped: number;
+    total: number;
+    completed: number;
+  };
+  specCounts?: { completed: number; total: number };
+  queuedSpecs?: Spec[];
 };
 
 export type Session = SessionMetadata & {
@@ -86,7 +93,6 @@ export type TestOrder = {
   suites?: unknown[];
 };
 
-
 export interface CatchError extends Error {
   response?: {
     status?: number;
@@ -104,3 +110,8 @@ export interface CatchError extends Error {
     statusMessage?: string;
   };
 }
+
+export type PlaywrightSuiteNode = {
+  specs?: { title: string }[];
+  suites?: PlaywrightSuiteNode[];
+};
