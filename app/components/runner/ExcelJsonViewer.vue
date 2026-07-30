@@ -40,6 +40,18 @@ const searchQuery = ref("");
 const activeFilter = ref<"all" | "passed" | "failed" | "skipped">("all");
 const activeBoard = ref("all");
 
+const expandedRows = ref<string[]>([]);
+
+const toggleRow = (row: FlatTestRow) => {
+  if (!row.history || row.history.length === 0) return;
+  const idx = expandedRows.value.indexOf(row.testId);
+  if (idx !== -1) {
+    expandedRows.value.splice(idx, 1);
+  } else {
+    expandedRows.value.push(row.testId);
+  }
+};
+
 const uniqueBoards = computed(() => {
   const boards = new Set<string>();
   flatTests.value.forEach((r) => {
@@ -148,13 +160,20 @@ watch(
 const getResultClass = (res: string) => {
   const r = res.toLowerCase();
   if (r.includes("pass"))
-    return "bg-emerald-50 text-emerald-700 border-emerald-100";
-  if (r.includes("fail")) return "bg-rose-50 text-rose-700 border-rose-100";
-  if (r.includes("flaky"))
-    return "bg-indigo-50 text-indigo-700 border-indigo-100";
+    return "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200 hover:border-emerald-300";
+  if (r.includes("fail"))
+    return "bg-rose-100 text-rose-700 border-rose-200 hover:bg-rose-200 hover:border-rose-300";
   if (r.includes("skip") || r.includes("pend"))
-    return "bg-slate-100 text-slate-700 border-slate-200 text-slate-500";
-  return "bg-slate-50 text-slate-700 border-slate-200";
+    return "bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200 hover:border-amber-300";
+  return "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200 hover:border-slate-300";
+};
+
+const isFlaky = (row: FlatTestRow) => {
+  if (!row.history || row.history.length < 2) return false;
+  const latestResult = row.result.toLowerCase();
+  if (!latestResult.includes("pass")) return false;
+  // If latest is pass, check if any previous history was fail
+  return row.history.some((h) => h.result.toLowerCase().includes("fail"));
 };
 </script>
 
@@ -199,7 +218,8 @@ const getResultClass = (res: string) => {
           </div>
         </div>
 
-        <div class="p-0 overflow-hidden flex flex-col flex-1 bg-slate-50">
+        <div class="flex flex-1 flex-row relative overflow-hidden bg-slate-50 rounded-b-2xl">
+          <div class="p-0 overflow-hidden flex flex-col flex-1 relative z-10 transition-all duration-300">
           <div
             v-if="!isLoading && !error && flatTests.length > 0"
             class="px-8 py-4 bg-white border-b border-slate-200 flex flex-col gap-4 shrink-0 shadow-sm z-20 relative"
@@ -403,11 +423,7 @@ const getResultClass = (res: string) => {
                   </th>
                 </tr>
               </thead>
-              <TransitionGroup
-                tag="tbody"
-                name="list"
-                class="bg-white divide-y divide-slate-100"
-              >
+              <tbody class="bg-white divide-y divide-slate-100">
                 <tr v-if="displayedTests.length === 0" key="empty-state">
                   <td
                     colspan="7"
@@ -424,98 +440,168 @@ const getResultClass = (res: string) => {
                     </div>
                   </td>
                 </tr>
-                <tr
-                  v-for="(row, idx) in displayedTests"
-                  :key="row.testId + '-' + idx"
-                  class="hover:bg-slate-50/80 transition-colors group"
-                >
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-700 font-mono"
+                <template v-for="(row, idx) in displayedTests" :key="row.testId + '-' + idx">
+                  <tr
+                    class="transition-colors group cursor-pointer"
+                    :class="expandedRows.includes(row.testId) ? 'bg-slate-50' : 'hover:bg-slate-50/80'"
+                    @click="toggleRow(row)"
                   >
-                    {{ row.testId }}
-                  </td>
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-800"
-                  >
-                    {{ row.category }}
-                  </td>
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600"
-                  >
-                    {{ row.page }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div
-                      v-if="row.history && row.history.length > 0"
-                      class="flex flex-wrap gap-1"
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-700 font-mono flex items-center gap-2"
                     >
+                      <Icon
+                        v-if="row.history && row.history.length > 0"
+                        :name="expandedRows.includes(row.testId) ? 'heroicons:chevron-down' : 'heroicons:chevron-right'"
+                        class="w-4 h-4 text-slate-400 transition-transform"
+                      />
+                      <span v-else class="w-4 h-4 inline-block"></span>
+                      {{ row.testId }}
+                    </td>
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-800"
+                    >
+                      {{ row.category }}
+                    </td>
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600"
+                    >
+                      {{ row.page }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <!-- Super Tag for history -->
+                      <div v-if="row.history && row.history.length > 0" class="relative inline-flex items-center">
+                        <button
+                          :class="[
+                            getResultClass(row.result),
+                            isFlaky(row) ? 'ring-2 ring-orange-400 ring-offset-1' : ''
+                          ]"
+                          class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold border transition-all duration-300 cursor-pointer hover:shadow-sm active:scale-95"
+                          title="Click to view run history"
+                          @click.stop="toggleRow(row)"
+                        >
+                          {{ row.result }}
+                          <Icon v-if="isFlaky(row)" name="heroicons:exclamation-triangle" class="ml-1.5 w-3.5 h-3.5 text-orange-600" />
+                        </button>
+                        <div
+                          v-if="row.history.length > 1"
+                          class="absolute -top-2 -right-2 flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full text-[10px] font-bold text-white shadow-sm ring-2 ring-white cursor-pointer z-10 transition-transform hover:scale-110"
+                          :class="isFlaky(row) ? 'bg-orange-500' : 'bg-slate-500'"
+                          @click.stop="toggleRow(row)"
+                        >
+                          {{ row.history.length }}
+                        </div>
+                      </div>
+
+                      <!-- No history, just direct link -->
                       <button
-                        v-for="(hist, hIdx) in row.history"
-                        :key="hIdx"
-                        :class="[
-                          getResultClass(hist.result),
-                          hist.htmlReportUrl
-                            ? 'cursor-pointer hover:shadow-md hover:ring-2 hover:ring-opacity-50'
-                            : 'cursor-default',
-                        ]"
-                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border transition-all duration-200"
-                        :title="
-                          (hist.label ? hist.label + ': ' : '') + hist.result
-                        "
-                        @click="
-                          hist.htmlReportUrl
-                            ? $emit('openHtmlReport', hist.htmlReportUrl)
-                            : null
-                        "
+                        v-else-if="htmlReportUrl"
+                        :class="getResultClass(row.result)"
+                        class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold border transition-all duration-300 cursor-pointer hover:shadow-sm hover:ring-2 hover:ring-opacity-50 active:scale-95"
+                        :title="$t('reportModal.htmlReport')"
+                        @click.stop="$emit('openHtmlReport', htmlReportUrl + (row.playwrightTestId ? '#?testId=' + row.playwrightTestId : ''))"
                       >
-                        {{ hist.label ? hist.label + ": " : ""
-                        }}{{ hist.result }}
+                        {{ row.result }}
                       </button>
-                    </div>
-                    <button
-                      v-else-if="htmlReportUrl"
-                      :class="getResultClass(row.result)"
-                      class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold border transition-all duration-300 cursor-pointer hover:shadow-sm hover:ring-2 hover:ring-opacity-50 active:scale-95"
-                      :title="$t('reportModal.htmlReport')"
-                      @click="$emit('openHtmlReport', htmlReportUrl + (row.playwrightTestId ? '#?testId=' + row.playwrightTestId : ''))"
+                      <span
+                        v-else
+                        :class="getResultClass(row.result)"
+                        class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold border transition-colors duration-300"
+                      >
+                        {{ row.result }}
+                      </span>
+                    </td>
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600"
                     >
-                      {{ row.result }}
-                    </button>
-                    <span
-                      v-else
-                      :class="getResultClass(row.result)"
-                      class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold border transition-colors duration-300"
+                      {{ row.model }}
+                    </td>
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600"
                     >
-                      {{ row.result }}
-                    </span>
-                  </td>
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600"
-                  >
-                    {{ row.model }}
-                  </td>
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600"
-                  >
-                    {{ row.date }}
-                  </td>
-                  <td
-                    class="px-6 py-4 text-sm font-medium text-slate-600 max-w-[200px] truncate"
-                    :title="row.fw"
-                  >
-                    {{ row.fw }}
-                  </td>
-                </tr>
-              </TransitionGroup>
+                      {{ row.date }}
+                    </td>
+                    <td
+                      class="px-6 py-4 text-sm font-medium text-slate-600 max-w-[200px] truncate"
+                      :title="row.fw"
+                    >
+                      {{ row.fw }}
+                    </td>
+                  </tr>
+                  
+                  <!-- Expanded Row Content -->
+                  <tr v-if="expandedRows.includes(row.testId)">
+                    <td colspan="7" class="p-0 bg-slate-50 border-b border-slate-200">
+                      <div class="expand-enter overflow-hidden origin-top">
+                        <div class="pl-[4.5rem] pr-8 py-5">
+                          <table class="w-full">
+                            <thead>
+                              <tr>
+                                <th class="py-2.5 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 w-1/3">Run #</th>
+                                <th class="py-2.5 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 w-1/3">Result</th>
+                                <th class="py-2.5 text-right text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 w-1/3">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200/60">
+                              <tr v-for="(hist, hIdx) in [...row.history!].reverse()" :key="hIdx" class="hover:bg-slate-100/50 transition-colors">
+                                <td class="py-3 whitespace-nowrap text-sm font-semibold text-slate-700">
+                                  Run {{ row.history!.length - hIdx }}
+                                  <span v-if="hIdx === 0" class="ml-2 bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Latest</span>
+                                </td>
+                                <td class="py-3 whitespace-nowrap">
+                                  <span :class="getResultClass(hist.result)" class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border">
+                                    {{ hist.result }}
+                                  </span>
+                                </td>
+                                <td class="py-3 whitespace-nowrap text-right">
+                                  <button
+                                    v-if="hist.htmlReportUrl"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-indigo-600 bg-white hover:bg-indigo-50 rounded-lg transition-colors border border-slate-200 hover:border-indigo-200 shadow-sm"
+                                    @click.stop="$emit('openHtmlReport', hist.htmlReportUrl)"
+                                  >
+                                    <Icon name="heroicons:document-text" class="w-4 h-4" />
+                                    View Report
+                                  </button>
+                                  <span v-else class="text-xs text-slate-400 italic">No report available</span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
             </table>
           </div>
         </div>
       </div>
     </div>
+    </div>
   </Transition>
+
+  <!-- Run History Modal -->
+  <!-- Run History Modal (Native Tailwind) -->
 </template>
 
 <style scoped>
+.expand-enter {
+  animation: expandDown 0.3s ease-out forwards;
+}
+
+@keyframes expandDown {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.95);
+    max-height: 0;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+    max-height: 800px;
+  }
+}
+
 .list-enter-active,
 .list-leave-active {
   transition:

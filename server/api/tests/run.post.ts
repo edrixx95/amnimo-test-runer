@@ -169,7 +169,45 @@ export default defineEventHandler(async (event) => {
   } else if (mode === "rerun-failed") {
     e2eArgs = ["run", "test:rerun-failed"];
     if (resolvedSessionName) {
-      e2eArgs.push("--", "--session", `"${resolvedSessionName}"`);
+      let finalSessionName = resolvedSessionName;
+      try {
+        const e2eDir = path.join(getSettings().e2ePath, "test-results", "e2e-reports");
+        const dateDirs = await fs.readdir(e2eDir);
+        dateDirs.sort().reverse();
+
+        let foundExact = false;
+        for (const dateDir of dateDirs) {
+          const runPath = path.join(e2eDir, dateDir);
+          const stat = await fs.stat(runPath).catch(() => null);
+          if (stat?.isDirectory()) {
+            const runs = await fs.readdir(runPath);
+            if (runs.includes(resolvedSessionName)) {
+              foundExact = true;
+              break;
+            }
+          }
+        }
+
+        if (!foundExact) {
+          for (const dateDir of dateDirs) {
+            const runPath = path.join(e2eDir, dateDir);
+            const stat = await fs.stat(runPath).catch(() => null);
+            if (stat?.isDirectory()) {
+              const runs = await fs.readdir(runPath);
+              runs.sort().reverse();
+              const matching = runs.find((d) => d.startsWith(resolvedSessionName + "-"));
+              if (matching) {
+                finalSessionName = matching;
+                break;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.log(e)
+        // Ignore errors and fallback to resolvedSessionName
+      }
+      e2eArgs.push("--", "--session", finalSessionName);
     }
   }
 

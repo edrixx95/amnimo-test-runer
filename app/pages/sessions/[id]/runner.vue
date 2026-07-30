@@ -353,12 +353,16 @@ const parseLogLine = (line: string) => {
     .replace(/\x1B(?:\[[0-9;]*[a-zA-Z]|\].*?\x07|\].*?\x1B\\)/g, "")
     .trim();
 
-  if (
-    cleanLine === "--- Executing Playwright Tests in Order ---" ||
-    cleanLine.startsWith("Failed tests to rerun:")
-  ) {
+  if (cleanLine.startsWith("Failed tests to rerun:")) {
     parsingHeader = true;
-    // DO NOT clear queuedSpecs here, as we already captured the perfect UI state before starting
+    // Always clear the old queue for rerun-failed because the previous queue is obsolete
+    queuedSpecs.value = [];
+    return;
+  }
+  
+  if (cleanLine === "--- Executing Playwright Tests in Order ---") {
+    parsingHeader = true;
+    // DO NOT clear queuedSpecs here for normal runs, as we prefer the perfect UI state
     return;
   }
   if (
@@ -370,9 +374,34 @@ const parseLogLine = (line: string) => {
   }
 
   if (parsingHeader) {
-    // We already built the perfect queue from the UI before execution,
-    // so we don't need to push specs again from the log header.
-    // Just ignore header lines.
+    // If we already built the perfect queue from the UI before execution,
+    // we don't need to push specs again from the log header.
+    if (queuedSpecs.value.length > 0) return;
+
+    // Otherwise (e.g. for rerun-failed), we must parse the header to build the queue
+    const match = cleanLine.match(/^(\d+)\.\s+(.*\.spec\.ts)$/);
+    if (match) {
+      queuedSpecs.value.push({
+        id: parseInt(match[1]!),
+        path: match[2]!,
+        status: "waiting",
+        innerTests: [],
+      });
+      return;
+    }
+    const matchRerun = cleanLine.match(/-\s+\w+:\s+.*\((.*\.spec\.ts):\d+\)/);
+    if (matchRerun) {
+      const specPath = matchRerun[1]!;
+      if (!queuedSpecs.value.find((s) => s.path === specPath)) {
+        queuedSpecs.value.push({
+          id: queuedSpecs.value.length + 1,
+          path: specPath,
+          status: "waiting",
+          innerTests: [],
+        });
+      }
+      return;
+    }
     return;
   }
 
@@ -653,12 +682,19 @@ const rerunFailed = async () => {
   clearBackendLogs();
 
   try {
+    let reportName = session.value?.name;
+    const reports = await $fetch<any[]>(`/api/sessions/${sessionId}/reports`);
+    if (reports && reports.length > 0) {
+      reportName = reports[0].name;
+    }
+
     await $fetch("/api/tests/run", {
       method: "POST",
       body: {
         sessionId,
         testType: session.value?.testType || "release",
         mode: "rerun-failed",
+        sessionName: reportName,
       },
     });
   } catch (err: any) {

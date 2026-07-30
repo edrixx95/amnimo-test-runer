@@ -44,6 +44,28 @@ const {
 } = useReportViewers();
 
 const { confirmModal, executeConfirm } = useConfirmModal();
+
+const getRunningPercentage = (session: Session) => {
+  if (!session.meta?.queuedSpecs) return 0;
+
+  let totalCases = 0;
+  let runningCases = 0;
+
+  for (const spec of session.meta.queuedSpecs) {
+    if (spec.innerTests && spec.innerTests.length > 0) {
+      totalCases += spec.innerTests.length;
+      for (const test of spec.innerTests) {
+        if (test.status === "running") runningCases++;
+      }
+    } else {
+      totalCases += 1;
+      if (spec.status === "running") runningCases++;
+    }
+  }
+
+  if (totalCases === 0) return 0;
+  return (runningCases / totalCases) * 100;
+};
 </script>
 
 <template>
@@ -146,7 +168,7 @@ const { confirmModal, executeConfirm } = useConfirmModal();
               </button>
             </div>
 
-            <div class="h-6 w-px bg-slate-200 mx-1"/>
+            <div class="h-6 w-px bg-slate-200 mx-1" />
 
             <CustomSelect
               v-model="sortBy"
@@ -220,9 +242,9 @@ const { confirmModal, executeConfirm } = useConfirmModal();
             :class="[
               session.status === 'Closed'
                 ? 'border-slate-300 bg-slate-200/80 opacity-80 grayscale'
-                : activeLocks.some(l => l.sessionId === session.id)
-                ? 'bg-amber-50/30 shadow-glass border-amber-400 border-[3px] hover:-translate-y-1 cursor-pointer ring-4 ring-amber-400/20'
-                : 'bg-white shadow-soft hover:shadow-glass hover:border-amnimo-200 border-gray-100 border hover:-translate-y-1 cursor-pointer',
+                : activeLocks.some((l) => l.sessionId === session.id)
+                  ? 'bg-amber-50/30 shadow-glass border-amber-400 border-[3px] hover:-translate-y-1 cursor-pointer ring-4 ring-amber-400/20'
+                  : 'bg-white shadow-soft hover:shadow-glass hover:border-amnimo-200 border-gray-100 border hover:-translate-y-1 cursor-pointer',
               'group flex flex-col rounded-2xl overflow-hidden transition-all duration-300',
             ]"
             @click="session.status !== 'Closed' && navigateToSession(session)"
@@ -261,10 +283,16 @@ const { confirmModal, executeConfirm } = useConfirmModal();
                       {{ session.testType || "release" }}
                     </span>
                     <!-- Lock Icon -->
-                    <div 
-                      v-if="activeLocks.some(l => l.sessionId === session.id)"
+                    <div
+                      v-if="activeLocks.some((l) => l.sessionId === session.id)"
                       class="flex items-center justify-center w-6 h-6 bg-amber-100 text-amber-600 rounded-full shadow-sm cursor-help animate-pulse"
-                      :title="$t('home.lockedDueTo', { resource: activeLocks.find(l => l.sessionId === session.id)?.resource.toLowerCase() })"
+                      :title="
+                        $t('home.lockedDueTo', {
+                          resource: activeLocks
+                            .find((l) => l.sessionId === session.id)
+                            ?.resource.toLowerCase(),
+                        })
+                      "
                     >
                       <Icon name="heroicons:lock-closed" class="w-3.5 h-3.5" />
                     </div>
@@ -330,31 +358,48 @@ const { confirmModal, executeConfirm } = useConfirmModal();
                   <span class="text-slate-500">{{ $t("home.progress") }}</span>
                   <span class="text-slate-700"
                     >{{ session.meta.testCounts?.completed || 0 }} /
-                    {{ session.meta.testCounts?.total || session.meta.specCounts?.total || 0 }}
+                    {{
+                      session.meta.testCounts?.total ||
+                      session.meta.specCounts?.total ||
+                      0
+                    }}
                     {{ $t("home.tests") || "tests" }}</span
                   >
                 </div>
                 <div
-                  class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden"
+                  class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden flex"
                 >
                   <div
-                    class="h-1.5 rounded-full transition-all duration-500"
+                    class="h-1.5 transition-all duration-500"
                     :class="
                       session.meta.testCounts?.failed! > 0
                         ? 'bg-red-500'
-                        : (session.meta.testCounts?.total && session.meta.testCounts?.completed === session.meta.testCounts?.total) ||
-                          (!session.meta.testCounts?.total && session.meta.specCounts?.completed === session.meta.specCounts?.total)
+                        : (session.meta.testCounts?.total &&
+                              session.meta.testCounts?.completed ===
+                                session.meta.testCounts?.total) ||
+                            (!session.meta.testCounts?.total &&
+                              session.meta.specCounts?.completed ===
+                                session.meta.specCounts?.total)
                           ? 'bg-green-500'
                           : 'bg-amnimo-600'
                     "
                     :style="{
                       width: session.meta.testCounts?.total
                         ? `${(session.meta.testCounts.completed / session.meta.testCounts.total) * 100}%`
-                        : session.meta.specCounts?.total 
+                        : session.meta.specCounts?.total
                           ? `${(session.meta.specCounts.completed / session.meta.specCounts.total) * 100}%`
                           : '0%',
                     }"
                   />
+                  <div
+                    v-if="getRunningPercentage(session) > 0"
+                    class="h-1.5 transition-all duration-500 bg-amnimo-400 relative overflow-hidden"
+                    :style="{ width: `${getRunningPercentage(session)}%` }"
+                  >
+                    <div
+                      class="absolute inset-0 w-full h-full animate-[shimmer_1s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                    />
+                  </div>
                 </div>
                 <div class="flex gap-2 pt-1">
                   <div
