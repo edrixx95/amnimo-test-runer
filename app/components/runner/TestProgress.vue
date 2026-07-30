@@ -18,11 +18,13 @@ type Spec = {
 const props = defineProps<{
   specs: Spec[];
   isTesting: boolean;
+  allowDrag?: boolean;
 }>();
 
 const _emit = defineEmits<{
   (e: "remove-file", path: string): void;
   (e: "remove-case", path: string, caseName: string): void;
+  (e: "reorder", draggedPath: string, targetPath: string, position: "before" | "after"): void;
 }>();
 
 const totalCases = computed(() => {
@@ -166,6 +168,60 @@ const getSpecProgress = (spec: Spec) => {
     total,
   };
 };
+
+const draggedSpecIndex = ref<number | null>(null);
+const dragOverSpecIndex = ref<number | null>(null);
+
+const onDragStart = (e: DragEvent, index: number) => {
+  if (!props.allowDrag) return;
+  draggedSpecIndex.value = index;
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
+  }
+};
+
+const onDragOver = (e: DragEvent, index: number) => {
+  if (!props.allowDrag) return;
+  e.preventDefault();
+  if (draggedSpecIndex.value !== index) {
+    dragOverSpecIndex.value = index;
+  }
+};
+
+const onDragLeave = () => {
+  dragOverSpecIndex.value = null;
+};
+
+const onDrop = (e: DragEvent, index: number) => {
+  if (!props.allowDrag) return;
+  dragOverSpecIndex.value = null;
+  
+  let draggedIdx = draggedSpecIndex.value;
+  if (draggedIdx === null && e.dataTransfer) {
+    const data = e.dataTransfer.getData("text/plain");
+    if (data) {
+      draggedIdx = parseInt(data, 10);
+    }
+  }
+
+  if (draggedIdx === null || isNaN(draggedIdx) || draggedIdx === index) return;
+  
+  const draggedSpec = props.specs[draggedIdx];
+  const targetSpec = props.specs[index];
+  
+  if (draggedSpec && targetSpec) {
+    const position = draggedIdx > index ? 'before' : 'after';
+    _emit('reorder', draggedSpec.path, targetSpec.path, position);
+  }
+  
+  draggedSpecIndex.value = null;
+};
+
+const onDragEnd = () => {
+  draggedSpecIndex.value = null;
+  dragOverSpecIndex.value = null;
+};
 </script>
 
 <template>
@@ -258,10 +314,29 @@ const getSpecProgress = (spec: Spec) => {
       </div>
 
       <div
-        v-for="spec in specs"
+        v-for="(spec, index) in specs"
         :key="spec.path"
-        class="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all duration-300 shadow-sm group/spec"
-      >
+        class="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all duration-300 shadow-sm group/spec relative cursor-grab active:cursor-grabbing"
+        :class="{ 'opacity-50 border-dashed border-slate-300': draggedSpecIndex === index }"
+        draggable="true"
+        @dragstart="onDragStart($event, index)"
+        @dragover.prevent="onDragOver($event, index)"
+        @dragenter.prevent
+        @dragleave="onDragLeave"
+        @drop.prevent="onDrop($event, index)"
+        @dragend="onDragEnd"
+        >
+        <!-- Drop Line Indicator Top -->
+        <div 
+          v-if="dragOverSpecIndex === index && draggedSpecIndex !== null && draggedSpecIndex > index" 
+          class="absolute -top-[2px] left-0 right-0 h-[3px] bg-amnimo-500 rounded-full z-10"
+        />
+        <!-- Drop Line Indicator Bottom -->
+        <div 
+          v-if="dragOverSpecIndex === index && draggedSpecIndex !== null && draggedSpecIndex < index" 
+          class="absolute -bottom-[2px] left-0 right-0 h-[3px] bg-amnimo-500 rounded-full z-10"
+        />
+
         <!-- Spec Header -->
         <div
           class="relative flex items-center gap-3 px-4 py-3 bg-white transition-colors border-b border-slate-100 cursor-pointer select-none group/header"

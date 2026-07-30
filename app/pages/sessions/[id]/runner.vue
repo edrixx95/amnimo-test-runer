@@ -29,7 +29,7 @@ const confirmModal = ref({
 });
 
 const executionMode = ref<"single" | "order">("single");
-const testViewMode = ref<"tree" | "filter">("tree");
+const searchQuery = ref("");
 const filterCategory = ref("");
 const filterPage = ref("");
 const playgroundSource = ref<"release" | "system">("release");
@@ -70,74 +70,82 @@ const filterPages = computed(() => {
   return cat.children.filter((n) => n.type === "folder");
 });
 
-const filterFiles = computed(() => {
-  if (!filterCategory.value || !filterPage.value) return [];
-  const cat = availableTests.value.find((n) => n.name === filterCategory.value);
-  if (!cat || !cat.children) return [];
-  const page = cat.children.find((n) => n.name === filterPage.value);
-  if (!page || !page.children) return [];
+const filteredAvailableTests = computed(() => {
+  let nodes = availableTests.value;
 
-  const getFiles = (nodes: FileNode[]): FileNode[] => {
-    let files: FileNode[] = [];
-    for (const node of nodes) {
-      if (node.type === "file") files.push(node);
-      else if (node.type === "folder" && node.children) {
-        files = files.concat(getFiles(node.children));
+  if (filterCategory.value) {
+    const cat = nodes.find(n => n.name === filterCategory.value);
+    nodes = cat && cat.children ? cat.children : [];
+  }
+
+  if (filterPage.value) {
+    const page = nodes.find(n => n.name === filterPage.value);
+    nodes = page && page.children ? page.children : [];
+  }
+
+  if (!searchQuery.value) return nodes;
+
+  const query = searchQuery.value.toLowerCase();
+  
+  const filterNodes = (nodesToFilter: FileNode[]): FileNode[] => {
+    return nodesToFilter.map(node => {
+      // If folder or file matches name/path exactly
+      const matchesQuery = node.name.toLowerCase().includes(query) || (node.path && node.path.toLowerCase().includes(query));
+      
+      let filteredChildren: FileNode[] = [];
+      if (node.type === "folder" && node.children) {
+        filteredChildren = filterNodes(node.children);
       }
-    }
-    return files;
+      
+      let filteredCases: string[] = [];
+      if (node.type === "file" && node.cases) {
+        filteredCases = node.cases.filter(c => c.toLowerCase().includes(query));
+      }
+      
+      if (matchesQuery || filteredChildren.length > 0 || filteredCases.length > 0) {
+        return {
+          ...node,
+          children: matchesQuery ? (node.children || []) : filteredChildren,
+          cases: matchesQuery ? node.cases : (filteredCases.length > 0 ? filteredCases : undefined)
+        };
+      }
+      
+      return null;
+    }).filter(Boolean) as FileNode[];
   };
 
-  return getFiles(page.children);
+  return filterNodes(nodes);
 });
 
-const isAllCasesSelected = (node: FileNode) => {
-  if (!node.cases || node.cases.length === 0) return false;
-  return node.cases.every(c => selectedTests.value.includes(`${node.path}::${c}`));
-};
-
-const isFileSelected = (node: FileNode) => {
-  if (!node.path) return false;
-  return selectedTests.value.includes(node.path) || isAllCasesSelected(node);
-};
-
-const toggleFilterFile = (node: FileNode) => {
-  if (!node.path) return;
-  if (isFileSelected(node)) {
-    const toRemove = new Set([node.path, ...(node.cases || []).map(c => `${node.path}::${c}`)]);
-    selectedTests.value = selectedTests.value.filter(t => !toRemove.has(t));
-  } else {
-    const toRemove = new Set((node.cases || []).map(c => `${node.path}::${c}`));
-    selectedTests.value = selectedTests.value.filter(t => !toRemove.has(t));
-    selectedTests.value.push(node.path);
-  }
-};
-
-const toggleFilterTestCase = (node: FileNode, tc: string) => {
-  if (!node.path) return;
-  const caseId = `${node.path}::${tc}`;
-  
-  const pathIndex = selectedTests.value.indexOf(node.path);
-  if (pathIndex > -1) {
-    selectedTests.value.splice(pathIndex, 1);
-    const otherCases = (node.cases || []).filter(c => c !== tc);
-    for (const c of otherCases) {
-      selectedTests.value.push(`${node.path}::${c}`);
-    }
-  } else {
-    const index = selectedTests.value.indexOf(caseId);
-    if (index > -1) {
-      selectedTests.value.splice(index, 1);
-    } else {
-      selectedTests.value.push(caseId);
-    }
-  }
-};
-
 const removeFileFromQueue = (path: string) => {
-  selectedTests.value = selectedTests.value.filter(
-    (t) => t !== path && !t.startsWith(path + "::"),
-  );
+  if (executionMode.value === "order") {
+    if (!disabledOrderTests.value.includes(path)) {
+      disabledOrderTests.value.push(path);
+    }
+    return;
+  }
+  selectedTests.value = selectedTests.value.filter((t) => !t.startsWith(path));
+};
+
+const onQueueReorder = (draggedPath: string, targetPath: string, position: "before" | "after") => {
+  if (executionMode.value === "order" && selectedOrder.value && selectedOrder.value.tests) {
+    const tests = [...selectedOrder.value.tests];
+    const draggedIdx = tests.indexOf(draggedPath);
+    if (draggedIdx === -1) return;
+    
+    // Remove it from current position
+    tests.splice(draggedIdx, 1);
+    
+    // Find target index in the modified array
+    const targetIdx = tests.indexOf(targetPath);
+    if (targetIdx === -1) return;
+    
+    const insertIdx = position === "before" ? targetIdx : targetIdx + 1;
+    tests.splice(insertIdx, 0, draggedPath);
+    
+    selectedOrder.value.tests = tests;
+    selectedOrder.value = { ...selectedOrder.value };
+  }
 };
 
 const findCasesByPath = (nodes: FileNode[], targetPath: string): string[] => {
@@ -168,17 +176,60 @@ const removeCaseFromQueue = (path: string, tc: string) => {
   }
 };
 
+const draggedIndex = ref<number | null>(null);
+const dragOverIndex = ref<number | null>(null);
+
+const onDragStart = (e: DragEvent, index: number) => {
+  draggedIndex.value = index;
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
+  }
+};
+
+const onDragOver = (e: DragEvent, index: number) => {
+  e.preventDefault();
+  if (draggedIndex.value !== index) {
+    dragOverIndex.value = index;
+  }
+};
+
+const onDragLeave = () => {
+  dragOverIndex.value = null;
+};
+
+const onDrop = (e: DragEvent, index: number) => {
+  dragOverIndex.value = null;
+  if (draggedIndex.value === null || draggedIndex.value === index) return;
+  if (!selectedOrder.value || !selectedOrder.value.tests) return;
+  
+  const tests = [...selectedOrder.value.tests];
+  const [removed] = tests.splice(draggedIndex.value, 1);
+  tests.splice(index, 0, removed as string);
+  selectedOrder.value.tests = tests;
+  draggedIndex.value = null;
+};
+
+const onDragEnd = () => {
+  draggedIndex.value = null;
+  dragOverIndex.value = null;
+};
+
+const disabledOrderTests = ref<string[]>([]);
+
 const computedQueuedSpecs = computed(() => {
   if (isTesting.value) return queuedSpecs.value;
 
   if (executionMode.value === "order") {
     if (!selectedOrder.value) return [];
-    return selectedOrder.value.tests.map((t, idx) => ({
-      id: idx + 1,
-      path: t,
-      status: "waiting",
-      innerTests: [],
-    }));
+    return selectedOrder.value.tests
+      .filter(t => !disabledOrderTests.value.includes(t))
+      .map((t, idx) => ({
+        id: idx + 1,
+        path: t,
+        status: "waiting",
+        innerTests: [],
+      }));
   }
 
 
@@ -261,7 +312,8 @@ const executeTests = async () => {
     if (executionMode.value === "single") {
       payload.tests = selectedTests.value;
     } else {
-      payload.order = selectedOrder.value?.name;
+      payload.orderName = selectedOrder.value?.name;
+      payload.tests = selectedOrder.value?.tests.filter((t) => !disabledOrderTests.value.includes(t));
     }
 
     await $fetch(`/api/tests/run`, {
@@ -524,15 +576,29 @@ const fetchTests = async (preserveState = false) => {
       session.value.testType === "playground"
         ? playgroundSource.value
         : session.value.testType || "release";
-    const orders = await $fetch<TestOrder[]>(`/api/tests/orders?type=${type}`);
+    
+    let url = `/api/tests/orders?type=${type}`;
+    if (session.value.board) {
+      url += `&board=${encodeURIComponent(session.value.board)}`;
+      if (session.value.deviceType) {
+        url += `&device=${encodeURIComponent(session.value.deviceType)}`;
+      }
+    }
+    const orders = await $fetch<TestOrder[]>(url);
     testOrders.value = orders;
+    
+    if (orders.length > 0 && !preserveState) {
+      selectedOrder.value = orders[0] || null;
+    }
 
     const tests = await $fetch<FileNode[]>(`/api/tests/files?type=${type}`);
     availableTests.value = tests;
 
     if (!preserveState) {
       selectedTests.value = [];
-      selectedOrder.value = null;
+      if (orders.length === 0) {
+        selectedOrder.value = null;
+      }
     }
   } catch (err) {
     console.error(err);
@@ -1009,64 +1075,28 @@ const toggleTest = async () => {
               v-if="executionMode === 'single'"
               class="flex flex-col min-h-0 flex-1 animate-fade-in"
             >
-              <div class="flex items-center justify-between mb-2 shrink-0">
-                <label class="block text-sm font-bold text-slate-800">{{
-                  $t("runner.availableTests")
-                }}</label>
-                <div class="flex bg-slate-200/60 p-0.5 rounded-lg">
-                  <button
-                    @click="testViewMode = 'tree'"
-                    class="px-2 py-1 rounded text-xs font-bold transition-colors"
-                    :class="
-                      testViewMode === 'tree'
-                        ? 'bg-white shadow-sm text-slate-800'
-                        : 'text-slate-500 hover:text-slate-700'
-                    "
-                  >
-                    {{ $t("runner.tree") }}
-                  </button>
-                  <button
-                    @click="testViewMode = 'filter'"
-                    class="px-2 py-1 rounded text-xs font-bold transition-colors"
-                    :class="
-                      testViewMode === 'filter'
-                        ? 'bg-white shadow-sm text-slate-800'
-                        : 'text-slate-500 hover:text-slate-700'
-                    "
-                  >
-                    {{ $t("runner.filter") }}
-                  </button>
-                </div>
+              <div class="flex items-center justify-between mb-3 shrink-0">
+                <label class="block text-sm font-bold text-slate-800">
+                  Test Explorer
+                </label>
               </div>
 
-              <!-- Tree View -->
-              <div
-                v-if="testViewMode === 'tree'"
-                class="overflow-y-auto flex-1 pr-2 bg-slate-50/50 rounded-xl border border-slate-200 p-2 custom-scrollbar"
-              >
-                <FileTree
-                  v-if="availableTests.length > 0"
-                  :nodes="availableTests"
-                  :selected="selectedTests"
-                  @update:selected="selectedTests = $event"
-                  :disabled="isTesting || isParsingTests"
-                />
-                <div
-                  v-else
-                  class="text-sm font-medium text-slate-500 italic p-4 text-center"
-                >
-                  {{ $t("runner.noTestFiles") }}
+              <div class="flex flex-col gap-2 shrink-0 mb-3">
+                <div class="relative">
+                  <Icon name="heroicons:magnifying-glass" class="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <input 
+                    v-model="searchQuery" 
+                    type="text" 
+                    placeholder="Search tests..." 
+                    class="w-full text-xs bg-white border border-slate-200 rounded-lg pl-8 pr-2 py-1.5 outline-none focus:border-amnimo-500 text-slate-700 font-medium placeholder:text-slate-400"
+                  />
                 </div>
-              </div>
-
-              <!-- Filter View -->
-              <div v-else class="flex flex-col min-h-0 flex-1 gap-2">
-                <div class="flex gap-2 shrink-0">
+                <div class="flex gap-2">
                   <select
                     v-model="filterCategory"
                     class="flex-1 text-xs bg-white border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-amnimo-500 text-slate-700 font-medium"
                   >
-                    <option value="">Category...</option>
+                    <option value="">All Categories</option>
                     <option
                       v-for="cat in filterCategories"
                       :key="cat.name"
@@ -1080,7 +1110,7 @@ const toggleTest = async () => {
                     :disabled="!filterCategory"
                     class="flex-1 text-xs bg-white border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-amnimo-500 text-slate-700 font-medium disabled:bg-slate-50 disabled:opacity-50"
                   >
-                    <option value="">Page...</option>
+                    <option value="">All Pages</option>
                     <option
                       v-for="page in filterPages"
                       :key="page.name"
@@ -1090,117 +1120,25 @@ const toggleTest = async () => {
                     </option>
                   </select>
                 </div>
+              </div>
 
+              <!-- Tree View -->
+              <div
+                class="overflow-y-auto flex-1 pr-2 bg-slate-50/50 rounded-xl border border-slate-200 p-2 custom-scrollbar"
+              >
+                <FileTree
+                  v-if="filteredAvailableTests.length > 0"
+                  :nodes="filteredAvailableTests"
+                  :selected="selectedTests"
+                  :search-query="searchQuery"
+                  @update:selected="selectedTests = $event"
+                  :disabled="isTesting || isParsingTests"
+                />
                 <div
-                  class="overflow-y-auto flex-1 pr-2 bg-slate-50/50 rounded-xl border border-slate-200 p-2 custom-scrollbar"
+                  v-else
+                  class="text-sm font-medium text-slate-500 italic p-4 text-center"
                 >
-                  <div
-                    v-if="!filterPage"
-                    class="text-xs text-slate-400 text-center italic mt-4"
-                  >
-                    {{ $t("runner.selectPage") }}
-                  </div>
-                  <div
-                    v-else-if="filterFiles.length === 0"
-                    class="text-xs text-slate-400 text-center italic mt-4"
-                  >
-                    {{ $t("runner.noTestsFound") }}
-                  </div>
-                  <div v-else class="space-y-3">
-                    <div v-for="file in filterFiles" :key="file.path">
-                      <div
-                        class="flex items-center gap-2 mb-1 min-w-0"
-                        :class="{
-                          'opacity-50': isFileSelected(file),
-                        }"
-                      >
-                        <button
-                          v-if="!isFileSelected(file)"
-                          @click="toggleFilterFile(file)"
-                          class="shrink-0 w-4 h-4 flex items-center justify-center bg-white border border-slate-300 hover:bg-amnimo-600 hover:text-white hover:border-amnimo-600 rounded text-slate-400 transition-colors"
-                          :disabled="isTesting || isParsingTests"
-                        >
-                          <Icon name="heroicons:plus" class="w-3 h-3" />
-                        </button>
-                        <div
-                          v-else
-                          class="shrink-0 w-4 h-4 flex items-center justify-center rounded text-amnimo-500"
-                        >
-                          <Icon name="heroicons:check" class="w-3.5 h-3.5" />
-                        </div>
-
-                        <Icon
-                          name="heroicons:document-text"
-                          class="w-4 h-4 text-gray-500 shrink-0"
-                        />
-                        <span
-                          class="text-xs font-bold text-slate-700 truncate"
-                          :title="file.name"
-                          >{{ file.name }}</span
-                        >
-                      </div>
-                      <div class="pl-6 space-y-1">
-                        <div
-                          v-if="file.cases!.length === 0"
-                          class="flex items-center gap-2 text-xs text-slate-400 py-1"
-                        >
-                          {{ $t("runner.noCasesFound") }}
-                        </div>
-                        <div
-                          v-else
-                          v-for="tc in file.cases"
-                          :key="tc"
-                          class="flex items-start gap-2 group min-w-0"
-                          :class="{
-                            'opacity-50':
-                              selectedTests.includes(file.path! + '::' + tc) ||
-                              isFileSelected(file),
-                          }"
-                        >
-                          <button
-                            v-if="
-                              !selectedTests.includes(file.path! + '::' + tc) &&
-                              !isFileSelected(file)
-                            "
-                            @click="
-                              !isTesting &&
-                              !isParsingTests &&
-                              toggleFilterTestCase(file, tc)
-                            "
-                            class="shrink-0 w-4 h-4 mt-0.5 flex items-center justify-center bg-white border border-slate-300 hover:bg-purple-500 hover:text-white hover:border-purple-500 rounded text-slate-400 transition-colors"
-                            :disabled="
-                              isTesting ||
-                              isParsingTests ||
-                              selectedTests.includes(file.path!)
-                            "
-                          >
-                            <Icon name="heroicons:plus" class="w-3 h-3" />
-                          </button>
-                          <div
-                            v-else
-                            class="shrink-0 w-4 h-4 mt-0.5 flex items-center justify-center rounded text-purple-500"
-                          >
-                            <Icon name="heroicons:check" class="w-3.5 h-3.5" />
-                          </div>
-
-                          <Icon
-                            name="heroicons:beaker"
-                            class="w-3.5 h-3.5 text-gray-400 group-hover:text-purple-400 shrink-0 mt-0.5"
-                          />
-                          <span
-                            class="text-xs text-slate-600 group-hover:text-purple-600 leading-tight cursor-pointer"
-                            @click="
-                              !isTesting &&
-                              !isParsingTests &&
-                              !selectedTests.includes(file.path!) &&
-                              toggleFilterTestCase(file, tc)
-                            "
-                            >{{ tc }}</span
-                          >
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  {{ $t("runner.noTestFiles") }}
                 </div>
               </div>
             </div>
@@ -1212,45 +1150,63 @@ const toggleTest = async () => {
             >
               <label
                 class="block text-sm font-bold text-slate-800 mb-2 shrink-0"
-                >{{ $t("runner.testOrders") }}</label
+                >{{ $t("runner.testOrders") }} <span v-if="selectedOrder" class="text-slate-500 font-normal">({{ selectedOrder.name }})</span></label
               >
               <div
-                class="space-y-2 overflow-y-auto flex-1 pr-2 custom-scrollbar"
+                class="space-y-1 overflow-y-auto flex-1 pr-2 custom-scrollbar"
               >
                 <div
-                  v-for="order in testOrders"
-                  :key="order.name"
-                  @click="!isTesting && !isParsingTests && selectOrder(order)"
-                  class="p-4 rounded-xl cursor-pointer transition-all duration-300 border group"
+                  v-if="selectedOrder && selectedOrder.tests"
+                  v-for="(test, index) in selectedOrder.tests"
+                  :key="test + '-' + index"
+                  :draggable="!disabledOrderTests.includes(test) && !isTesting && !isParsingTests"
+                  @dragstart="!disabledOrderTests.includes(test) && onDragStart($event, index)"
+                  @dragover="!disabledOrderTests.includes(test) && onDragOver($event, index)"
+                  @dragleave="onDragLeave"
+                  @drop="!disabledOrderTests.includes(test) && onDrop($event, index)"
+                  @dragend="onDragEnd"
+                  class="p-2.5 rounded-lg border transition-all duration-200 flex items-center gap-3 group relative"
                   :class="[
-                    selectedOrder?.name === order.name
-                      ? 'border-amnimo-500 bg-amnimo-50 shadow-sm'
-                      : 'border-slate-200 bg-white hover:border-amnimo-400 hover:shadow-soft',
-                    isTesting || isParsingTests
-                      ? 'opacity-50 cursor-not-allowed'
-                      : '',
+                    disabledOrderTests.includes(test) 
+                      ? 'bg-slate-50 border-slate-200 opacity-60' 
+                      : 'bg-white border-slate-200 cursor-grab active:cursor-grabbing hover:border-amnimo-400 hover:shadow-soft',
+                    draggedIndex === index ? 'opacity-50 border-dashed bg-slate-50' : '',
+                    isTesting || isParsingTests ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
                   ]"
                 >
-                  <div class="flex items-center gap-3 text-sm">
-                    <Icon
-                      name="heroicons:document-text"
-                      class="w-5 h-5 transition-colors"
-                      :class="
-                        selectedOrder?.name === order.name
-                          ? 'text-amnimo-700'
-                          : 'text-slate-500 group-hover:text-amnimo-600'
-                      "
-                    />
-                    <span class="font-bold text-slate-800">{{
-                      order.name
-                    }}</span>
+                  <!-- Drop Line Indicator Top -->
+                  <div 
+                    v-if="!disabledOrderTests.includes(test) && dragOverIndex === index && draggedIndex !== null && draggedIndex > index" 
+                    class="absolute -top-[3px] left-0 right-0 h-[3px] bg-amnimo-500 rounded-full z-10"
+                  ></div>
+                  <!-- Drop Line Indicator Bottom -->
+                  <div 
+                    v-if="!disabledOrderTests.includes(test) && dragOverIndex === index && draggedIndex !== null && draggedIndex < index" 
+                    class="absolute -bottom-[3px] left-0 right-0 h-[3px] bg-amnimo-500 rounded-full z-10"
+                  ></div>
+
+                  <Icon v-if="!disabledOrderTests.includes(test)" name="heroicons:bars-2" class="w-4 h-4 text-slate-400 group-hover:text-amnimo-500 shrink-0" />
+                  <div v-else class="w-4 h-4 shrink-0 flex items-center justify-center">
+                    <Icon name="heroicons:minus" class="w-3 h-3 text-slate-400" />
                   </div>
-                  <div class="text-xs font-semibold text-slate-500 mt-1.5 pl-8">
-                    {{ order.tests.length }} {{ $t("runner.tests") }}
-                  </div>
+
+                  <span class="text-xs font-bold truncate min-w-0 flex-1" :class="disabledOrderTests.includes(test) ? 'text-slate-400 line-through' : 'text-slate-700'" :title="test">
+                    <span class="font-medium w-5 inline-block no-underline" :class="disabledOrderTests.includes(test) ? 'text-slate-300' : 'text-slate-400'">{{ index + 1 }}.</span> {{ test }}
+                  </span>
+
+                  <!-- Action Button -->
+                  <button
+                    v-if="disabledOrderTests.includes(test) && !isTesting"
+                    @click="disabledOrderTests = disabledOrderTests.filter(t => t !== test)"
+                    class="shrink-0 w-6 h-6 flex items-center justify-center rounded bg-slate-200 hover:bg-amnimo-500 text-slate-500 hover:text-white transition-colors"
+                    :title="$t('runner.addToQueue')"
+                  >
+                    <Icon name="heroicons:plus" class="w-4 h-4" />
+                  </button>
                 </div>
+                
                 <div
-                  v-if="testOrders.length === 0"
+                  v-if="!selectedOrder || !selectedOrder.tests || selectedOrder.tests.length === 0"
                   class="text-sm font-medium text-slate-500 italic p-4 text-center border border-dashed border-slate-300 rounded-xl"
                 >
                   {{ $t("runner.noOrderFiles") }}
@@ -1451,8 +1407,10 @@ const toggleTest = async () => {
             v-else
             :specs="computedQueuedSpecs"
             :isTesting="isTesting"
+            :allowDrag="session?.status !== 'Running'"
             @remove-file="removeFileFromQueue"
             @remove-case="removeCaseFromQueue"
+            @reorder="onQueueReorder"
           />
         </div>
       </aside>

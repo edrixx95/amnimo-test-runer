@@ -51,7 +51,7 @@ async function updateSessionStatus(sessionId: string, status: SessionStatus) {
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { sessionId, testType, mode, tests, sessionName, queuedSpecs } = body;
+  const { sessionId, testType, mode, tests, orderName, sessionName, queuedSpecs } = body;
   
   const host = getRequestHost(event);
   const protocol = getRequestProtocol(event);
@@ -158,9 +158,24 @@ export default defineEventHandler(async (event) => {
       parsedEnv["PLAYWRIGHT_GREP"] = grepCases.join("|");
     }
   } else if (mode === "order") {
+    let runOrderName = orderName;
+    if (orderName && Array.isArray(tests)) {
+      // User may have reordered tests, save back to JSON file
+      const actualType = testType === "playground" ? "release" : (testType || "release");
+      runOrderName = orderName.replace('.json', '') + '.run.json';
+      const orderFilePath = path.join(cwd, "test-order", actualType, runOrderName);
+      try {
+        await fs.writeFile(orderFilePath, JSON.stringify(tests, null, 2), "utf-8");
+      } catch (err) {
+        console.error("Failed to save reordered tests:", err);
+      }
+    }
+    
     if (testType === "release") {
       e2eArgs = ["run", "test:release"];
-      if (tests && typeof tests === "string") {
+      if (runOrderName) {
+        e2eArgs.push("--", runOrderName);
+      } else if (tests && typeof tests === "string") { // fallback for old behavior
         e2eArgs.push("--", tests);
       }
     } else {

@@ -13,6 +13,7 @@ const props = defineProps<{
   nodes: FileNode[];
   selected: string[];
   disabled?: boolean;
+  searchQuery?: string;
 }>();
 
 const emit = defineEmits<{
@@ -21,10 +22,26 @@ const emit = defineEmits<{
 
 const openFolders = ref<Set<string>>(new Set());
 
+watch(() => props.searchQuery, (newVal) => {
+  if (newVal && newVal.trim().length > 0) {
+    props.nodes.forEach(node => {
+      if (node.type === "folder") {
+        openFolders.value.add(node.name);
+      }
+      if (node.type === "file") {
+        openFolders.value.add(node.path || node.name);
+      }
+    });
+  } else {
+    openFolders.value.clear();
+  }
+}, { immediate: true });
+
 const toggleFolder = (name: string) => {
   if (openFolders.value.has(name)) {
     openFolders.value.delete(name);
   } else {
+    openFolders.value.clear(); // Accordion behavior
     openFolders.value.add(name);
   }
 };
@@ -35,6 +52,32 @@ const toggleFolderAndLoadCases = (node: FileNode) => {
 };
 
 const isOpen = (name: string) => openFolders.value.has(name);
+
+const onEnter = (el: Element) => {
+  const htmlEl = el as HTMLElement;
+  htmlEl.style.height = '0px';
+  htmlEl.style.opacity = '0';
+  void htmlEl.offsetHeight; // force reflow
+  htmlEl.style.transition = 'height 0.3s ease-in-out, opacity 0.3s ease-in-out';
+  htmlEl.style.height = htmlEl.scrollHeight + 'px';
+  htmlEl.style.opacity = '1';
+};
+
+const onAfterEnter = (el: Element) => {
+  const htmlEl = el as HTMLElement;
+  htmlEl.style.height = 'auto';
+  htmlEl.style.transition = '';
+};
+
+const onLeave = (el: Element) => {
+  const htmlEl = el as HTMLElement;
+  htmlEl.style.height = htmlEl.scrollHeight + 'px';
+  htmlEl.style.opacity = '1';
+  void htmlEl.offsetHeight; // force reflow
+  htmlEl.style.transition = 'height 0.3s ease-in-out, opacity 0.3s ease-in-out';
+  htmlEl.style.height = '0px';
+  htmlEl.style.opacity = '0';
+};
 
 const isAllCasesSelected = (node: FileNode) => {
   if (!node.cases || node.cases.length === 0) return false;
@@ -111,17 +154,24 @@ const emitUpdate = (values: string[]) => {
           <span>{{ node.name }}</span>
         </div>
 
-        <div
-          v-if="isOpen(node.name)"
-          class="pl-4 ml-2 border-l border-gray-700/50 mt-1"
+        <transition
+          @enter="onEnter"
+          @after-enter="onAfterEnter"
+          @leave="onLeave"
         >
-          <FileTree
-            :nodes="node.children || []"
-            :selected="selected"
-            :disabled="disabled"
-            @update:selected="emitUpdate"
-          />
-        </div>
+          <div
+            v-if="isOpen(node.name)"
+            class="pl-4 ml-2 border-l border-gray-700/50 mt-1 overflow-hidden origin-top"
+          >
+            <FileTree
+              :nodes="node.children || []"
+              :selected="selected"
+              :disabled="disabled"
+              :search-query="searchQuery"
+              @update:selected="emitUpdate"
+            />
+          </div>
+        </transition>
       </div>
 
       <!-- File -->
@@ -178,10 +228,15 @@ const emitUpdate = (values: string[]) => {
         </div>
 
         <!-- Cases under file -->
-        <div
-          v-if="isOpen(node.path || node.name)"
-          class="pl-9 mt-0.5 space-y-0.5"
+        <transition
+          @enter="onEnter"
+          @after-enter="onAfterEnter"
+          @leave="onLeave"
         >
+          <div
+            v-if="isOpen(node.path || node.name)"
+            class="pl-9 mt-0.5 space-y-0.5 overflow-hidden origin-top"
+          >
           <div
             v-if="node.cases!.length === 0"
             class="p-1.5 text-xs text-gray-500"
@@ -231,6 +286,7 @@ const emitUpdate = (values: string[]) => {
             </div>
           </div>
         </div>
+        </transition>
       </div>
     </div>
   </div>
