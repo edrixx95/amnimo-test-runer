@@ -8,6 +8,8 @@ const { t } = useI18n();
 const props = defineProps<{
   modelValue: boolean;
   initialPath?: string;
+  mode?: "select" | "save";
+  defaultFilename?: string;
 }>();
 
 const emit = defineEmits<{
@@ -20,6 +22,7 @@ const inputPath = ref("");
 const parentPath = ref<string | null>(null);
 const folders = ref<string[]>([]);
 const selectedFolder = ref<string | null>(null);
+const fileName = ref("");
 
 const isLoading = ref(false);
 const errorMsg = ref("");
@@ -30,6 +33,7 @@ watch(
   (isOpen) => {
     if (isOpen) {
       selectedFolder.value = null;
+      fileName.value = props.defaultFilename || "";
       loadDirectory(props.initialPath || currentPath.value || "");
     }
   },
@@ -87,9 +91,17 @@ function close() {
 }
 
 function confirm() {
-  // If a folder is selected in the list, use that path.
-  // Otherwise, use the current viewed path (inputPath).
-  emit("select", inputPath.value || currentPath.value);
+  const basePath = inputPath.value || currentPath.value;
+  if (props.mode === "save") {
+    const separator = basePath.match(/[\\/]/)?.[0] || "\\";
+    const fullPath =
+      basePath.replace(/[\\/]$/, "") +
+      separator +
+      (fileName.value || "report.json");
+    emit("select", fullPath);
+  } else {
+    emit("select", basePath);
+  }
   close();
 }
 </script>
@@ -101,7 +113,7 @@ function confirm() {
       class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
     >
       <div
-        class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col transform transition-all border border-slate-200"
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] h-[650px] flex flex-col transform transition-all border border-slate-200"
         @click.stop
       >
         <!-- Header -->
@@ -112,11 +124,22 @@ function confirm() {
             <div
               class="w-8 h-8 rounded-full bg-amnimo-100 text-amnimo-600 flex items-center justify-center"
             >
-              <Icon name="heroicons:folder-open" class="w-4 h-4" />
+              <Icon
+                :name="
+                  mode === 'save'
+                    ? 'heroicons:document-arrow-down'
+                    : 'heroicons:folder-open'
+                "
+                class="w-4 h-4"
+              />
             </div>
             <div>
               <h3 class="font-bold text-slate-800">
-                {{ $t("folderPicker.selectFolder") }}
+                {{
+                  mode === "save"
+                    ? "Save File As..."
+                    : $t("folderPicker.selectFolder")
+                }}
               </h3>
               <p
                 class="text-xs text-slate-500 font-mono mt-0.5 truncate max-w-sm"
@@ -150,7 +173,7 @@ function confirm() {
             class="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-mono focus:ring-amnimo-500 focus:border-amnimo-500"
             :placeholder="$t('folderPicker.enterPathManually')"
             @keyup.enter="navigateTo(inputPath)"
-          >
+          />
           <button
             class="px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg font-bold text-sm shrink-0"
             @click="navigateTo(inputPath)"
@@ -160,7 +183,7 @@ function confirm() {
         </div>
 
         <!-- Folder List -->
-        <div class="flex-1 h-[40vh] min-h-[300px] overflow-y-auto p-2 bg-white">
+        <div class="flex-1 min-h-0 overflow-y-auto p-2 bg-white">
           <div
             v-if="isLoading"
             class="h-full flex items-center justify-center text-slate-400 gap-2"
@@ -183,7 +206,12 @@ function confirm() {
           >
             {{ $t("folderPicker.folderEmpty") }}
           </div>
-          <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-1">
+          <TransitionGroup
+            v-else
+            tag="div"
+            name="list"
+            class="grid grid-cols-1 sm:grid-cols-2 gap-1"
+          >
             <button
               v-for="folder in folders"
               :key="folder"
@@ -211,7 +239,23 @@ function confirm() {
               />
               <span class="text-sm truncate select-none">{{ folder }}</span>
             </button>
-          </div>
+          </TransitionGroup>
+        </div>
+
+        <!-- Filename Input for Save Mode -->
+        <div
+          v-if="mode === 'save'"
+          class="px-5 py-3 border-t border-slate-100 flex items-center gap-3 bg-white"
+        >
+          <label class="text-sm font-bold text-slate-700 shrink-0"
+            >File name:</label
+          >
+          <input
+            v-model="fileName"
+            type="text"
+            class="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-mono focus:ring-amnimo-500 focus:border-amnimo-500"
+            placeholder="Enter file name"
+          />
         </div>
 
         <!-- Footer -->
@@ -233,7 +277,7 @@ function confirm() {
               class="px-5 py-2 rounded-xl bg-amnimo-600 text-white hover:bg-amnimo-700 font-bold text-sm shadow-sm transition-all shadow-amnimo-200"
               @click="confirm"
             >
-              {{ $t("folderPicker.selectFolder") }}
+              {{ mode === "save" ? "Save" : $t("folderPicker.selectFolder") }}
             </button>
           </div>
         </div>
@@ -259,5 +303,19 @@ function confirm() {
 
 .fade-enter-from > div {
   transform: scale(0.95) translateY(10px);
+}
+
+/* Folder List Transition */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.25s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(5px);
+}
+.list-leave-active {
+  position: absolute;
 }
 </style>

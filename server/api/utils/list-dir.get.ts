@@ -6,7 +6,9 @@ export default defineEventHandler((event) => {
   const query = getQuery(event);
   let targetPath = (query.path as string) || "";
 
-  if (!targetPath) {
+  if (targetPath === "__DOWNLOADS__") {
+    targetPath = path.join(os.homedir(), "Downloads");
+  } else if (!targetPath) {
     targetPath = os.homedir();
   } else {
     targetPath = path.resolve(targetPath);
@@ -42,11 +44,24 @@ export default defineEventHandler((event) => {
       folders,
     };
   } catch (_e: unknown) {
-    const e = _e as import('~~/shared/types').CatchError;
-    const err = e as { message?: string, statusCode?: number, statusMessage?: string };
+    const e = _e as import("~~/shared/types").CatchError;
+    const err = e as {
+      message?: string;
+      statusCode?: number;
+      statusMessage?: string;
+    };
     throw createError({
       statusCode: 400,
-      statusMessage: (err as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).message || "Access denied or invalid path",
+      statusMessage:
+        (
+          err as {
+            response?: { status?: number };
+            statusCode?: number;
+            message?: string;
+            statusMessage?: string;
+            code?: string;
+          }
+        ).message || "Access denied or invalid path",
     });
   }
 });

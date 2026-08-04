@@ -462,5 +462,16 @@
     "deviceUnlocked": "デバイスのロックが解除されました",
     "bySession": "セッション:",
     "resource": "リソース"
+  },
+  "initialSetup": {
+    "welcome": "Amnimo Test Runner へようこそ",
+    "description": "開始するには、E2Eテストプロジェクトのパスを設定してください。",
+    "e2ePath": "E2Eテストパス",
+    "e2ePlaceholder": "例: C:\\amnimo-e2e-tests",
+    "browse": "参照...",
+    "hint": "これはPlaywrightの設定ファイルが含まれるルートフォルダである必要があります。",
+    "saveError": "設定の保存に失敗しました。再試行してください。",
+    "saving": "保存中...",
+    "saveContinue": "保存して続行"
   }
 }

@@ -5,6 +5,7 @@
     </NuxtLayout>
     <BaseToast />
     <UpdateNotifier />
+    <InitialSetupModal />
   </div>
 </template>
 

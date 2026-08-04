@@ -462,5 +462,16 @@
     "deviceUnlocked": "Device unlocked",
     "bySession": "by session",
     "resource": "Resource"
+  },
+  "initialSetup": {
+    "welcome": "Welcome to Amnimo Test Runner",
+    "description": "To get started, please configure the path to your E2E test project.",
+    "e2ePath": "E2E Tests Path",
+    "e2ePlaceholder": "e.g. C:\\amnimo-e2e-tests",
+    "browse": "Browse...",
+    "hint": "This should be the root folder containing your Playwright config.",
+    "saveError": "Failed to save settings. Please try again.",
+    "saving": "Saving...",
+    "saveContinue": "Save & Continue"
   }
 }

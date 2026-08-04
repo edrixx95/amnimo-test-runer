@@ -37,6 +37,7 @@ const {
   reportSessionId,
   showDataViewer,
   dataViewerUrl,
+  dataViewerSessionName,
   showHtmlReport,
   htmlReportUrl,
   openReport,
@@ -112,7 +113,7 @@ const getRunningPercentage = (session: Session) => {
               type="text"
               :placeholder="$t('home.searchPlaceholder')"
               class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-amnimo-500 focus:ring-1 focus:ring-amnimo-500 transition-all outline-none"
-            >
+            />
           </div>
 
           <!-- Filters -->
@@ -148,7 +149,7 @@ const getRunningPercentage = (session: Session) => {
                 v-model="dateRange.start"
                 type="date"
                 class="bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer"
-              >
+              />
               <span class="text-slate-400 text-xs font-medium">{{
                 $t("home.to")
               }}</span>
@@ -156,7 +157,7 @@ const getRunningPercentage = (session: Session) => {
                 v-model="dateRange.end"
                 type="date"
                 class="bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer"
-              >
+              />
               <!-- Clear date button -->
               <button
                 v-if="dateRange.start || dateRange.end"
@@ -455,7 +456,7 @@ const getRunningPercentage = (session: Session) => {
               <div class="flex gap-2">
                 <button
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors shadow-sm hover:shadow-md"
-                  @click.stop="openReport(session.id)"
+                  @click.stop="openReport(session.id, session.name)"
                 >
                   <Icon name="heroicons:document-text" class="w-4 h-4" />
                   {{ $t("home.viewReport") }}
@@ -514,7 +515,7 @@ const getRunningPercentage = (session: Session) => {
                   type="text"
                   class="block w-full rounded-xl border-slate-300 bg-white text-slate-900 shadow-sm focus:border-amnimo-500 focus:ring-amnimo-500 sm:text-sm py-2.5 px-3 border transition-colors outline-none focus:ring-2 focus:ring-opacity-50"
                   required
-                >
+                />
               </div>
               <p class="text-sm font-medium text-slate-500">
                 {{ $t("home.modal.description") }}
@@ -550,6 +551,7 @@ const getRunningPercentage = (session: Session) => {
     <ExcelJsonViewer
       v-model="showDataViewer"
       :json-url="dataViewerUrl"
+      :session-name="dataViewerSessionName"
       @open-html-report="openHtmlReportDialog"
     />
 
@@ -571,4 +573,3 @@ const getRunningPercentage = (session: Session) => {
     />
   </div>
 </template>
-

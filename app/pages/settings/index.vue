@@ -168,7 +168,6 @@ const validatePath = async () => {
 };
 
 const saveSettings = async () => {
-  if (!e2ePath.value) return;
   isSaving.value = true;
   try {
     await $fetch("/api/settings", {
@@ -232,7 +231,7 @@ const saveSettings = async () => {
                   class="flex-1 px-4 py-2 border border-slate-300 rounded-xl font-mono text-sm focus:ring-amnimo-500 focus:border-amnimo-500 bg-slate-50"
                   placeholder="C:\path\to\amnimo-e2e"
                   @input="resetValidation"
-                >
+                />
                 <button
                   class="px-4 py-2 bg-slate-100 text-slate-700 font-bold text-sm border border-slate-200 rounded-xl hover:bg-slate-200 transition-colors shrink-0"
                   @click="isFolderPickerOpen = true"
@@ -287,7 +286,7 @@ const saveSettings = async () => {
                 }}
               </button>
               <button
-                :disabled="isSaving || !e2ePath"
+                :disabled="isSaving"
                 class="px-6 py-2 text-sm font-bold text-white bg-amnimo-600 rounded-xl hover:bg-amnimo-700 transition-colors shadow-sm disabled:opacity-50"
                 @click="saveSettings"
               >
@@ -397,7 +396,7 @@ const saveSettings = async () => {
                 class="hidden"
                 accept=".zip"
                 @change="handleImportBackup"
-              >
+              />
               <button
                 :disabled="isImporting"
                 class="px-4 py-2 text-sm font-bold bg-white text-slate-700 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50 inline-flex items-center gap-2 shrink-0"

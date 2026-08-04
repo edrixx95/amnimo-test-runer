@@ -99,7 +99,7 @@ const toggleSidebar = () => {
             src="/amnimo-icon.ico"
             class="w-8 h-8 object-contain"
             alt="Amnimo"
-          >
+          />
         </div>
         <div
           class="absolute left-6 top-1/2 -translate-y-1/2 transition-all duration-300 whitespace-nowrap"
@@ -155,6 +155,25 @@ const toggleSidebar = () => {
           </span>
         </NuxtLink>
 
+        <!-- Release Spec Link -->
+        <NuxtLink
+          to="/release-spec"
+          class="group flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 text-gray-500 hover:bg-slate-50 hover:text-gray-900 overflow-hidden"
+          active-class="!bg-amnimo-50 !text-amnimo-900 shadow-sm ring-1 ring-amnimo-100"
+          title="Release Spec"
+        >
+          <Icon
+            name="heroicons:document-text"
+            class="w-6 h-6 shrink-0 transition-transform duration-300 group-hover:scale-110"
+          />
+          <span
+            class="ml-3 whitespace-nowrap transition-opacity duration-300"
+            :class="isCollapsed ? 'opacity-0' : 'opacity-100'"
+          >
+            Release Spec
+          </span>
+        </NuxtLink>
+
         <!-- Add more nav items here in the future following the same pattern -->
       </nav>
 
@@ -175,7 +194,7 @@ const toggleSidebar = () => {
               v-if="eventLogs.length > 0"
               class="absolute -top-1 -right-1 flex items-center justify-center min-w-[14px] h-[14px] px-1 bg-red-500 text-white text-[9px] font-bold rounded-full shadow-sm animate-pulse border border-white"
             >
-              {{ eventLogs.length > 99 ? '99+' : eventLogs.length }}
+              {{ eventLogs.length > 99 ? "99+" : eventLogs.length }}
             </span>
           </div>
           <span
@@ -322,12 +341,24 @@ const toggleSidebar = () => {
 
     <!-- Notifications Modal -->
     <Transition name="modal">
-      <div v-if="showEventLog" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0">
-        <div class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm transform-gpu will-change-opacity" @click="showEventLog = false" />
-        
-        <div class="modal-content relative bg-white rounded-2xl shadow-glass w-full max-w-lg overflow-hidden border border-slate-200 max-h-[80vh] flex flex-col">
-          <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-slate-50 shrink-0">
-            <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+      <div
+        v-if="showEventLog"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0"
+      >
+        <div
+          class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm transform-gpu will-change-opacity"
+          @click="showEventLog = false"
+        />
+
+        <div
+          class="modal-content relative bg-white rounded-2xl shadow-glass w-full max-w-lg overflow-hidden border border-slate-200 max-h-[80vh] flex flex-col"
+        >
+          <div
+            class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-slate-50 shrink-0"
+          >
+            <h3
+              class="text-xl font-bold text-slate-900 flex items-center gap-2"
+            >
               <Icon name="heroicons:bell" class="w-6 h-6 text-amnimo-600" />
               {{ $t("notifications.title") }}
             </h3>
@@ -339,39 +370,76 @@ const toggleSidebar = () => {
               >
                 {{ $t("notifications.clearAll") }}
               </button>
-              <button class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors" @click="showEventLog = false">
+              <button
+                class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
+                @click="showEventLog = false"
+              >
                 <Icon name="heroicons:x-mark" class="w-6 h-6" />
               </button>
             </div>
           </div>
 
-          <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/50">
-            <div v-if="eventLogs.length === 0" class="text-center text-slate-500 py-12 bg-white rounded-xl border border-slate-200 shadow-sm">
-              <Icon name="heroicons:inbox" class="w-12 h-12 mx-auto mb-2 opacity-30 text-slate-400" />
-              <p class="font-medium text-slate-600">{{ $t("notifications.empty") }}</p>
+          <div
+            class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/50"
+          >
+            <div
+              v-if="eventLogs.length === 0"
+              class="text-center text-slate-500 py-12 bg-white rounded-xl border border-slate-200 shadow-sm"
+            >
+              <Icon
+                name="heroicons:inbox"
+                class="w-12 h-12 mx-auto mb-2 opacity-30 text-slate-400"
+              />
+              <p class="font-medium text-slate-600">
+                {{ $t("notifications.empty") }}
+              </p>
             </div>
 
             <div
               v-for="log in eventLogs"
               :key="log.id"
               class="p-4 rounded-xl border bg-white shadow-sm flex gap-3 transition-colors duration-300"
-              :class="log.type === 'acquired' ? 'border-amber-200 hover:border-amber-300' : 'border-emerald-200 hover:border-emerald-300'"
+              :class="
+                log.type === 'acquired'
+                  ? 'border-amber-200 hover:border-amber-300'
+                  : 'border-emerald-200 hover:border-emerald-300'
+              "
             >
               <div class="shrink-0 mt-0.5">
-                <Icon 
-                  :name="log.type === 'acquired' ? 'heroicons:lock-closed' : 'heroicons:lock-open'" 
+                <Icon
+                  :name="
+                    log.type === 'acquired'
+                      ? 'heroicons:lock-closed'
+                      : 'heroicons:lock-open'
+                  "
                   class="w-5 h-5"
-                  :class="log.type === 'acquired' ? 'text-amber-500' : 'text-emerald-500'"
+                  :class="
+                    log.type === 'acquired'
+                      ? 'text-amber-500'
+                      : 'text-emerald-500'
+                  "
                 />
               </div>
               <div class="min-w-0 flex-1">
                 <p class="font-bold text-sm text-slate-800">
-                  {{ log.type === 'acquired' ? $t("notifications.deviceLocked") : $t("notifications.deviceUnlocked") }}
+                  {{
+                    log.type === "acquired"
+                      ? $t("notifications.deviceLocked")
+                      : $t("notifications.deviceUnlocked")
+                  }}
                 </p>
-                <p class="text-sm text-slate-600 mt-1 break-words leading-relaxed">
-                  <span class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 border border-slate-200">{{ log.lock.resource }}</span> 
+                <p
+                  class="text-sm text-slate-600 mt-1 break-words leading-relaxed"
+                >
+                  <span
+                    class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 border border-slate-200"
+                    >{{ log.lock.resource }}</span
+                  >
                   <span class="mx-1">{{ $t("notifications.bySession") }}</span>
-                  <span class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 border border-slate-200">{{ log.lock.sessionName || log.lock.sessionId }}</span>
+                  <span
+                    class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 border border-slate-200"
+                    >{{ log.lock.sessionName || log.lock.sessionId }}</span
+                  >
                 </p>
                 <p class="text-xs text-slate-400 mt-2 font-medium">
                   {{ new Date(log.timestamp).toLocaleString() }}
