@@ -61,6 +61,7 @@ async function checkPoe() {
 
     if (poes.length > 0) {
       const lan1 = poes.find((p: any) => p.name === "lan1");
+      const eth0 = poes.find((p: any) => p.name === "eth0");
 
       if (lan1) {
         poeInfo.value = lan1;
@@ -69,6 +70,19 @@ async function checkPoe() {
         } else {
           errorMsg.value = t("peripheralPoeCheck.errorState", {
             state: lan1.state,
+          });
+        }
+      } else {
+        errorMsg.value = t("peripheralPoeCheck.errorNotFound");
+      }
+
+      if (eth0) {
+        poeInfo.value = eth0;
+        if (eth0.state === "connected") {
+          emit("update:modelValue", true);
+        } else {
+          errorMsg.value = t("peripheralPoeCheck.errorState", {
+            state: eth0.state,
           });
         }
       } else {

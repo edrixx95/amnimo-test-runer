@@ -141,7 +141,7 @@
     "warning": "Warning",
     "info": "Info"
   },
-  "customSelect": {
+  "baseSelect": {
     "select": "Select..."
   },
   "envEditor": {

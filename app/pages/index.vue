@@ -117,7 +117,7 @@ const getRunningPercentage = (session: Session) => {
 
           <!-- Filters -->
           <div class="flex flex-wrap items-center gap-3">
-            <CustomSelect
+            <BaseSelect
               v-model="filterStatus"
               :options="[
                 { label: 'All Statuses', value: 'All' },
@@ -131,7 +131,7 @@ const getRunningPercentage = (session: Session) => {
               ]"
             />
 
-            <CustomSelect
+            <BaseSelect
               v-model="filterDevice"
               :options="[
                 { label: $t('home.allDevices'), value: 'All' },
@@ -170,7 +170,7 @@ const getRunningPercentage = (session: Session) => {
 
             <div class="h-6 w-px bg-slate-200 mx-1" />
 
-            <CustomSelect
+            <BaseSelect
               v-model="sortBy"
               icon="heroicons:arrows-up-down"
               :options="[
@@ -571,3 +571,4 @@ const getRunningPercentage = (session: Session) => {
     />
   </div>
 </template>
+

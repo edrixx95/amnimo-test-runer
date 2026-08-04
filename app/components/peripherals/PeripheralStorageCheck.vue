@@ -56,7 +56,7 @@ const expectedDevices = computed<ExpectedDevice[]>(() => {
       {
         id: "internal",
         name: t("peripheralStorageCheck.internalStorage"),
-        regex: /^nvme0p1$/,
+        regex: /^nvme0n1$/,
         icon: IconInternalStorage,
       },
       {
@@ -77,7 +77,7 @@ const expectedDevices = computed<ExpectedDevice[]>(() => {
       {
         id: "usb",
         name: t("peripheralStorageCheck.usbDrive"),
-        regex: /^(sda|sdb)$/,
+        regex: /^sda$/,
         icon: IconUsb,
       },
     ];

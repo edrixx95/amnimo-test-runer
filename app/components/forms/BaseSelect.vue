@@ -8,6 +8,7 @@ const props = defineProps<{
   options: { label: string; value: string | number }[];
   placeholder?: string;
   icon?: string;
+  buttonClass?: string;
 }>();
 
 const emit = defineEmits(["update:modelValue"]);
@@ -21,11 +22,12 @@ onClickOutside(dropdownRef, () => {
   isOpen.value = false;
 });
 
+const selectedOption = computed(() => props.options.find((opt) => opt.value === props.modelValue));
+
 const selectedLabel = computed(() => {
-  const selected = props.options.find((opt) => opt.value === props.modelValue);
-  return selected
-    ? selected.label
-    : props.placeholder || t("customSelect.select");
+  return selectedOption.value
+    ? selectedOption.value.label
+    : props.placeholder || t("baseSelect.select");
 });
 
 const selectOption = (value: string | number) => {
@@ -37,17 +39,22 @@ const selectOption = (value: string | number) => {
 <template>
   <div ref="dropdownRef" class="relative min-w-[140px]">
     <div
-      class="flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 cursor-pointer hover:bg-white hover:border-amnimo-500 transition-colors shadow-sm"
-      :class="{ 'bg-white border-amnimo-500 ring-1 ring-amnimo-500': isOpen }"
+      class="flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700 cursor-pointer hover:bg-white hover:border-amnimo-500 transition-colors shadow-sm"
+      :class="[
+        buttonClass || 'rounded-xl',
+        { 'bg-white border-amnimo-500 ring-1 ring-amnimo-500': isOpen }
+      ]"
       @click="isOpen = !isOpen"
     >
-      <div class="flex items-center gap-2">
-        <Icon v-if="icon" :name="icon" class="w-4 h-4 text-slate-400" />
-        <span class="truncate">{{ selectedLabel }}</span>
+      <div class="flex items-center gap-2 overflow-hidden">
+        <slot name="selected" :option="selectedOption">
+          <Icon v-if="icon" :name="icon" class="w-4 h-4 text-slate-400 shrink-0" />
+          <span class="truncate">{{ selectedLabel }}</span>
+        </slot>
       </div>
       <Icon
         name="heroicons:chevron-down"
-        class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0"
+        class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ml-2"
         :class="{ 'rotate-180': isOpen }"
       />
     </div>
@@ -64,7 +71,7 @@ const selectOption = (value: string | number) => {
         v-if="isOpen"
         class="absolute z-50 w-full min-w-max mt-2 bg-white border border-slate-200 rounded-xl shadow-glass overflow-hidden right-0 origin-top-right"
       >
-        <div class="max-h-60 overflow-y-auto custom-scrollbar py-1.5">
+        <div class="max-h-70 overflow-y-auto custom-scrollbar py-1.5">
           <div
             v-for="option in options"
             :key="option.value"
@@ -76,7 +83,9 @@ const selectOption = (value: string | number) => {
             ]"
             @click="selectOption(option.value)"
           >
-            <span class="whitespace-nowrap">{{ option.label }}</span>
+            <slot name="option" :option="option">
+              <span class="whitespace-nowrap">{{ option.label }}</span>
+            </slot>
             <Icon
               v-if="modelValue === option.value"
               name="heroicons:check"
@@ -88,3 +97,4 @@ const selectOption = (value: string | number) => {
     </Transition>
   </div>
 </template>
+

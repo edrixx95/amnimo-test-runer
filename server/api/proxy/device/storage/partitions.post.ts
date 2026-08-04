@@ -64,10 +64,22 @@ export default defineEventHandler(async (event) => {
   } catch (_e: unknown) {
     const e = _e as import('~~/shared/types').CatchError;
     const error = e as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string };
-    console.error("Storage check proxy error:", error);
+    console.error("Storage check proxy error:", _e);
+    
+    // Extract actual message if possible
+    let errorMsg = "Failed to communicate with device";
+    if (error && error.message) {
+      errorMsg = error.message;
+    } else if (error && error.statusMessage) {
+      errorMsg = error.statusMessage;
+    } else if (_e instanceof Error) {
+      errorMsg = _e.message;
+    }
+
     throw createError({
-      statusCode: (error as { response?: { status?: number }, statusCode?: number, message?: string, statusMessage?: string, code?: string }).statusCode || 500,
-      statusMessage: error.statusMessage || "Failed to communicate with device",
+      statusCode: (error as any)?.statusCode || 500,
+      statusMessage: errorMsg,
+      message: errorMsg,
     });
   }
 });

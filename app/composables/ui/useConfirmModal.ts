@@ -1,23 +1,21 @@
- 
- 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref } from 'vue';
 import { useToast } from '~/composables/useToast';
 import { useI18n } from 'vue-i18n';
 
+const confirmModal = ref({
+  isOpen: false,
+  title: "",
+  message: "",
+  confirmText: "",
+  type: "danger" as "danger" | "warning" | "info",
+  isLoading: false,
+  action: null as null | (() => Promise<void>),
+});
+
 export function useConfirmModal() {
   const { t } = useI18n();
   const { addToast } = useToast();
-
-  const confirmModal = ref({
-    isOpen: false,
-    title: "",
-    message: "",
-    confirmText: "",
-    type: "danger" as "danger" | "warning" | "info",
-    isLoading: false,
-    action: null as null | (() => Promise<void>),
-  });
 
   const executeConfirm = async () => {
     if (!confirmModal.value.action) return;

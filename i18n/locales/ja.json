@@ -141,7 +141,7 @@
     "warning": "警告",
     "info": "情報"
   },
-  "customSelect": {
+  "baseSelect": {
     "select": "選択..."
   },
   "envEditor": {
