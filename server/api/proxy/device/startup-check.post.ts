@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
 import { defineEventHandler, readBody, createError } from "h3";
 import { z } from "zod";
@@ -23,13 +22,14 @@ export default defineEventHandler(async (event) => {
   const { targetUrl, defaultPassword } = result.data;
   const apiUrl = new URL("/api/on_first_startup", targetUrl).toString();
 
+  const originalTlsConfig = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
   try {
     // 1. Check startup state
     const getResponse = await $fetch<any>(apiUrl, {
       method: "GET",
       timeout: 10000,
-      // @ts-ignore
-      rejectUnauthorized: false,
     });
 
     const messages = getResponse?.result?.messages || [];
@@ -44,8 +44,6 @@ export default defineEventHandler(async (event) => {
         },
         body: { password: defaultPassword },
         timeout: 15000,
-        // @ts-ignore
-        rejectUnauthorized: false,
       });
 
       return {
@@ -83,5 +81,11 @@ export default defineEventHandler(async (event) => {
       statusMessage:
         error.statusMessage || "Failed to check device startup state",
     });
+  } finally {
+    if (originalTlsConfig !== undefined) {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsConfig;
+    } else {
+      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+    }
   }
 });

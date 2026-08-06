@@ -9,8 +9,18 @@
     >
       <!-- Welcome Header -->
       <div
-        class="px-8 pt-8 pb-6 text-center border-b border-slate-100 bg-slate-50/50"
+        id="tour-init-welcome"
+        class="relative px-8 pt-8 pb-6 text-center border-b border-slate-100 bg-slate-50/50"
       >
+        <!-- Replay Tour Button -->
+        <button
+          @click="startTour"
+          class="absolute top-4 right-4 p-2 text-slate-400 hover:text-amnimo-600 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
+          title="Interactive Guide"
+        >
+          <Icon name="heroicons:play-circle" class="w-5 h-5" />
+          Guide
+        </button>
         <div
           class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amnimo-100 text-amnimo-600 mb-4"
         >
@@ -29,7 +39,7 @@
         <label class="block text-sm font-semibold text-slate-700 mb-2">{{
           $t("initialSetup.e2ePath")
         }}</label>
-        <div class="flex gap-2">
+        <div id="tour-init-e2e-input" class="flex gap-2">
           <input
             v-model="e2ePath"
             type="text"
@@ -37,6 +47,7 @@
             class="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amnimo-500 focus:border-amnimo-500 text-sm outline-none transition-shadow"
           />
           <button
+            id="tour-init-browse-btn"
             @click="isFolderPickerOpen = true"
             class="px-4 py-2.5 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-colors whitespace-nowrap text-sm border border-slate-200"
           >
@@ -55,11 +66,11 @@
         </p>
       </div>
 
-      <!-- Footer -->
       <div
         class="px-8 py-5 bg-slate-50 border-t border-slate-100 flex justify-end"
       >
         <button
+          id="tour-init-save-btn"
           @click="saveSettings"
           :disabled="isSaving || !e2ePath.trim()"
           class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-amnimo-600 text-white font-semibold rounded-lg hover:bg-amnimo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-amnimo-500 w-full sm:w-auto"
@@ -125,9 +136,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import InitialSetup from "~/components/manual/InitialSetup.vue";
-
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 const { t } = useI18n();
 
 const isOpen = ref(false);
@@ -136,18 +148,79 @@ const e2ePath = ref("");
 const isFolderPickerOpen = ref(false);
 const isSaving = ref(false);
 const errorMsg = ref("");
+let driverObj: any = null;
 
 onMounted(async () => {
   try {
     const res = await $fetch<{ e2ePath: string }>("/api/settings");
     if (!res || !res.e2ePath || res.e2ePath.trim() === "") {
       isOpen.value = true;
+      checkAndStartTour();
     }
   } catch (e) {
     console.error("Failed to fetch initial settings", e);
     isOpen.value = true;
+    checkAndStartTour();
   }
 });
+
+const checkAndStartTour = async () => {
+  await nextTick();
+  // Add a slight delay to ensure modal animation completes
+  setTimeout(() => {
+    if (!localStorage.getItem("amnimo_init_tour_completed")) {
+      startTour();
+    }
+  }, 300);
+};
+
+const startTour = (startIndex: number | Event = 0) => {
+  const indexToStart = typeof startIndex === "number" ? startIndex : 0;
+  driverObj = driver({
+    popoverClass: "amnimo-tour-theme",
+    showProgress: true,
+    animate: true,
+    nextBtnText: "Next",
+    prevBtnText: "Previous",
+    doneBtnText: "Done",
+    steps: [
+      {
+        element: "#tour-init-e2e-input",
+        popover: {
+          title: t("tour.initialSetup.step2Title"),
+          description: t("tour.initialSetup.step2Desc"),
+          side: "bottom",
+          align: "start",
+        },
+      },
+      {
+        element: "#tour-init-browse-btn",
+        popover: {
+          title: t("tour.initialSetup.step3Title"),
+          description: t("tour.initialSetup.step3Desc"),
+          side: "bottom",
+          align: "end",
+        },
+      },
+      {
+        element: "#tour-init-save-btn",
+        popover: {
+          title: t("tour.initialSetup.step4Title"),
+          description: t("tour.initialSetup.step4Desc"),
+          side: "top",
+          align: "end",
+        },
+      },
+    ],
+    allowClose: false,
+    onDestroyStarted: () => {
+      // Only triggered when the tour naturally finishes (because allowClose is false)
+      localStorage.setItem("amnimo_init_tour_completed", "true");
+      driverObj.destroy();
+    },
+  });
+  driverObj.drive(indexToStart);
+};
 
 const handleFolderSelected = (path: string) => {
   e2ePath.value = path;
@@ -175,3 +248,7 @@ const saveSettings = async () => {
   }
 };
 </script>
+
+<style scoped>
+/* Scoped styles can go here if needed in the future */
+</style>

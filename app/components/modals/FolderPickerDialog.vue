@@ -1,7 +1,9 @@
 <script setup lang="ts">
 /* eslint-disable */
-import { ref, watch } from "vue";
+import { ref, watch, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
 const { t } = useI18n();
 
@@ -27,6 +29,8 @@ const fileName = ref("");
 const isLoading = ref(false);
 const errorMsg = ref("");
 
+let folderDriverObj: any = null;
+
 // Watch visibility
 watch(
   () => props.modelValue,
@@ -35,9 +39,84 @@ watch(
       selectedFolder.value = null;
       fileName.value = props.defaultFilename || "";
       loadDirectory(props.initialPath || currentPath.value || "");
+      nextTick(() => {
+        startFolderTour();
+      });
+    } else {
+      if (folderDriverObj) {
+        folderDriverObj.destroy();
+        folderDriverObj = null;
+      }
     }
   },
 );
+
+const startFolderTour = (force = false) => {
+  if (import.meta.client) {
+    const isCompleted = localStorage.getItem(
+      "amnimo_folder_picker_tour_completed",
+    );
+    if (!isCompleted || force) {
+      if (folderDriverObj) {
+        folderDriverObj.destroy();
+      }
+      folderDriverObj = driver({
+        popoverClass: "amnimo-tour-theme",
+        animate: true,
+        showProgress: true,
+        allowClose: false,
+        steps: [
+          {
+            element: "#tour-folder-picker-up-btn",
+            popover: {
+              title: t("tour.initialSetup.stepFolderUpBtnTitle"),
+              description: t("tour.initialSetup.stepFolderUpBtnDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-folder-picker-path-input",
+            popover: {
+              title: t("tour.initialSetup.stepFolderPathInputTitle"),
+              description: t("tour.initialSetup.stepFolderPathInputDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-folder-picker-list",
+            popover: {
+              title: t("tour.initialSetup.stepFolderListTitle"),
+              description: t("tour.initialSetup.stepFolderListDesc"),
+              side: "left",
+              align: "center",
+            },
+          },
+          {
+            element: "#tour-folder-picker-confirm",
+            popover: {
+              title: t("tour.initialSetup.stepFolderConfirmTitle"),
+              description: t("tour.initialSetup.stepFolderConfirmDesc"),
+              side: "top",
+              align: "end",
+            },
+          },
+        ],
+        onDestroyStarted: () => {
+          localStorage.setItem("amnimo_folder_picker_tour_completed", "true");
+          if (folderDriverObj) {
+            folderDriverObj.destroy();
+            folderDriverObj = null;
+          }
+        },
+      });
+      setTimeout(() => {
+        if (folderDriverObj) folderDriverObj.drive();
+      }, 300);
+    }
+  }
+};
 
 async function loadDirectory(pathStr: string) {
   isLoading.value = true;
@@ -118,7 +197,7 @@ function confirm() {
       >
         <!-- Header -->
         <div
-          class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50"
+          class="px-5 py-4 border-b border-slate-100 rounded-t-2xl flex items-center justify-between bg-slate-50"
         >
           <div class="flex items-center gap-3">
             <div
@@ -149,17 +228,28 @@ function confirm() {
               </p>
             </div>
           </div>
-          <button
-            class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            @click="close"
-          >
-            <Icon name="heroicons:x-mark" class="w-5 h-5" />
-          </button>
+          <div class="flex items-center gap-1">
+            <button
+              class="px-2 py-1.5 text-slate-400 hover:text-amnimo-600 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold mr-2"
+              title="Interactive Guide"
+              @click="startFolderTour(true)"
+            >
+              <Icon name="heroicons:play-circle" class="w-5 h-5" />
+              Guide
+            </button>
+            <button
+              class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              @click="close"
+            >
+              <Icon name="heroicons:x-mark" class="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <!-- Path Breadcrumb / Input -->
         <div class="px-5 py-3 border-b border-slate-100 flex gap-2">
           <button
+            id="tour-folder-picker-up-btn"
             :disabled="!parentPath"
             class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:bg-slate-50 flex items-center gap-1 shrink-0"
             :title="$t('folderPicker.goUpOneLevel')"
@@ -168,6 +258,7 @@ function confirm() {
             <Icon name="heroicons:arrow-up" class="w-4 h-4" />
           </button>
           <input
+            id="tour-folder-picker-path-input"
             v-model="inputPath"
             type="text"
             class="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-mono focus:ring-amnimo-500 focus:border-amnimo-500"
@@ -183,7 +274,10 @@ function confirm() {
         </div>
 
         <!-- Folder List -->
-        <div class="flex-1 min-h-0 overflow-y-auto p-2 bg-white">
+        <div
+          id="tour-folder-picker-list"
+          class="flex-1 min-h-0 overflow-y-auto p-2 bg-white"
+        >
           <div
             v-if="isLoading"
             class="h-full flex items-center justify-center text-slate-400 gap-2"
@@ -260,7 +354,7 @@ function confirm() {
 
         <!-- Footer -->
         <div
-          class="px-5 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between"
+          class="px-5 py-4 rounded-b-2xl border-t border-slate-100 bg-slate-50 flex items-center justify-between"
         >
           <div class="text-xs text-slate-500 flex items-center gap-1.5">
             <Icon name="heroicons:information-circle" class="w-4 h-4" />
@@ -274,6 +368,7 @@ function confirm() {
               {{ $t("folderPicker.cancel") }}
             </button>
             <button
+              id="tour-folder-picker-confirm"
               class="px-5 py-2 rounded-xl bg-amnimo-600 text-white hover:bg-amnimo-700 font-bold text-sm shadow-sm transition-all shadow-amnimo-200"
               @click="confirm"
             >

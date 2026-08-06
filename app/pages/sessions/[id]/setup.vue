@@ -18,6 +18,11 @@ const {
   availableDeviceTypes,
   selectBoard,
   pingStatus,
+  pingCheckStatus,
+  pingCheckError,
+  deviceInfoCheckStatus,
+  deviceInfoCheckError,
+  pingErrorMessage,
   isPinging,
   pingDevice,
   checklistState,
@@ -28,6 +33,285 @@ const {
   prevStep,
   finishSetup,
 } = useSessionSetup();
+
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
+
+let setupStep1DriverObj: any = null;
+let setupStep2DriverObj: any = null;
+let setupStep3DriverObj: any = null;
+const { t } = useI18n();
+
+const startSetupStep1Tour = (force = false) => {
+  if (import.meta.client && currentStep.value === 1) {
+    const isCompleted = localStorage.getItem("amnimo_setup1_tour_completed");
+    if (!isCompleted || force) {
+      if (setupStep1DriverObj) setupStep1DriverObj.destroy();
+      setupStep1DriverObj = driver({
+        popoverClass: "amnimo-tour-theme",
+        animate: true,
+        showProgress: true,
+        allowClose: false,
+        steps: [
+          {
+            element: "#tour-setup-name",
+            popover: {
+              title: t("tour.setup1.stepNameTitle"),
+              description: t("tour.setup1.stepNameDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-setup-desc",
+            popover: {
+              title: t("tour.setup1.stepDescTitle"),
+              description: t("tour.setup1.stepDescDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-setup-next-btn",
+            popover: {
+              title: t("tour.setup1.stepNextTitle"),
+              description: t("tour.setup1.stepNextDesc"),
+              side: "top",
+              align: "end",
+            },
+          },
+        ],
+        onDestroyStarted: () => {
+          localStorage.setItem("amnimo_setup1_tour_completed", "true");
+          if (setupStep1DriverObj) {
+            setupStep1DriverObj.destroy();
+            setupStep1DriverObj = null;
+          }
+        },
+      });
+      setupStep1DriverObj.drive();
+    }
+  }
+};
+
+const startSetupStep2Tour = (force = false) => {
+  if (import.meta.client && currentStep.value === 2) {
+    const isCompleted = localStorage.getItem("amnimo_setup2_tour_completed");
+    if (!isCompleted || force) {
+      if (setupStep2DriverObj) setupStep2DriverObj.destroy();
+      setupStep2DriverObj = driver({
+        popoverClass: "amnimo-tour-theme",
+        animate: true,
+        showProgress: true,
+        allowClose: false,
+        steps: [
+          {
+            element: "#tour-setup-device-series",
+            popover: {
+              title: t("tour.setup2.stepDeviceTitle"),
+              description: t("tour.setup2.stepDeviceDesc"),
+              side: "bottom",
+              align: "start",
+              onNextClick: (element, step, opts) => {
+                if (formData.value.board !== "AX30") {
+                  selectBoard("X", "AX30");
+                }
+                setTimeout(() => {
+                  opts.driver.moveNext();
+                }, 400);
+              },
+            },
+          },
+          {
+            element: "#tour-setup-device-type",
+            popover: {
+              title: t("tour.setup2.stepTypeTitle"),
+              description: t("tour.setup2.stepTypeDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-setup-base-url",
+            popover: {
+              title: t("tour.setup2.stepBaseUrlTitle"),
+              description: t("tour.setup2.stepBaseUrlDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-setup-next-btn",
+            popover: {
+              title: t("tour.setup2.stepNextTitle"),
+              description: t("tour.setup2.stepNextDesc"),
+              side: "top",
+              align: "end",
+            },
+          },
+        ],
+        onDestroyStarted: () => {
+          localStorage.setItem("amnimo_setup2_tour_completed", "true");
+          if (setupStep2DriverObj) {
+            setupStep2DriverObj.destroy();
+            setupStep2DriverObj = null;
+          }
+        },
+      });
+      setupStep2DriverObj.drive();
+    }
+  }
+};
+
+const startSetupStep3Tour = (force = false) => {
+  if (import.meta.client && currentStep.value === 3) {
+    const isCompleted = localStorage.getItem("amnimo_setup3_tour_completed");
+    if (!isCompleted || force) {
+      if (setupStep3DriverObj) setupStep3DriverObj.destroy();
+      setupStep3DriverObj = driver({
+        popoverClass: "amnimo-tour-theme",
+        animate: true,
+        showProgress: true,
+        allowClose: false,
+        steps: [
+          {
+            element: "#tour-env-block1-row1",
+            popover: {
+              title: t("tour.setup3.stepBoardInfoTitle"),
+              description: t("tour.setup3.stepBoardInfoDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-env-prev-fw",
+            popover: {
+              title: t("tour.setup3.stepPrevFwTitle"),
+              description: t("tour.setup3.stepPrevFwDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-env-test-fw",
+            popover: {
+              title: t("tour.setup3.stepTestFwTitle"),
+              description: t("tour.setup3.stepTestFwDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-env-pc-server",
+            popover: {
+              title: t("tour.setup3.stepPcServerTitle"),
+              description: t("tour.setup3.stepPcServerDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-env-iis-btn",
+            popover: {
+              title: t("tour.setup3.stepIisBtnTitle"),
+              description: t("tour.setup3.stepIisBtnDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-env-iis-list",
+            popover: {
+              title: t("tour.setup3.stepIisListTitle"),
+              description: t("tour.setup3.stepIisListDesc"),
+              side: "right",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-setup-next-btn",
+            popover: {
+              title: t("tour.setup3.stepNextTitle"),
+              description: t("tour.setup3.stepNextDesc"),
+              side: "top",
+              align: "end",
+            },
+          },
+        ],
+        onDestroyStarted: () => {
+          localStorage.setItem("amnimo_setup3_tour_completed", "true");
+          const mainContainer = document.querySelector("main.overflow-y-auto");
+          if (mainContainer) {
+            mainContainer.scrollTo({ top: 0, behavior: "smooth" });
+          }
+          window.dispatchEvent(new CustomEvent("close-env-dropdowns"));
+          if (setupStep3DriverObj) {
+            setupStep3DriverObj.destroy();
+            setupStep3DriverObj = null;
+          }
+        },
+      });
+      setupStep3DriverObj.drive();
+    }
+  }
+};
+
+onMounted(() => {
+  if (!isLoadingSession.value) {
+    if (currentStep.value === 1) startSetupStep1Tour();
+    if (currentStep.value === 2) startSetupStep2Tour();
+    if (currentStep.value === 3) startSetupStep3Tour();
+  }
+});
+
+watch([isLoadingSession, currentStep], ([isLoading, step]) => {
+  if (!isLoading) {
+    if (step === 1) {
+      startSetupStep1Tour();
+      if (setupStep2DriverObj) {
+        setupStep2DriverObj.destroy();
+        setupStep2DriverObj = null;
+      }
+      if (setupStep3DriverObj) {
+        setupStep3DriverObj.destroy();
+        setupStep3DriverObj = null;
+      }
+    } else if (step === 2) {
+      startSetupStep2Tour();
+      if (setupStep1DriverObj) {
+        setupStep1DriverObj.destroy();
+        setupStep1DriverObj = null;
+      }
+      if (setupStep3DriverObj) {
+        setupStep3DriverObj.destroy();
+        setupStep3DriverObj = null;
+      }
+    } else if (step === 3) {
+      startSetupStep3Tour();
+      if (setupStep1DriverObj) {
+        setupStep1DriverObj.destroy();
+        setupStep1DriverObj = null;
+      }
+      if (setupStep2DriverObj) {
+        setupStep2DriverObj.destroy();
+        setupStep2DriverObj = null;
+      }
+    } else {
+      if (setupStep1DriverObj) {
+        setupStep1DriverObj.destroy();
+        setupStep1DriverObj = null;
+      }
+      if (setupStep2DriverObj) {
+        setupStep2DriverObj.destroy();
+        setupStep2DriverObj = null;
+      }
+      if (setupStep3DriverObj) {
+        setupStep3DriverObj.destroy();
+        setupStep3DriverObj = null;
+      }
+    }
+  }
+});
 </script>
 
 <template>
@@ -49,6 +333,21 @@ const {
             session?.name || session?.id || "..."
           }}</span>
         </h2>
+        <button
+          v-if="currentStep === 1 || currentStep === 2 || currentStep === 3"
+          @click="
+            currentStep === 1
+              ? startSetupStep1Tour(true)
+              : currentStep === 2
+                ? startSetupStep2Tour(true)
+                : startSetupStep3Tour(true)
+          "
+          class="px-2 py-1.5 text-slate-400 hover:text-amnimo-600 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
+          title="Interactive Guide"
+        >
+          <Icon name="heroicons:play-circle" class="w-5 h-5" />
+          Guide
+        </button>
       </div>
       <div class="flex items-center gap-2">
         <span
@@ -302,7 +601,7 @@ const {
                   </div>
 
                   <!-- Device Series Selection -->
-                  <div>
+                  <div id="tour-setup-device-series">
                     <label
                       class="block text-sm font-semibold text-slate-700 mb-3"
                       >{{ $t("setup.deviceSeriesBoard") }}</label
@@ -513,7 +812,7 @@ const {
                                   : 'text-amnimo-500'
                             "
                           />
-                          {{ $t("setup.connectionStatus") }}
+                          {{ $t("setup.stepTarget") }}
                         </h4>
                         <span
                           v-if="pingStatus === 'success'"
@@ -527,16 +826,20 @@ const {
                             $t("setup.online")
                           }}</span>
                         </span>
-                        <span
+                        <div
                           v-else-if="pingStatus === 'failed'"
-                          class="inline-flex items-center gap-1.5 text-sm font-bold text-red-700 bg-red-100 px-3 py-1.5 rounded-lg border border-red-300 animate-fade-in shadow-sm"
+                          class="flex flex-col items-end gap-1"
                         >
-                          <Icon
-                            name="heroicons:exclamation-triangle"
-                            class="w-5 h-5"
-                          />
-                          {{ $t("setup.offline") }}
-                        </span>
+                          <span
+                            class="inline-flex items-center gap-1.5 text-sm font-bold text-red-700 bg-red-100 px-3 py-1.5 rounded-lg border border-red-300 animate-fade-in shadow-sm"
+                          >
+                            <Icon
+                              name="heroicons:exclamation-triangle"
+                              class="w-5 h-5"
+                            />
+                            {{ $t("setup.offline") }}
+                          </span>
+                        </div>
                       </div>
 
                       <div
@@ -573,6 +876,135 @@ const {
                             </a>
                           </div>
                         </div>
+
+                        <!-- Progress Box -->
+                        <Transition name="fade">
+                          <div
+                            v-if="pingStatus !== 'idle'"
+                            class="mt-4 pt-4 border-t border-slate-200 space-y-3"
+                          >
+                            <!-- Step 1: Ping -->
+                            <div class="flex items-center justify-between">
+                              <div class="flex items-center gap-3">
+                                <div
+                                  v-if="pingCheckStatus === 'checking'"
+                                  class="w-6 h-6 flex items-center justify-center"
+                                >
+                                  <AppSpinner
+                                    size="sm"
+                                    class="text-amnimo-500"
+                                  />
+                                </div>
+                                <div
+                                  v-else-if="pingCheckStatus === 'success'"
+                                  class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"
+                                >
+                                  <Icon
+                                    name="heroicons:check"
+                                    class="w-4 h-4"
+                                  />
+                                </div>
+                                <div
+                                  v-else-if="pingCheckStatus === 'failed'"
+                                  class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-600"
+                                >
+                                  <Icon
+                                    name="heroicons:x-mark"
+                                    class="w-4 h-4"
+                                  />
+                                </div>
+                                <span
+                                  class="font-medium"
+                                  :class="{
+                                    'text-slate-500':
+                                      pingCheckStatus === 'checking',
+                                    'text-emerald-700':
+                                      pingCheckStatus === 'success',
+                                    'text-red-700':
+                                      pingCheckStatus === 'failed',
+                                  }"
+                                >
+                                  IPアドレスへのPing
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              v-if="
+                                pingCheckStatus === 'failed' && pingCheckError
+                              "
+                              class="ml-9 text-red-700 text-xs bg-red-50 p-2 rounded border border-red-100"
+                            >
+                              {{ pingCheckError }}
+                            </div>
+
+                            <!-- Step 2: Device Info Check -->
+                            <div
+                              v-if="
+                                pingCheckStatus === 'success' &&
+                                deviceInfoCheckStatus !== 'idle'
+                              "
+                              class="flex flex-col gap-2"
+                            >
+                              <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                  <div
+                                    v-if="deviceInfoCheckStatus === 'checking'"
+                                    class="w-6 h-6 flex items-center justify-center"
+                                  >
+                                    <AppSpinner
+                                      size="sm"
+                                      class="text-amnimo-500"
+                                    />
+                                  </div>
+                                  <div
+                                    v-else-if="
+                                      deviceInfoCheckStatus === 'success'
+                                    "
+                                    class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"
+                                  >
+                                    <Icon
+                                      name="heroicons:check"
+                                      class="w-4 h-4"
+                                    />
+                                  </div>
+                                  <div
+                                    v-else-if="
+                                      deviceInfoCheckStatus === 'failed'
+                                    "
+                                    class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-600"
+                                  >
+                                    <Icon
+                                      name="heroicons:x-mark"
+                                      class="w-4 h-4"
+                                    />
+                                  </div>
+                                  <span
+                                    class="font-medium"
+                                    :class="{
+                                      'text-slate-500':
+                                        deviceInfoCheckStatus === 'checking',
+                                      'text-emerald-700':
+                                        deviceInfoCheckStatus === 'success',
+                                      'text-red-700':
+                                        deviceInfoCheckStatus === 'failed',
+                                    }"
+                                  >
+                                    デバイス情報の確認
+                                  </span>
+                                </div>
+                              </div>
+                              <div
+                                v-if="
+                                  deviceInfoCheckStatus === 'failed' &&
+                                  deviceInfoCheckError
+                                "
+                                class="ml-9 text-red-700 text-xs bg-red-50 p-2 rounded border border-red-100"
+                              >
+                                {{ deviceInfoCheckError }}
+                              </div>
+                            </div>
+                          </div>
+                        </Transition>
                       </div>
 
                       <div class="flex justify-end">
@@ -926,6 +1358,7 @@ const {
               </button>
 
               <button
+                id="tour-setup-next-btn"
                 v-if="currentStep < steps.length"
                 type="submit"
                 :disabled="!isStepValid || isSaving"

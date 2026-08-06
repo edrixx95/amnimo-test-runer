@@ -45,7 +45,7 @@
       <transition :name="transitionName" mode="out-in">
         <div
           :key="activeSubTab"
-          class="flex-1 w-full h-full flex flex-col overflow-hidden p-6 md:p-10 pb-6"
+          class="flex-1 w-full h-full flex flex-col overflow-hidden p-6 pb-6"
         >
           <!-- Tab 1: Create Session -->
           <template v-if="activeSubTab === 'create'">
@@ -69,7 +69,7 @@
                       </h3>
                     </div>
                     <p
-                      class="text-slate-600 text-sm leading-relaxed pl-11"
+                      class="text-slate-600 text-sm leading-relaxed"
                       v-html="$t('manual.sessions.page.step1Desc')"
                     ></p>
                   </div>
@@ -101,7 +101,7 @@
                       </h3>
                     </div>
                     <p
-                      class="text-slate-600 text-sm leading-relaxed pl-11"
+                      class="text-slate-600 text-sm leading-relaxed"
                       v-html="$t('manual.sessions.page.step2Desc')"
                     ></p>
                   </div>
@@ -133,7 +133,7 @@
                       </h3>
                     </div>
                     <p
-                      class="text-slate-600 text-sm leading-relaxed pl-11"
+                      class="text-slate-600 text-sm leading-relaxed"
                       v-html="$t('manual.sessions.page.step3Desc')"
                     ></p>
                   </div>
@@ -209,11 +209,11 @@
                       </h3>
                     </div>
                     <p
-                      class="text-slate-600 text-base leading-relaxed pl-11"
+                      class="text-slate-600 text-base leading-relaxed"
                       v-html="$t('manual.sessionSetup.page.typeDesc')"
                     ></p>
                     <ul
-                      class="list-disc list-outside ml-14 space-y-3 text-slate-700 text-sm"
+                      class="list-disc list-outside ml-5 space-y-3 text-slate-700 text-sm"
                     >
                       <li
                         v-html="$t('manual.sessionSetup.page.typeRelease')"
@@ -258,18 +258,91 @@
                       </h3>
                     </div>
                     <p
-                      class="text-slate-600 text-base leading-relaxed pl-11"
+                      class="text-slate-600 text-base leading-relaxed"
                       v-html="$t('manual.sessionSetup.page.deviceDesc')"
                     ></p>
                     <ul
-                      class="list-disc list-outside ml-14 space-y-3 text-slate-700 text-sm"
+                      class="list-disc list-outside ml-5 space-y-3 text-slate-700 text-sm"
                     >
-                      <li
-                        v-html="$t('manual.sessionSetup.page.deviceBoard')"
-                      ></li>
-                      <li
-                        v-html="$t('manual.sessionSetup.page.deviceUrl')"
-                      ></li>
+                      <li class="space-y-2">
+                        <span
+                          v-html="$t('manual.sessionSetup.page.deviceBoard')"
+                        ></span>
+                        <div class="pt-2 w-full max-w-sm">
+                          <div
+                            class="relative rounded-xl border p-4 cursor-pointer focus:outline-none transition-all duration-300 group bg-amnimo-50/80 border-amnimo-500 shadow-md shadow-amnimo-500/10 scale-[1.02] ring-1 ring-amnimo-500"
+                          >
+                            <div class="flex items-center gap-3 w-full">
+                              <div
+                                class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors text-amnimo-600 shadow-sm"
+                              >
+                                <img
+                                  src="/icons/boards/AX30.png"
+                                  alt="AX30"
+                                  class="w-full h-full object-contain"
+                                />
+                              </div>
+                              <div class="min-w-0 flex-1">
+                                <p
+                                  class="font-bold text-slate-900 text-lg group-hover:text-amnimo-700 transition-colors truncate"
+                                >
+                                  AX30
+                                </p>
+                              </div>
+                              <div
+                                class="flex items-center gap-2 shrink-0 animate-in fade-in slide-in-from-right-2"
+                              >
+                                <div
+                                  class="h-5 w-px bg-slate-200 mx-1 rounded-full"
+                                ></div>
+                                <span
+                                  class="text-[10px] uppercase text-slate-400 font-bold tracking-widest"
+                                  >Type</span
+                                >
+                                <div
+                                  class="rounded-lg px-2.5 py-1 text-xs font-bold cursor-pointer transition-all duration-200 border bg-amnimo-600 border-amnimo-600 text-white shadow-sm"
+                                >
+                                  A
+                                </div>
+                                <div
+                                  class="rounded-lg px-2.5 py-1 text-xs font-bold cursor-pointer transition-all duration-200 border bg-white text-slate-500 border-slate-200 hover:border-amnimo-300 hover:text-amnimo-600"
+                                >
+                                  B
+                                </div>
+                              </div>
+                              <div
+                                class="w-6 h-6 shrink-0 ml-1 flex items-center justify-center"
+                              >
+                                <Icon
+                                  name="heroicons:check-circle"
+                                  class="w-6 h-6 text-amnimo-600 transition-all duration-300 transform opacity-100 scale-100"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                      <li class="space-y-2">
+                        <span
+                          v-html="$t('manual.sessionSetup.page.deviceUrl')"
+                        ></span>
+                        <div
+                          class="pt-2 w-full max-w-sm opacity-90 pointer-events-none select-none"
+                        >
+                          <div>
+                            <label
+                              class="block text-sm font-semibold text-slate-700 mb-2"
+                              >ベースURL</label
+                            >
+                            <input
+                              type="text"
+                              class="block w-full rounded-xl border-slate-200 bg-slate-50 text-slate-600 shadow-sm sm:text-base py-3 px-4 border transition-all duration-300"
+                              value="https://192.168.0.254"
+                              readonly
+                            />
+                          </div>
+                        </div>
+                      </li>
                     </ul>
                   </div>
                   <div class="md:w-2/3 w-full sticky top-0">
@@ -300,11 +373,11 @@
                       </h3>
                     </div>
                     <p
-                      class="text-slate-600 text-base leading-relaxed pl-11"
+                      class="text-slate-600 text-base leading-relaxed"
                       v-html="$t('manual.sessionSetup.page.envDesc')"
                     ></p>
 
-                    <div class="pl-11 space-y-4">
+                    <div class="space-y-4">
                       <h4 class="font-semibold text-slate-800 border-b pb-1">
                         {{ $t("manual.sessionSetup.page.envDevice") }}
                       </h4>
@@ -404,12 +477,12 @@
                       </h3>
                     </div>
                     <p
-                      class="text-slate-600 text-base leading-relaxed pl-11"
+                      class="text-slate-600 text-base leading-relaxed"
                       v-html="$t('manual.sessionSetup.page.checkDesc')"
                     ></p>
 
                     <ul
-                      class="list-disc list-outside ml-14 space-y-3 text-slate-700 text-sm"
+                      class="list-disc list-outside ml-5 space-y-3 text-slate-700 text-sm"
                     >
                       <li v-html="$t('manual.sessionSetup.page.check1')"></li>
                       <li v-html="$t('manual.sessionSetup.page.check2')"></li>

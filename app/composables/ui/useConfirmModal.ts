@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ref } from 'vue';
-import { useToast } from '~/composables/useToast';
-import { useI18n } from 'vue-i18n';
+import { ref } from "vue";
+import { useToast } from "~/composables/useToast";
+import { useI18n } from "vue-i18n";
 
 const confirmModal = ref({
   isOpen: false,
@@ -11,6 +11,7 @@ const confirmModal = ref({
   type: "danger" as "danger" | "warning" | "info",
   isLoading: false,
   action: null as null | (() => Promise<void>),
+  cancelAction: null as null | (() => void),
 });
 
 export function useConfirmModal() {
@@ -40,6 +41,7 @@ export function useConfirmModal() {
     confirmText: string;
     type?: "danger" | "warning" | "info";
     action: () => Promise<void>;
+    cancelAction?: () => void;
   }) => {
     confirmModal.value = {
       isOpen: true,
@@ -49,12 +51,20 @@ export function useConfirmModal() {
       type: options.type || "danger",
       isLoading: false,
       action: options.action,
+      cancelAction: options.cancelAction || null,
     };
+  };
+
+  const executeCancel = () => {
+    if (confirmModal.value.cancelAction) {
+      confirmModal.value.cancelAction();
+    }
   };
 
   return {
     confirmModal,
     executeConfirm,
-    openConfirm
+    executeCancel,
+    openConfirm,
   };
 }

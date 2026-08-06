@@ -56,8 +56,16 @@ const {
       </h4>
       <div class="space-y-5">
         <!-- Row 1: Readonly -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div v-for="key in block1Row1Keys" :key="key" class="relative">
+        <div
+          id="tour-env-block1-row1"
+          class="grid grid-cols-1 md:grid-cols-3 gap-5"
+        >
+          <div
+            v-for="key in block1Row1Keys"
+            :key="key"
+            :id="`tour-env-${key}`"
+            class="relative"
+          >
             <label
               class="flex items-center text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide"
             >
@@ -90,7 +98,7 @@ const {
                 type="text"
                 readonly
                 class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 cursor-not-allowed outline-none"
-              >
+              />
             </template>
             <template v-else>
               <div class="relative">
@@ -101,7 +109,7 @@ const {
                   @click="toggleDropdown(key)"
                   @blur="handleBlur"
                   @input="emitChange"
-                >
+                />
                 <div
                   class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
                 >
@@ -152,7 +160,12 @@ const {
 
         <!-- Row 2: Firmwares -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div v-for="key in block1Row2Keys" :key="key" class="relative">
+          <div
+            v-for="key in block1Row2Keys"
+            :key="key"
+            :id="`tour-env-${key}`"
+            class="relative"
+          >
             <label
               class="flex items-center text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide"
             >
@@ -187,7 +200,7 @@ const {
                 class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-800 cursor-pointer focus:bg-white focus:ring-2 focus:ring-amnimo-500/20 focus:border-amnimo-500 transition-all placeholder-slate-400 outline-none"
                 @click="toggleDropdown(key)"
                 @blur="handleBlur"
-              >
+              />
               <div
                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
               >
@@ -239,7 +252,7 @@ const {
 
     <!-- Block 2 -->
     <div
-      class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-soft hover:border-amnimo-300"
+      class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all hover:border-amnimo-300"
     >
       <h4
         class="text-base font-bold text-slate-800 mb-5 flex items-center gap-2"
@@ -252,7 +265,12 @@ const {
         {{ $t("envEditor.environmentNetworkConfig") }}
       </h4>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div v-for="key in block2Keys" :key="key">
+        <div
+          v-for="key in block2Keys"
+          :key="key"
+          :id="`tour-env-${key}`"
+          class="relative"
+        >
           <label
             class="flex items-center text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide"
           >
@@ -288,10 +306,11 @@ const {
                 'pr-12': key === 'PC_SERVER_PORT' || key === 'PC_SERVER_URL',
               }"
               @input="emitChange"
-            >
+            />
 
             <button
               v-if="key === 'PC_SERVER_URL'"
+              id="tour-env-iis-btn"
               :disabled="isScanningIIS"
               class="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
               :title="$t('envEditor.scanIisSites')"
@@ -363,7 +382,7 @@ const {
 
     <!-- Block 3 -->
     <div
-      class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-soft hover:border-amnimo-300"
+      class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all hover:border-amnimo-300"
     >
       <h4
         class="text-base font-bold text-slate-800 mb-5 flex items-center gap-2"
@@ -376,7 +395,12 @@ const {
         {{ $t("envEditor.systemConstants") }}
       </h4>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div v-for="key in block3Keys" :key="key" class="relative">
+        <div
+          v-for="key in block3Keys"
+          :key="key"
+          :id="`tour-env-${key}`"
+          class="relative"
+        >
           <label
             class="flex items-center text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide"
           >
@@ -411,7 +435,7 @@ const {
               @click="toggleDropdown(key)"
               @blur="handleBlur"
               @input="emitChange"
-            >
+            />
             <div
               v-if="getOptions(key).length > 0"
               class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"

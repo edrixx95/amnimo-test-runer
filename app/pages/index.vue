@@ -4,7 +4,12 @@ import { useSessionActions } from "~/composables/sessions/useSessionActions";
 import { useReportViewers } from "~/composables/sessions/useReportViewers";
 import { useConfirmModal } from "~/composables/ui/useConfirmModal";
 import { useLocks } from "~/composables/useLocks";
+import { onMounted, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
+const { t } = useI18n();
 const { activeLocks } = useLocks();
 
 const {
@@ -67,16 +72,115 @@ const getRunningPercentage = (session: Session) => {
   if (totalCases === 0) return 0;
   return (runningCases / totalCases) * 100;
 };
+
+let dashboardDriverObj: any = null;
+
+const startDashboardTour = (force = false) => {
+  if (import.meta.client) {
+    const isCompleted = localStorage.getItem("amnimo_dashboard_tour_completed");
+    if (!isCompleted || force) {
+      if (dashboardDriverObj) {
+        dashboardDriverObj.destroy();
+      }
+
+      const isListEmpty = sessionStore.sessions.length === 0;
+
+      dashboardDriverObj = driver({
+        popoverClass: "amnimo-tour-theme",
+        animate: true,
+        showProgress: true,
+        allowClose: false,
+        steps: [
+          {
+            element: "#tour-dashboard-new-session",
+            popover: {
+              title: t("tour.dashboard.stepNewSessionTitle"),
+              description: t("tour.dashboard.stepNewSessionDesc"),
+              side: "bottom",
+              align: "end",
+            },
+          },
+          {
+            element: "#tour-dashboard-session-list",
+            popover: {
+              title: isListEmpty
+                ? t("tour.dashboard.stepListEmptyTitle")
+                : t("tour.dashboard.stepListPopulatedTitle"),
+              description: isListEmpty
+                ? t("tour.dashboard.stepListEmptyDesc")
+                : t("tour.dashboard.stepListPopulatedDesc"),
+              side: "top",
+              align: "center",
+            },
+          },
+          {
+            element: "#tour-dashboard-search",
+            popover: {
+              title: t("tour.dashboard.stepSearchTitle"),
+              description: t("tour.dashboard.stepSearchDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+          {
+            element: "#tour-dashboard-filters",
+            popover: {
+              title: t("tour.dashboard.stepFiltersTitle"),
+              description: t("tour.dashboard.stepFiltersDesc"),
+              side: "bottom",
+              align: "start",
+            },
+          },
+        ],
+        onDestroyStarted: () => {
+          localStorage.setItem("amnimo_dashboard_tour_completed", "true");
+          if (dashboardDriverObj) {
+            dashboardDriverObj.destroy();
+            dashboardDriverObj = null;
+          }
+        },
+      });
+      setTimeout(() => {
+        if (dashboardDriverObj) dashboardDriverObj.drive();
+      }, 500);
+    }
+  }
+};
+
+watch(
+  () => sessionStore.isLoading,
+  (isLoading) => {
+    if (!isLoading) {
+      startDashboardTour();
+    }
+  },
+);
+
+onMounted(() => {
+  if (!sessionStore.isLoading) {
+    startDashboardTour();
+  }
+});
 </script>
 
 <template>
   <div class="flex-1 flex flex-col h-full overflow-hidden relative">
     <header
-      class="h-16 flex items-center px-8 border-b border-gray-100 bg-white shrink-0 shadow-sm z-10 relative"
+      class="h-16 flex items-center justify-between px-8 border-b border-gray-100 bg-white shrink-0 shadow-sm z-10 relative"
     >
       <h2 class="text-xl font-semibold text-slate-800 tracking-tight">
         {{ $t("home.title") }}
       </h2>
+      <div class="flex items-center gap-4">
+        <button
+          @click="startDashboardTour(true)"
+          class="px-2 py-1.5 text-slate-400 hover:text-amnimo-600 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
+          title="Interactive Guide"
+        >
+          <Icon name="heroicons:play-circle" class="w-5 h-5" />
+          Guide
+        </button>
+      </div>
     </header>
 
     <div class="flex-1 p-8 overflow-auto bg-slate-50/50">
@@ -89,6 +193,7 @@ const getRunningPercentage = (session: Session) => {
             <p class="text-slate-500 mt-1">{{ $t("home.description") }}</p>
           </div>
           <button
+            id="tour-dashboard-new-session"
             class="inline-flex items-center gap-2 bg-amnimo-600 hover:bg-amnimo-700 hover:shadow-lg hover:shadow-amnimo-500/30 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
             @click="openCreateModal"
           >
@@ -103,7 +208,7 @@ const getRunningPercentage = (session: Session) => {
           style="animation-delay: 0.05s"
         >
           <!-- Search -->
-          <div class="flex-1 min-w-[200px] relative">
+          <div id="tour-dashboard-search" class="flex-1 min-w-[200px] relative">
             <Icon
               name="heroicons:magnifying-glass"
               class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
@@ -117,7 +222,10 @@ const getRunningPercentage = (session: Session) => {
           </div>
 
           <!-- Filters -->
-          <div class="flex flex-wrap items-center gap-3">
+          <div
+            id="tour-dashboard-filters"
+            class="flex flex-wrap items-center gap-3"
+          >
             <BaseSelect
               v-model="filterStatus"
               :options="[
@@ -197,6 +305,7 @@ const getRunningPercentage = (session: Session) => {
 
         <div
           v-else
+          id="tour-dashboard-session-list"
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in-up"
           style="animation-delay: 0.1s"
         >

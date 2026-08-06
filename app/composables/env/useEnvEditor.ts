@@ -1,5 +1,3 @@
- 
- 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, watch, onMounted, nextTick } from "vue";
 import { useToast } from "~/composables/useToast";
@@ -29,7 +27,7 @@ export const block3Keys = [
 
 export function useEnvEditor(
   modelValueRef: { value: string },
-  emit: (event: "update:modelValue", value: string) => void
+  emit: (event: "update:modelValue", value: string) => void,
 ) {
   const { t } = useI18n();
   const { addToast } = useToast();
@@ -45,7 +43,15 @@ export function useEnvEditor(
 
   // IIS Scanning State
   const isScanningIIS = ref(false);
-  const iisSites = ref<{ name: string; state: string; port: number; url: string; physicalPath?: string; }[]>([]);
+  const iisSites = ref<
+    {
+      name: string;
+      state: string;
+      port: number;
+      url: string;
+      physicalPath?: string;
+    }[]
+  >([]);
   const showIISDropdown = ref(false);
   const iisTargetKey = ref<string | null>(null);
 
@@ -67,10 +73,16 @@ export function useEnvEditor(
     }
   };
 
-  const selectIISSite = (site: { port: number; url: string; physicalPath?: string; }) => {
+  const selectIISSite = (site: {
+    port: number;
+    url: string;
+    physicalPath?: string;
+  }) => {
     if (site.physicalPath) {
       localStorage.setItem("amnimo_server_path", site.physicalPath);
-      window.dispatchEvent(new CustomEvent("serverPathUpdated", { detail: site.physicalPath }));
+      window.dispatchEvent(
+        new CustomEvent("serverPathUpdated", { detail: site.physicalPath }),
+      );
     }
 
     if (site.url) {
@@ -112,6 +124,7 @@ export function useEnvEditor(
   };
 
   const handleBlur = () => {
+    if (document.body.classList.contains("driver-active")) return;
     focusedField.value = null;
   };
 
@@ -151,7 +164,19 @@ export function useEnvEditor(
       if (series === "X") return ["AX11", "AX12", "AX21", "AX30"];
       if (series === "R") return ["AR10", "AR20"];
       if (series === "C") return ["AC10", "AC15", "AC25"];
-      return ["AG10", "AG20", "AX11", "AX12", "AX21", "AX30", "AR10", "AR20", "AC10", "AC15", "AC25"];
+      return [
+        "AG10",
+        "AG20",
+        "AX11",
+        "AX12",
+        "AX21",
+        "AX30",
+        "AR10",
+        "AR20",
+        "AC10",
+        "AC15",
+        "AC25",
+      ];
     }
     if (key === "DEVICE_TYPE") {
       const board = parsedEnv.value["BOARD"];
@@ -230,7 +255,9 @@ export function useEnvEditor(
           const val = line.substring(idx + 1).trim();
           env[key] = val;
 
-          const filteredComments = currentCommentBlocks.filter((c) => !c.startsWith("["));
+          const filteredComments = currentCommentBlocks.filter(
+            (c) => !c.startsWith("["),
+          );
           if (filteredComments.length > 0) {
             comments[key] = filteredComments.join("\n");
           }
@@ -249,11 +276,14 @@ export function useEnvEditor(
     emitChange();
   };
 
-  watch(() => modelValueRef.value, (newVal) => {
-    if (Object.keys(parsedEnv.value).length === 0 && newVal !== "") {
-      parseEnv(newVal);
-    }
-  });
+  watch(
+    () => modelValueRef.value,
+    (newVal) => {
+      if (Object.keys(parsedEnv.value).length === 0 && newVal !== "") {
+        parseEnv(newVal);
+      }
+    },
+  );
 
   onMounted(async () => {
     document.addEventListener("click", (e) => {
@@ -278,12 +308,22 @@ export function useEnvEditor(
       const ports = await $fetch<number[]>("/api/utils/available-ports");
       availablePorts.value = ports.map((p) => p.toString());
 
-      if (!parsedEnv.value["CLI_SERVER_PORT"] && availablePorts.value.length > 0) {
+      if (
+        !parsedEnv.value["CLI_SERVER_PORT"] &&
+        availablePorts.value.length > 0
+      ) {
         parsedEnv.value["CLI_SERVER_PORT"] = availablePorts.value[0]!;
         emitChange();
       }
     } catch (_err) {
       console.error("Failed to load available ports", _err);
+    }
+
+    if (import.meta.client) {
+      window.addEventListener("close-env-dropdowns", () => {
+        focusedField.value = null;
+        showIISDropdown.value = false;
+      });
     }
   });
 
@@ -302,6 +342,6 @@ export function useEnvEditor(
     selectOption,
     getOptions,
     parseEnv,
-    emitChange
+    emitChange,
   };
 }

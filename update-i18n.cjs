@@ -176,6 +176,22 @@ ja.manual.sessionSetup = {
       "ステップ4のすべての項目が「チェック成功」状態になると、「Complete & Go to Runner」ボタンがクリック可能（アクティブ）になります。このボタンをクリックして、テスト実行画面へ進みます。",
   },
 };
+
+ja.tour = ja.tour || {};
+ja.tour.initialSetup = {
+  step1Title: "ようこそ！",
+  step1Desc: "Amnimo Test Runnerへようこそ。まずはE2Eプロジェクトへのパスを設定しましょう。",
+  step2Title: "E2Eパスの指定",
+  step2Desc: "ここには、テストコードが含まれる amnimo-e2e フォルダのパスを入力します。",
+  step3Title: "フォルダの参照",
+  step3Desc: "「参照」ボタンをクリックして、パソコン内のフォルダを直接選択することもできます。",
+  step4Title: "設定の保存",
+  step4Desc: "パスの指定が完了したら、「保存して続行」をクリックして設定を完了してください。",
+  skipTitle: "ツアーを終了しますか？",
+  skipConfirm: "ツアーをスキップしてもよろしいですか？",
+  skipButton: "スキップ"
+};
+
 ja.manual.sections.sessionSetup = "セッションのセットアップ";
 ja.nav.sessionSetup = "セッションのセットアップ";
 
@@ -245,6 +261,22 @@ en.manual.sessionSetup = {
       'When all items in Step 4 are in a "check successful" state, the "Complete & Go to Runner" button becomes active. Click it to proceed to the test execution screen.',
   },
 };
+
+en.tour = en.tour || {};
+en.tour.initialSetup = {
+  step1Title: "Welcome!",
+  step1Desc: "Welcome to Amnimo Test Runner. Let's start by setting up your E2E project path.",
+  step2Title: "E2E Path",
+  step2Desc: "Enter the path to the amnimo-e2e folder containing your test source code.",
+  step3Title: "Browse Folder",
+  step3Desc: "You can click the 'Browse' button to select the folder directly from your computer.",
+  step4Title: "Save Settings",
+  step4Desc: "Once you have specified the path, click 'Save and Continue' to apply your settings.",
+  skipTitle: "Skip Guide?",
+  skipConfirm: "Are you sure you want to skip the tour?",
+  skipButton: "Skip"
+};
+
 en.manual.sections.sessionSetup = "Session Setup";
 en.nav.sessionSetup = "Session Setup";
 
