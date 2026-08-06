@@ -174,6 +174,25 @@ const toggleSidebar = () => {
           </span>
         </NuxtLink>
 
+        <!-- Manual Link -->
+        <NuxtLink
+          to="/manual"
+          class="group flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 text-gray-500 hover:bg-slate-50 hover:text-gray-900 overflow-hidden"
+          active-class="!bg-amnimo-50 !text-amnimo-900 shadow-sm ring-1 ring-amnimo-100"
+          :title="isCollapsed ? $t('nav.manual') : ''"
+        >
+          <Icon
+            name="heroicons:book-open"
+            class="w-6 h-6 shrink-0 transition-transform duration-300 group-hover:scale-110"
+          />
+          <span
+            class="ml-3 whitespace-nowrap transition-opacity duration-300"
+            :class="isCollapsed ? 'opacity-0' : 'opacity-100'"
+          >
+            {{ $t("nav.manual") }}
+          </span>
+        </NuxtLink>
+
         <!-- Add more nav items here in the future following the same pattern -->
       </nav>
 

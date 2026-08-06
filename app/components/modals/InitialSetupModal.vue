@@ -81,15 +81,57 @@
       :initial-path="e2ePath"
       @select="handleFolderSelected"
     />
+
+    <!-- Slide-over Manual Panel -->
+    <div
+      v-if="showManual"
+      class="fixed inset-0 z-[115] bg-slate-900/20 backdrop-blur-sm transition-opacity"
+      @click="showManual = false"
+    ></div>
+    <div
+      v-if="showManual"
+      class="fixed inset-y-0 right-0 z-[120] w-full max-w-2xl bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
+    >
+      <div
+        class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0"
+      >
+        <h3
+          class="text-lg font-semibold text-slate-800 flex items-center gap-2"
+        >
+          <Icon name="heroicons:book-open" class="w-5 h-5 text-amnimo-600" />
+          {{ $t("nav.manual") }}
+        </h3>
+        <button
+          @click="showManual = false"
+          class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+        >
+          <Icon name="heroicons:x-mark" class="w-6 h-6" />
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-8 custom-scrollbar relative">
+        <InitialSetup />
+      </div>
+    </div>
+
+    <!-- Floating Help Icon -->
+    <button
+      @click="showManual = !showManual"
+      class="fixed bottom-8 right-8 z-[110] w-14 h-14 bg-amnimo-600 text-white rounded-full shadow-lg hover:bg-amnimo-700 hover:scale-105 hover:shadow-xl transition-all duration-300 flex items-center justify-center animate-bounce-slow"
+      :title="$t('nav.manual')"
+    >
+      <Icon name="heroicons:book-open" class="w-7 h-7" />
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import InitialSetup from "~/components/manual/InitialSetup.vue";
 
 const { t } = useI18n();
 
 const isOpen = ref(false);
+const showManual = ref(false);
 const e2ePath = ref("");
 const isFolderPickerOpen = ref(false);
 const isSaving = ref(false);
