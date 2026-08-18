@@ -307,6 +307,7 @@ const executeTests = async () => {
     const payload: any = {
       mode: executionMode.value,
       testType: session.value.testType,
+        sourceType: playgroundSource.value,
       sessionName: session.value.name,
     };
     if (executionMode.value === "single") {
@@ -759,7 +760,8 @@ const rerunFailed = async () => {
       body: {
         sessionId,
         testType: session.value?.testType || "release",
-        mode: "rerun-failed",
+          sourceType: playgroundSource.value,
+          mode: "rerun-failed",
         sessionName: reportName,
       },
     });
@@ -872,7 +874,8 @@ const toggleTest = async () => {
         body: {
           sessionId,
           testType: session.value?.testType || "release",
-          mode: executionMode.value,
+            sourceType: playgroundSource.value,
+            mode: executionMode.value,
           tests: testList,
           queuedSpecs: queuedSpecs.value,
         },

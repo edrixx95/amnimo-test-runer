@@ -108,6 +108,22 @@ export const getAggregatedReport = async (
       const excelData = fs.readFileSync(path.join(allDir, excelFile), "utf-8");
       const data = JSON.parse(excelData);
 
+      const reportJsonFile = files.find((f) => f.endsWith(".json") && !f.endsWith("-excel.json"));
+      let traceMap = new Map();
+      if (reportJsonFile) {
+        try {
+          const rData = JSON.parse(fs.readFileSync(path.join(allDir, reportJsonFile), "utf-8"));
+          if (rData.tests) {
+            for (const t of rData.tests) {
+              const traceAttachment = t.attachments?.find((a) => a.name === "trace");
+              if (traceAttachment?.path) {
+                traceMap.set(t.id, traceAttachment.path);
+              }
+            }
+          }
+        } catch(e){}
+      }
+
       if (data && Array.isArray(data.categories)) {
         for (const cat of data.categories) {
           if (Array.isArray(cat.pages)) {
@@ -148,6 +164,8 @@ export const getAggregatedReport = async (
                     status = "Skipped";
 
                   const pwTestId = test["playwright-test-id"] || "";
+                  const tracePath = pwTestId ? traceMap.get(pwTestId) : null;
+                  const traceViewerUrl = (hasHtml && tracePath) ? `/api/reports/serve/${run.relativePath}/html-report/trace/index.html?trace=/api/trace/serve?path=${encodeURIComponent(tracePath)}` : null;
                   const specificHtmlReportUrl =
                     hasHtml && pwTestId
                       ? `${htmlReportUrl}#?testId=${pwTestId}`
@@ -158,6 +176,8 @@ export const getAggregatedReport = async (
                     result: rawResult,
                     status: status,
                     htmlReportUrl: specificHtmlReportUrl,
+                    tracePath: tracePath,
+                    traceViewerUrl: traceViewerUrl,
                   });
                 }
               }

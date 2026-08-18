@@ -51,7 +51,7 @@ async function updateSessionStatus(sessionId: string, status: SessionStatus) {
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { sessionId, testType, mode, tests, orderName, sessionName, queuedSpecs } = body;
+  const { sessionId, testType, mode, tests, orderName, sessionName, queuedSpecs, sourceType } = body;
   
   const host = getRequestHost(event);
   const protocol = getRequestProtocol(event);
@@ -134,6 +134,7 @@ export default defineEventHandler(async (event) => {
 
   // 2. Start E2E Process
   let e2eArgs: string[] = [];
+  const actualType = testType === "playground" ? (sourceType || "release") : (testType || "release");
 
   if (mode === "single") {
     const files = new Set<string>();
@@ -152,7 +153,7 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    e2eArgs = ["test", "--", ...Array.from(files)];
+    e2eArgs = ["run", `test:${actualType}`, "--", ...Array.from(files)];
     // We pass grep cases via env var to avoid cmd.exe quoting bugs
     if (grepCases.length > 0) {
       parsedEnv["PLAYWRIGHT_GREP"] = grepCases.join("|");
@@ -161,7 +162,6 @@ export default defineEventHandler(async (event) => {
     let runOrderName = orderName;
     if (orderName && Array.isArray(tests)) {
       // User may have reordered tests, save back to JSON file
-      const actualType = testType === "playground" ? "release" : (testType || "release");
       runOrderName = orderName.replace('.json', '') + '.run.json';
       const orderFilePath = path.join(cwd, "test-order", actualType, runOrderName);
       try {
@@ -171,8 +171,8 @@ export default defineEventHandler(async (event) => {
       }
     }
     
-    if (testType === "release") {
-      e2eArgs = ["run", "test:release"];
+    if (actualType === "release" || actualType === "system") {
+      e2eArgs = ["run", `test:${actualType}`];
       if (runOrderName) {
         e2eArgs.push("--", runOrderName);
       } else if (tests && typeof tests === "string") { // fallback for old behavior

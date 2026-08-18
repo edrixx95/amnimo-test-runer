@@ -19,6 +19,7 @@ type HistoryEntry = {
   result: string;
   status: string;
   htmlReportUrl: string | null;
+  traceViewerUrl?: string | null;
 };
 
 type FlatTestRow = {
@@ -673,27 +674,44 @@ const onSaveDialogConfirm = async (selectedPath: string) => {
                                     </span>
                                   </td>
                                   <td class="py-3 whitespace-nowrap text-right">
-                                    <button
-                                      v-if="hist.htmlReportUrl"
-                                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-indigo-600 bg-white hover:bg-indigo-50 rounded-lg transition-colors border border-slate-200 hover:border-indigo-200 shadow-sm"
-                                      @click.stop="
-                                        $emit(
-                                          'openHtmlReport',
-                                          hist.htmlReportUrl,
-                                        )
-                                      "
-                                    >
-                                      <Icon
-                                        name="heroicons:document-text"
-                                        class="w-4 h-4"
-                                      />
-                                      View Report
-                                    </button>
+                                    <div class="flex items-center gap-2 justify-end">
+                                      <button
+                                        v-if="hist.traceViewerUrl"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-rose-600 bg-white hover:bg-rose-50 rounded-lg transition-colors border border-slate-200 hover:border-rose-200 shadow-sm"
+                                        @click.stop="
+                                          $emit(
+                                            'openHtmlReport',
+                                            hist.traceViewerUrl,
+                                          )
+                                        "
+                                      >
+                                        <Icon
+                                          name="heroicons:magnifying-glass-circle"
+                                          class="w-4 h-4"
+                                        />
+                                        View Trace
+                                      </button>
+                                      <button
+                                        v-if="hist.htmlReportUrl"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-indigo-600 bg-white hover:bg-indigo-50 rounded-lg transition-colors border border-slate-200 hover:border-indigo-200 shadow-sm"
+                                        @click.stop="
+                                          $emit(
+                                            'openHtmlReport',
+                                            hist.htmlReportUrl,
+                                          )
+                                        "
+                                      >
+                                        <Icon
+                                          name="heroicons:document-text"
+                                          class="w-4 h-4"
+                                        />
+                                        View Report
+                                      </button>
+                                    </div>
                                     <span
-                                      v-else
+                                      v-if="!hist.htmlReportUrl && !hist.traceViewerUrl"
                                       class="text-xs text-slate-400 italic"
-                                      >No report available</span
-                                    >
+                                    >No report available</span>
                                   </td>
                                 </tr>
                               </tbody>

@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     const orderFile =
       tests && typeof tests === "string"
         ? tests
-        : testType === "release"
+        : (testType === "release" || testType === "system")
           ? "AG10.json"
           : "custom.json";
     const orderFilePath = path.join(
@@ -43,15 +43,17 @@ export default defineEventHandler(async (event) => {
     return { suites: [] };
   }
 
+  const actualType = testType === "playground" ? "release" : (testType || "release");
+
   // Resolve to full relative paths
   const resolvedFiles = items.map((item) => {
     if (item.endsWith(".spec.ts")) {
-      return item.includes("playwright/tests/release")
+      return item.includes(`playwright/tests/${actualType}`)
         ? item
-        : `playwright/tests/release/${item}`;
+        : `playwright/tests/${actualType}/${item}`;
     }
     const basename = path.basename(item);
-    return `playwright/tests/release/${item}/${basename}.spec.ts`;
+    return `playwright/tests/${actualType}/${item}/${basename}.spec.ts`;
   });
 
   // Construct command
