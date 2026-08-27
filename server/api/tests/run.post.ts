@@ -153,7 +153,8 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    e2eArgs = ["run", `test:${actualType}`, "--", ...Array.from(files)];
+    const scriptName = actualType === "system-test" ? "system" : actualType;
+    e2eArgs = ["run", `test:${scriptName}`, "--", ...Array.from(files)];
     // We pass grep cases via env var to avoid cmd.exe quoting bugs
     if (grepCases.length > 0) {
       parsedEnv["PLAYWRIGHT_GREP"] = grepCases.join("|");
@@ -171,8 +172,9 @@ export default defineEventHandler(async (event) => {
       }
     }
     
-    if (actualType === "release" || actualType === "system") {
-      e2eArgs = ["run", `test:${actualType}`];
+    if (actualType === "release" || actualType === "system-test") {
+      const scriptName = actualType === "system-test" ? "system" : actualType;
+      e2eArgs = ["run", `test:${scriptName}`];
       if (runOrderName) {
         e2eArgs.push("--", runOrderName);
       } else if (tests && typeof tests === "string") { // fallback for old behavior

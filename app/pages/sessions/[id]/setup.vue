@@ -503,10 +503,10 @@ watch([isLoadingSession, currentStep], ([isLoading, step]) => {
                     </div>
 
                     <div
-                      @click="formData.testType = 'system'"
+                      @click="formData.testType = 'system-test'"
                       class="relative rounded-2xl border p-8 cursor-pointer focus:outline-none transition-all duration-300 flex flex-col items-center text-center group"
                       :class="
-                        formData.testType === 'system'
+                        formData.testType === 'system-test'
                           ? 'bg-amnimo-50/50 border-amnimo-500 shadow-lg shadow-amnimo-500/20 scale-[1.02]'
                           : 'bg-white border-slate-200 hover:border-amnimo-300 hover:shadow-soft'
                       "
@@ -514,7 +514,7 @@ watch([isLoadingSession, currentStep], ([isLoading, step]) => {
                       <div
                         class="w-16 h-16 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110"
                         :class="
-                          formData.testType === 'system'
+                          formData.testType === 'system-test'
                             ? 'bg-amnimo-600 border-transparent text-white'
                             : 'text-slate-400'
                         "
@@ -523,7 +523,7 @@ watch([isLoadingSession, currentStep], ([isLoading, step]) => {
                           name="heroicons:cpu-chip"
                           class="w-8 h-8"
                           :class="
-                            formData.testType === 'system'
+                            formData.testType === 'system-test'
                               ? 'text-amnimo-600'
                               : 'text-gray-600'
                           "
@@ -989,7 +989,7 @@ watch([isLoadingSession, currentStep], ([isLoading, step]) => {
                                         deviceInfoCheckStatus === 'failed',
                                     }"
                                   >
-                                    デバイス情報の確認
+                                    チE��イス惁E��の確誁E
                                   </span>
                                 </div>
                               </div>

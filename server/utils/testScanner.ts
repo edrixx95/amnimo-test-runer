@@ -24,7 +24,7 @@ const ROOT_ORDER = [
   "dashboard",
   "header",
   "network",
-  "system",
+  "system-test",
   "service",
   "management",
 ];
@@ -97,7 +97,7 @@ function sortNodes(nodes: FileNode[], parentName?: string): void {
       orderArray = ROOT_ORDER;
     } else if (parentName === "network") {
       orderArray = NETWORK_ORDER;
-    } else if (parentName === "system") {
+    } else if (parentName === "system-test") {
       orderArray = SYSTEM_ORDER;
     } else if (parentName === "service") {
       orderArray = SERVICE_ORDER;

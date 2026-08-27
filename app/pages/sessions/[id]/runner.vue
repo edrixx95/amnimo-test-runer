@@ -32,7 +32,7 @@ const executionMode = ref<"single" | "order">("single");
 const searchQuery = ref("");
 const filterCategory = ref("");
 const filterPage = ref("");
-const playgroundSource = ref<"release" | "system">("release");
+const playgroundSource = ref<"release" | "system-test">("release");
 
 watch(playgroundSource, () => {
   fetchTests();
@@ -1029,10 +1029,10 @@ const toggleTest = async () => {
                 {{ $t("runner.release") }}
               </button>
               <button
-                @click="playgroundSource = 'system'"
+                @click="playgroundSource = 'system-test'"
                 class="flex-1 text-sm py-2 rounded-lg font-bold transition-all duration-300"
                 :class="
-                  playgroundSource === 'system'
+                  playgroundSource === 'system-test'
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-600 hover:text-slate-800'
                 "

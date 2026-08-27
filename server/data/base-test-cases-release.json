@@ -275,153 +275,6 @@
     ]
   },
   {
-    "name": "system",
-    "type": "folder",
-    "children": [
-      {
-        "name": "hostname",
-        "type": "folder",
-        "children": [
-          {
-            "name": "hostname.spec.ts",
-            "type": "file",
-            "path": "system/hostname/hostname.spec.ts",
-            "cases": [
-              "SYSTEM-RELEASE-1: ホスト名設定を変更できることを確認する。"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "time",
-        "type": "folder",
-        "children": [
-          {
-            "name": "time.spec.ts",
-            "type": "file",
-            "path": "system/time/time.spec.ts",
-            "cases": [
-              "SYSTEM-RELEASE-2: 最新の情報に更新時、デバイス時刻が正しく反映されることを確認する。",
-              "SYSTEM-RELEASE-3: タイムゾーン設定の変更が可能であることを確認する。",
-              "SYSTEM-RELEASE-4: 時刻の手動設定が可能であることを確認する。",
-              "SYSTEM-RELEASE-5: 時刻の時刻入力が可能であることを確認する。",
-              "SYSTEM-RELEASE-6: 時刻のNTP同期が可能であることを確認する。",
-              "SYSTEM-RELEASE-7: 時刻のNTP設定が可能であることを確認する。"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "account",
-        "type": "folder",
-        "children": [
-          {
-            "name": "account.spec.ts",
-            "type": "file",
-            "path": "system/account/account.spec.ts",
-            "cases": [
-              "SYSTEM-RELEASE-8: アカウント設定を追加できることを確認する。",
-              "SYSTEM-RELEASE-9: アカウント設定を編集できることを確認する。",
-              "SYSTEM-RELEASE-10: アカウント設定を削除できることを確認する。"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "package-repository",
-        "type": "folder",
-        "children": [
-          {
-            "name": "package-repository.spec.ts",
-            "type": "file",
-            "path": "system/package-repository/package-repository.spec.ts",
-            "cases": [
-              "SYSTEM-RELEASE-11: パッケージリポジトリ設定を追加できることを確認する。",
-              "SYSTEM-RELEASE-12: パッケージリポジトリ設定を編集できることを確認する。",
-              "SYSTEM-RELEASE-13: パッケージリポジトリ設定を削除できることを確認する。"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "storage",
-        "type": "folder",
-        "children": [
-          {
-            "name": "storage.spec.ts",
-            "type": "file",
-            "path": "system/storage/storage.spec.ts",
-            "cases": [
-              "SYSTEM-RELEASE-14: 内部ストレージのパーティションを作成できることを確認する。",
-              "SYSTEM-RELEASE-15: 内部ストレージのパーティションをフォーマットできることを確認する。",
-              "SYSTEM-RELEASE-16: 内部ストレージのパーティションをマウントできることを確認する。",
-              "SYSTEM-RELEASE-17: 内部ストレージのパーティションをアンマウントできることを確認する。",
-              "SYSTEM-RELEASE-18: 内部ストレージのパーティションを削除できることを確認する。",
-              "SYSTEM-RELEASE-19: USBのパーティションを作成できることを確認する。",
-              "SYSTEM-RELEASE-20: USBのパーティションをフォーマットできることを確認する。",
-              "SYSTEM-RELEASE-21: USBのパーティションをマウントできることを確認する。",
-              "SYSTEM-RELEASE-22: USBのパーティションをアンマウントできることを確認する。",
-              "SYSTEM-RELEASE-23: USBのパーティションを削除できることを確認する。",
-              "SYSTEM-RELEASE-24: SDカードのパーティションを作成できることを確認する。",
-              "SYSTEM-RELEASE-25: SDカードのパーティションをフォーマットできることを確認する。",
-              "SYSTEM-RELEASE-26: SDカードのパーティションをマウントできることを確認する。",
-              "SYSTEM-RELEASE-27: SDカードのパーティションをアンマウントできることを確認する。",
-              "SYSTEM-RELEASE-28: SDカードのパーティションを削除できることを確認する。",
-              "SYSTEM-RELEASE-29: ストレージ設定を追加できることを確認する。",
-              "SYSTEM-RELEASE-30: ストレージ設定を編集できることを確認する。",
-              "SYSTEM-RELEASE-31: ストレージ設定を削除できることを確認する。"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "gui",
-        "type": "folder",
-        "children": [
-          {
-            "name": "gui.spec.ts",
-            "type": "file",
-            "path": "system/gui/gui.spec.ts",
-            "cases": [
-              "SYSTEM-RELEASE-32: GUI設定を変更できることを確認する。"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "poe",
-        "type": "folder",
-        "children": [
-          {
-            "name": "poe.spec.ts",
-            "type": "file",
-            "path": "system/poe/poe.spec.ts",
-            "cases": [
-              "SYSTEM-RELEASE-33: 最新の情報に更新時、PoEのステータスが正しく反映されることを確認する。",
-              "SYSTEM-RELEASE-34: PoEポートリセットができることを確認する。",
-              "SYSTEM-RELEASE-35: PoE設定を編集できることを確認する。",
-              "SYSTEM-RELEASE-36: PoE設定を初期化できることを確認する。"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "ssh",
-        "type": "folder",
-        "children": [
-          {
-            "name": "ssh.spec.ts",
-            "type": "file",
-            "path": "system/ssh/ssh.spec.ts",
-            "cases": [
-              "SYSTEM-RELEASE-37: SSH設定を変更できることを確認する。"
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "service",
     "type": "folder",
     "children": [
@@ -684,6 +537,153 @@
               "MANAGEMENT-RELEASE-16: 設定情報のダウンロードが可能なことを確認。",
               "MANAGEMENT-RELEASE-17: 設定初期化を行った場合に設定情報が初期化され、初期化後の設定で起動することを確認。",
               "MANAGEMENT-RELEASE-18: 設定情報ファイルをアップロードができ、アップロードした設定情報で機器が起動することを確認。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "system",
+    "type": "folder",
+    "children": [
+      {
+        "name": "account",
+        "type": "folder",
+        "children": [
+          {
+            "name": "account.spec.ts",
+            "type": "file",
+            "path": "system/account/account.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-8: アカウント設定を追加できることを確認する。",
+              "SYSTEM-RELEASE-9: アカウント設定を編集できることを確認する。",
+              "SYSTEM-RELEASE-10: アカウント設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "gui",
+        "type": "folder",
+        "children": [
+          {
+            "name": "gui.spec.ts",
+            "type": "file",
+            "path": "system/gui/gui.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-32: GUI設定を変更できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "hostname",
+        "type": "folder",
+        "children": [
+          {
+            "name": "hostname.spec.ts",
+            "type": "file",
+            "path": "system/hostname/hostname.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-1: ホスト名設定を変更できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "package-repository",
+        "type": "folder",
+        "children": [
+          {
+            "name": "package-repository.spec.ts",
+            "type": "file",
+            "path": "system/package-repository/package-repository.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-11: パッケージリポジトリ設定を追加できることを確認する。",
+              "SYSTEM-RELEASE-12: パッケージリポジトリ設定を編集できることを確認する。",
+              "SYSTEM-RELEASE-13: パッケージリポジトリ設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "poe",
+        "type": "folder",
+        "children": [
+          {
+            "name": "poe.spec.ts",
+            "type": "file",
+            "path": "system/poe/poe.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-33: 最新の情報に更新時、PoEのステータスが正しく反映されることを確認する。",
+              "SYSTEM-RELEASE-34: PoEポートリセットができることを確認する。",
+              "SYSTEM-RELEASE-35: PoE設定を編集できることを確認する。",
+              "SYSTEM-RELEASE-36: PoE設定を初期化できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ssh",
+        "type": "folder",
+        "children": [
+          {
+            "name": "ssh.spec.ts",
+            "type": "file",
+            "path": "system/ssh/ssh.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-37: SSH設定を変更できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "storage",
+        "type": "folder",
+        "children": [
+          {
+            "name": "storage.spec.ts",
+            "type": "file",
+            "path": "system/storage/storage.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-14: 内部ストレージのパーティションを作成できることを確認する。",
+              "SYSTEM-RELEASE-15: 内部ストレージのパーティションをフォーマットできることを確認する。",
+              "SYSTEM-RELEASE-16: 内部ストレージのパーティションをマウントできることを確認する。",
+              "SYSTEM-RELEASE-17: 内部ストレージのパーティションをアンマウントできることを確認する。",
+              "SYSTEM-RELEASE-18: 内部ストレージのパーティションを削除できることを確認する。",
+              "SYSTEM-RELEASE-19: USBのパーティションを作成できることを確認する。",
+              "SYSTEM-RELEASE-20: USBのパーティションをフォーマットできることを確認する。",
+              "SYSTEM-RELEASE-21: USBのパーティションをマウントできることを確認する。",
+              "SYSTEM-RELEASE-22: USBのパーティションをアンマウントできることを確認する。",
+              "SYSTEM-RELEASE-23: USBのパーティションを削除できることを確認する。",
+              "SYSTEM-RELEASE-24: SDカードのパーティションを作成できることを確認する。",
+              "SYSTEM-RELEASE-25: SDカードのパーティションをフォーマットできることを確認する。",
+              "SYSTEM-RELEASE-26: SDカードのパーティションをマウントできることを確認する。",
+              "SYSTEM-RELEASE-27: SDカードのパーティションをアンマウントできることを確認する。",
+              "SYSTEM-RELEASE-28: SDカードのパーティションを削除できることを確認する。",
+              "SYSTEM-RELEASE-29: ストレージ設定を追加できることを確認する。",
+              "SYSTEM-RELEASE-30: ストレージ設定を編集できることを確認する。",
+              "SYSTEM-RELEASE-31: ストレージ設定を削除できることを確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "time",
+        "type": "folder",
+        "children": [
+          {
+            "name": "time.spec.ts",
+            "type": "file",
+            "path": "system/time/time.spec.ts",
+            "cases": [
+              "SYSTEM-RELEASE-2: 最新の情報に更新時、デバイス時刻が正しく反映されることを確認する。",
+              "SYSTEM-RELEASE-3: タイムゾーン設定の変更が可能であることを確認する。",
+              "SYSTEM-RELEASE-4: 時刻の手動設定が可能であることを確認する。",
+              "SYSTEM-RELEASE-5: 時刻の時刻入力が可能であることを確認する。",
+              "SYSTEM-RELEASE-6: 時刻のNTP同期が可能であることを確認する。",
+              "SYSTEM-RELEASE-7: 時刻のNTP設定が可能であることを確認する。"
             ]
           }
         ]

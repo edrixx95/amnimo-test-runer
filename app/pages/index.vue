@@ -375,7 +375,7 @@ onMounted(() => {
                         'bg-purple-50 text-purple-700 border-purple-200':
                           session.testType === 'playground',
                         'bg-blue-50 text-blue-700 border-blue-200':
-                          session.testType === 'system',
+                          session.testType === 'system-test',
                         'bg-emerald-50 text-emerald-700 border-emerald-200':
                           !session.testType || session.testType === 'release',
                       }"
@@ -384,7 +384,7 @@ onMounted(() => {
                         :name="
                           session.testType === 'playground'
                             ? 'heroicons:beaker'
-                            : session.testType === 'system'
+                            : session.testType === 'system-test'
                               ? 'heroicons:cube-transparent'
                               : 'heroicons:rocket-launch'
                         "

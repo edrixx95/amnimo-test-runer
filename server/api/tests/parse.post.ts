@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     const orderFile =
       tests && typeof tests === "string"
         ? tests
-        : (testType === "release" || testType === "system")
+        : (testType === "release" || testType === "system-test")
           ? "AG10.json"
           : "custom.json";
     const orderFilePath = path.join(
