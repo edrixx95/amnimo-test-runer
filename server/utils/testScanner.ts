@@ -3,10 +3,7 @@ import fs from "node:fs/promises";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { getSettings } from "./settingsManager";
-import { EventEmitter } from "node:events";
 import type { PlaywrightSuiteNode } from "~~/shared/types";
-
-export const testScannerEvents = new EventEmitter();
 
 const execAsync = promisify(exec);
 
@@ -186,58 +183,96 @@ export async function scanTestCases(type: string): Promise<FileNode[]> {
       ? `npx.cmd playwright test ${fullTargetPath} --list --reporter=json`
       : `npx playwright test ${fullTargetPath} --list --reporter=json`;
 
-    const { stdout } = await execAsync(cmd, { cwd: e2eDir });
+    const { stdout } = await execAsync(cmd, {
+      cwd: e2eDir,
+      // The JSON reporter includes every discovered test and can exceed
+      // exec's default 1 MiB stdout limit for system-test.
+      maxBuffer: 20 * 1024 * 1024,
+    });
 
-    const configIndex = stdout.indexOf('"config":');
-    if (configIndex !== -1) {
-      const jsonStart = stdout.lastIndexOf("{", configIndex);
-      if (jsonStart !== -1) {
-        const report = JSON.parse(stdout.substring(jsonStart));
-        const suites = report.suites || [];
+    // Playwright's JSON reporter can be preceded by logs from dotenv or test
+    // modules. Find the report root instead of the last "{" in stdout.
+    const reportStart = stdout.search(/^\s*\{\s*"config"\s*:/m);
+    if (reportStart === -1) {
+      throw new Error("Could not find Playwright JSON report in output");
+    }
 
-        const typePrefix = `playwright/tests/${type}/`;
-        const typePrefix2 = `${type}/`;
+    const report = JSON.parse(stdout.substring(reportStart));
+    const suites = report.suites || [];
+    if (!Array.isArray(suites)) {
+      throw new Error("Invalid Playwright JSON report: suites is not an array");
+    }
+    if (treeHasSpecFiles(tree) && suites.length === 0) {
+      throw new Error("Playwright JSON report contains no test suites");
+    }
 
-        const extractSpecs = (s: PlaywrightSuiteNode, arr: string[]) => {
-          if (s.specs) {
-            for (const spec of s.specs) {
-              arr.push(spec.title);
-            }
-          }
-          if (s.suites) {
-            for (const child of s.suites) {
-              extractSpecs(child, arr);
-            }
-          }
-        };
+    const typePrefix = `playwright/tests/${type}/`;
+    const typePrefix2 = `${type}/`;
 
-        for (const suite of suites) {
-          let relPath = suite.file;
-          if (relPath.includes(typePrefix)) {
-            relPath = relPath.substring(
-              relPath.indexOf(typePrefix) + typePrefix.length,
-            );
-          } else if (relPath.includes(typePrefix2)) {
-            relPath = relPath.substring(
-              relPath.indexOf(typePrefix2) + typePrefix2.length,
-            );
-          }
-          relPath = relPath.replace(/\\/g, "/");
-
-          const arr: string[] = [];
-          extractSpecs(suite, arr);
-          casesMap[relPath] = arr;
+    const extractSpecs = (s: PlaywrightSuiteNode, arr: string[]) => {
+      if (s.specs) {
+        for (const spec of s.specs) {
+          arr.push(spec.title);
         }
       }
+      if (s.suites) {
+        for (const child of s.suites) {
+          extractSpecs(child, arr);
+        }
+      }
+    };
+
+    for (const suite of suites) {
+      let relPath = suite.file;
+      if (relPath.includes(typePrefix)) {
+        relPath = relPath.substring(
+          relPath.indexOf(typePrefix) + typePrefix.length,
+        );
+      } else if (relPath.includes(typePrefix2)) {
+        relPath = relPath.substring(
+          relPath.indexOf(typePrefix2) + typePrefix2.length,
+        );
+      }
+      relPath = relPath.replace(/\\/g, "/");
+
+      const arr: string[] = [];
+      extractSpecs(suite, arr);
+      casesMap[relPath] = arr;
+    }
+
+    if (
+      treeHasSpecFiles(tree) &&
+      !Object.values(casesMap).some((cases) => cases.length > 0)
+    ) {
+      throw new Error("Playwright JSON report contains no test cases");
     }
   } catch (err) {
     console.error("Failed to run playwright test --list during scan:", err);
-    // Ignore error, we will just return empty cases in tree
+    throw err;
   }
 
   // 3. Merge cases into tree and sort
   mergeCasesIntoTree(tree, casesMap);
   sortNodes(tree);
+
+  return tree;
+}
+
+function treeHasSpecFiles(nodes: FileNode[]): boolean {
+  return nodes.some(
+    (node) =>
+      node.type === "file" ||
+      (node.children ? treeHasSpecFiles(node.children) : false),
+  );
+}
+
+export async function refreshTestTree(type: string): Promise<FileNode[]> {
+  const cacheFile = path.resolve(`server/data/base-test-cases-${type}.json`);
+  const tree = await scanTestCases(type);
+
+  await fs.mkdir(path.dirname(cacheFile), { recursive: true });
+  await fs.writeFile(cacheFile, JSON.stringify(tree, null, 2));
+  console.log(`[TestScanner] Cache refreshed for type: ${type}`);
 
   return tree;
 }
@@ -250,50 +285,7 @@ export async function getCachedTestTree(type: string): Promise<FileNode[]> {
     return JSON.parse(data) as FileNode[];
   } catch (err) {
     console.log(err);
-    // If not exists or error, scan immediately and save
-    const tree = await scanTestCases(type);
-
-    // Attempt to save cache in background
-    fs.mkdir(path.dirname(cacheFile), { recursive: true })
-      .then(() => {
-        return fs.writeFile(cacheFile, JSON.stringify(tree, null, 2));
-      })
-      .catch((e) => console.error("Failed to write cache:", e));
-
-    return tree;
+    // If not exists or error, scan and save synchronously.
+    return refreshTestTree(type);
   }
-}
-
-export function backgroundUpdateTestTree(
-  type: string,
-  notifyChange?: () => void,
-): void {
-  const cacheFile = path.resolve(`server/data/base-test-cases-${type}.json`);
-
-  // Run scan in background
-  setTimeout(async () => {
-    try {
-      const tree = await scanTestCases(type);
-      const newJson = JSON.stringify(tree, null, 2);
-
-      let existingJson = "";
-      try {
-        existingJson = await fs.readFile(cacheFile, "utf-8");
-      } catch (e) {
-        /* ignore */
-        console.log(e);
-      }
-
-      // Update only if different
-      if (newJson !== existingJson) {
-        await fs.mkdir(path.dirname(cacheFile), { recursive: true });
-        await fs.writeFile(cacheFile, newJson);
-        console.log(`[TestScanner] Cache updated for type: ${type}`);
-        testScannerEvents.emit("tests-updated");
-        if (notifyChange) notifyChange();
-      }
-    } catch (err) {
-      console.error("[TestScanner] Background update failed:", err);
-    }
-  }, 1000); // Small delay to let API return first
 }

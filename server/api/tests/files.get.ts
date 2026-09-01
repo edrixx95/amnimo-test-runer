@@ -1,7 +1,4 @@
-import {
-  getCachedTestTree,
-  backgroundUpdateTestTree,
-} from "../../utils/testScanner";
+import { getCachedTestTree } from "../../utils/testScanner";
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
@@ -12,9 +9,6 @@ export default defineEventHandler(async (event) => {
 
   try {
     const tree = await getCachedTestTree(type);
-
-    // Trigger a background update
-    backgroundUpdateTestTree(type);
 
     return tree;
   } catch (_e: unknown) {

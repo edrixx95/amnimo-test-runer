@@ -14,6 +14,7 @@ const sessionId = route.params.id as string;
 const session = ref<Session | null>(null);
 const isLoading = ref(true);
 const isParsingTests = ref(false);
+const isRefreshingTestTree = ref(false);
 
 const showReportModal = ref(false);
 
@@ -538,10 +539,6 @@ const connectStream = () => {
   eventSource.addEventListener("message", (e) => {
     const data = JSON.parse(e.data);
     if (data.source === "system") {
-      if (data.event === "tests-updated") {
-        fetchTests(true);
-        return;
-      }
       if (session.value && data.status) session.value.status = data.status;
       if (data.status === "Completed" || data.status === "Failed") {
         isTesting.value = false;
@@ -605,6 +602,44 @@ const fetchTests = async (preserveState = false) => {
     console.error(err);
   } finally {
     isLoading.value = false;
+  }
+};
+
+const refreshTestTree = async () => {
+  if (
+    !session.value ||
+    isRefreshingTestTree.value ||
+    isTesting.value ||
+    isParsingTests.value
+  ) {
+    return;
+  }
+
+  isRefreshingTestTree.value = true;
+  const type =
+    session.value.testType === "playground"
+      ? playgroundSource.value
+      : session.value.testType || "release";
+
+  try {
+    const tests = await $fetch<FileNode[]>("/api/tests/files/refresh", {
+      method: "POST",
+      query: { type },
+    });
+    availableTests.value = tests;
+    addToast({
+      title: t("runner.testTreeRefreshSuccess"),
+      type: "success",
+    });
+  } catch (err) {
+    console.error("Failed to refresh test tree:", err);
+    addToast({
+      title: t("runner.errorTitle"),
+      message: t("runner.testTreeRefreshFailed"),
+      type: "error",
+    });
+  } finally {
+    isRefreshingTestTree.value = false;
   }
 };
 
@@ -1082,6 +1117,20 @@ const toggleTest = async () => {
                 <label class="block text-sm font-bold text-slate-800">
                   Test Explorer
                 </label>
+                <button
+                  type="button"
+                  :disabled="isTesting || isParsingTests || isRefreshingTestTree"
+                  :title="$t('runner.refreshTestTree')"
+                  class="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-semibold text-slate-500 hover:text-amnimo-700 hover:bg-amnimo-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  @click="refreshTestTree"
+                >
+                  <Icon
+                    name="heroicons:arrow-path"
+                    class="w-3.5 h-3.5"
+                    :class="{ 'animate-spin': isRefreshingTestTree }"
+                  />
+                  {{ $t("runner.refreshTestTree") }}
+                </button>
               </div>
 
               <div class="flex flex-col gap-2 shrink-0 mb-3">
