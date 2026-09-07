@@ -6,7 +6,7 @@
 .cache
 dist
 dist-electron
-sessions
+/sessions/
 
 # Node dependencies
 node_modules

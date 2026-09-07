@@ -80,9 +80,10 @@ export type WsMessage = {
 
 export type FileNode = {
   name: string;
-  path: string;
-  type: "file" | "directory";
+  type: "file" | "folder" | "directory";
+  path?: string;
   children?: FileNode[];
+  cases?: string[];
 };
 
 export type TestOrder = {

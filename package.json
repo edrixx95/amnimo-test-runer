@@ -39,7 +39,7 @@
     "files": [
       ".output/**/*",
       "electron/**/*",
-      "shared/release-spec/**/*"
+      "spec-manager/**/*"
     ],
     "win": {
       "target": "nsis",
@@ -66,14 +66,10 @@
     "@vueuse/nuxt": "^12.6.0",
     "adm-zip": "^0.6.0",
     "chart.js": "^4.5.1",
-    "clsx": "^2.1.1",
-    "crossws": "^0.3.1",
     "driver.js": "^1.8.0",
     "electron-updater": "^6.8.9",
-    "exceljs": "^4.4.0",
     "nuxt": "^4.4.8",
     "pinia": "^4.0.1",
-    "tailwind-merge": "^3.6.0",
     "vue": "^3.5.39",
     "vue-chartjs": "^5.3.4",
     "vue-router": "^5.1.0",

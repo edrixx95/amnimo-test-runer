@@ -3,17 +3,9 @@ import fs from "node:fs/promises";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { getSettings } from "./settingsManager";
-import type { PlaywrightSuiteNode } from "~~/shared/types";
+import type { PlaywrightSuiteNode, FileNode } from "~~/shared/types";
 
 const execAsync = promisify(exec);
-
-export type FileNode = {
-  name: string;
-  type: "file" | "folder";
-  path?: string;
-  children?: FileNode[];
-  cases?: string[];
-};
 
 const ROOT_ORDER = [
   "simple-settings",

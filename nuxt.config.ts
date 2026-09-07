@@ -21,11 +21,6 @@ export default defineNuxtConfig({
     strategy: 'no_prefix',
     vueI18n: './i18n.config.ts'
   },
-  nitro: {
-    experimental: {
-      websocket: true
-    }
-  },
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
     layoutTransition: { name: 'page', mode: 'out-in' }

@@ -19,7 +19,7 @@ export const getActiveTemplatePath = async () => {
   } catch {
     const bundledPath = path.resolve(
       process.cwd(),
-      "shared/release-spec/リリーステスト_試験仕様書.xlsx",
+      "spec-manager/template/リリーステスト_試験仕様書.xlsx",
     );
     await fs.copyFile(bundledPath, activePath);
   }
